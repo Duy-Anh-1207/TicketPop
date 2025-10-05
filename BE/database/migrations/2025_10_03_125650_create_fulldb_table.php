@@ -11,6 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('vai_tro', function (Blueprint $table) {
+            $table->id();
+            $table->string('ten_vai_tro', 50);
+            $table->text('mo_ta')->nullable();
+            $table->timestamps();
+        });
+
+
         Schema::create('nguoi_dung', function (Blueprint $table) {
             $table->id();
             $table->string('ten', 100);
@@ -23,9 +31,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('vai_tro', function (Blueprint $table) {
+        Schema::create('quyen_han', function (Blueprint $table) {
             $table->id();
-            $table->string('ten_vai_tro', 50);
+            $table->string('quyen', 100);
             $table->text('mo_ta')->nullable();
             $table->timestamps();
         });
@@ -82,7 +90,6 @@ return new class extends Migration
 
         Schema::create('phong_chieu', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('rap_id')->constrained('rap')->onUpdate('cascade')->onDelete('cascade');
             $table->string('ten_phong', 100);
             $table->string('loai_so_do', 10); // Ví dụ: 8x8, 12x12
             $table->integer('hang_thuong');
@@ -110,11 +117,11 @@ return new class extends Migration
             $table->timestamps();
         });
 
-         Schema::create('lich_chieu', function (Blueprint $table) {
+        Schema::create('lich_chieu', function (Blueprint $table) {
             $table->id();
             $table->foreignId('phim_id')->constrained('phim')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('phong_id')->constrained('phong_chieu')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('chuyen_ngu_id')->constrained('chuyen_ngu');
+            $table->foreignId('phien_ban_id')->constrained('phien_ban');
             $table->dateTime('gio_chieu');
             $table->dateTime('gio_ket_thuc');
             $table->timestamps();
