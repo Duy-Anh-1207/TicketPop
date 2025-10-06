@@ -1,69 +1,104 @@
-<?php 
-// app/Http/Controllers/UserController.php
+<?php
+
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\User;
-class UserController extends Controller{
-
-public function index(Request $request)
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+class UserController extends Controller
 {
-    $query = User::query();
-
-    // Tìm kiếm theo tên hoặc email
-    if ($request->has('search')) {
-        $query->where('name', 'like', '%' . $request->search . '%')
-              ->orWhere('email', 'like', '%' . $request->search . '%');
+    // Lấy tất cả người dùng
+    public function index()
+    {
+        return response()->json(User::all());
     }
 
-    // Lọc theo vai trò
-    if ($request->has('role')) {
-        $query->where('role', $request->role);
-    }
-
-    return response()->json($query->paginate(10));
-}
-public function show($id)
+    // Tạo người dùng mới
+    public function store(Request $request)
 {
-    $user = User::findOrFail($id);
-    return response()->json($user);
-}
-public function store(Request $request)
-{
-    $request->validate([
-        'name' => 'required|string',
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
         'email' => 'required|email|unique:users',
-        'password' => 'required|min:6',
-        'role' => 'required|string'
+        'password' => 'required|string|min:6',
+        'email_verified_at' => now(),
     ]);
 
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => bcrypt($request->password),
-        'role' => $request->role,
-    ]);
+    $validated['password'] = Hash::make($validated['password']);
+    $user = User::create($validated);
 
-    return response()->json($user, 201);
+    return response()->json([
+        'message' => 'User created successfully',
+        'data' => $user
+    ], 201);
 }
-public function update(Request $request, $id)
+
+    // Hiển thị 1 người dùng theo ID
+    public function show($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        return response()->json($user);
+    }
+
+    // Cập nhật thông tin người dùng
+    public function update(Request $request, $id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $id,
+            'password' => 'sometimes|string|min:6',
+            'email_verified_at' => now(),
+        ]);
+
+        if (isset($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        }
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'data' => $user,
+        ]);
+    }
+
+    // Xóa người dùng
+    public function destroy($id)
+    {
+        $user = User::find($id);
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => 'User deleted successfully']);
+    }
+    public function toggleStatus($id)
 {
     $user = User::findOrFail($id);
 
-    $request->validate([
-        'name' => 'sometimes|string',
-        'email' => 'sometimes|email|unique:users,email,' . $id,
-        'role' => 'sometimes|string'
-    ]);
+    // Kiểm tra cột is_active có tồn tại không
+    if (! Schema::hasColumn('users', 'is_active')) {
+        return response()->json([
+            'message' => "Column 'is_active' does not exist on users table. Please add it or modify the API to use the correct column."
+        ], 400);
+    }
 
-    $user->update($request->only(['name', 'email', 'role']));
-
-    return response()->json($user);
-}
-public function toggleStatus($id)
-{
-    $user = User::findOrFail($id);
-    $user->is_active = !$user->is_active;
+    $user->is_active = ! (bool) $user->is_active;
     $user->save();
 
     return response()->json([
@@ -73,30 +108,40 @@ public function toggleStatus($id)
 }
 public function assignRole(Request $request, $id)
 {
-    $request->validate([
+    $user = User::find($id);
+    if (! $user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
+
+    $validated = $request->validate([
         'role' => 'required|string'
     ]);
 
-    $user = User::findOrFail($id);
-    $user->role = $request->role;
+    $user->role = $validated['role'];
     $user->save();
 
     return response()->json([
-        'message' => 'Gán vai trò thành công',
-        'user' => $user
+        'message' => 'Role assigned successfully',
+        'data' => $user
     ]);
 }
-public function resetPassword($id)
+public function resetPassword(Request $request, $id)
 {
-    $user = User::findOrFail($id);
-    $newPassword = '123456'; // hoặc random password
+    $user = User::find($id);
+    if (! $user) {
+        return response()->json(['message' => 'User not found'], 404);
+    }
 
-    $user->password = bcrypt($newPassword);
+    $validated = $request->validate([
+        'password' => 'required|string|min:6'
+    ]);
+
+    $user->password = Hash::make($validated['password']);
     $user->save();
 
     return response()->json([
-        'message' => 'Mật khẩu đã được reset',
-        'new_password' => $newPassword
+        'message' => 'Password reset successfully',
+        'data' => $user
     ]);
 }
 

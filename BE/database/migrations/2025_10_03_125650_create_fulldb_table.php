@@ -60,7 +60,7 @@ return new class extends Migration
             $table->string('trailer', 255)->nullable();
             $table->string('ngon_ngu', 100);
             $table->string('quoc_gia', 100);
-            $table->string('anh_poster', 255)->nullable();
+            $table->string('anh_poster', length: 255)->nullable();
             $table->date('ngay_cong_chieu');
             $table->date('ngay_ket_thuc')->nullable();
             $table->string('do_tuoi_gioi_han', 50);
