@@ -9,22 +9,18 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="left-sidebar with-vertical">
-      <div className="brand-logo d-flex align-items-center justify-content-between">    
+      <div className="brand-logo d-flex align-items-center justify-content-between">
         <a
           href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
-          className="text-nowrap logo-img"
-        >
+          className="text-nowrap logo-img">
           <img
             src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
-            className="dark-logo"
-            alt="Logo-Dark"
-          />
+            className="dark-logo" alt="Logo-Dark" />
         </a>
         <a
           href="#"
           className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-          onClick={(e) => e.preventDefault()}
-        >
+          onClick={(e) => e.preventDefault()}>
           <i className="ti ti-x"></i>
         </a>
       </div>
@@ -32,7 +28,7 @@ const Sidebar: React.FC = () => {
       <div className="scroll-sidebar" data-simplebar>
         <nav className="sidebar-nav">
           <ul id="sidebarnav" className="mb-0">
-            
+
             <li className="nav-small-cap">
               <Icon
                 icon="solar:menu-dots-bold-duotone"
@@ -75,9 +71,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
-                className={`collapse first-level ${
-                  isFrontPagesOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isFrontPagesOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <a
@@ -170,9 +165,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
-                className={`collapse first-level ${
-                  isEcommerceOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isEcommerceOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <a
@@ -247,7 +241,7 @@ const Sidebar: React.FC = () => {
                   </a>
                 </li>
               </ul>
-            
+
             </li>
 
             <li className="sidebar-item">
@@ -307,9 +301,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isUserProfileOpen}
-                className={`collapse first-level ${
-                  isUserProfileOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isUserProfileOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <a
