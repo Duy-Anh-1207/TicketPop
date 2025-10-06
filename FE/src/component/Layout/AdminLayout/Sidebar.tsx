@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify/react";
+import { Link } from "react-router-dom";
 
 const Sidebar: React.FC = () => {
   const [isFrontPagesOpen, setIsFrontPagesOpen] = useState(false);
@@ -9,7 +10,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="left-sidebar with-vertical">
-      <div className="brand-logo d-flex align-items-center justify-content-between">    
+      <div className="brand-logo d-flex align-items-center justify-content-between">
         <a
           href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
           className="text-nowrap logo-img"
@@ -32,7 +33,7 @@ const Sidebar: React.FC = () => {
       <div className="scroll-sidebar" data-simplebar>
         <nav className="sidebar-nav">
           <ul id="sidebarnav" className="mb-0">
-            
+
             <li className="nav-small-cap">
               <Icon
                 icon="solar:menu-dots-bold-duotone"
@@ -71,22 +72,18 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">Front Pages</span>
+                <span className="hide-menu ps-1">QTHT</span>
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
-                className={`collapse first-level ${
-                  isFrontPagesOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isFrontPagesOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-landingpage.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/phim" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Homepage</span>
-                  </a>
+                    <span className="hide-menu">Quản lý phim</span>
+                  </Link>
                 </li>
                 <li className="sidebar-item">
                   <a
@@ -170,9 +167,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
-                className={`collapse first-level ${
-                  isEcommerceOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isEcommerceOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <a
@@ -247,7 +243,7 @@ const Sidebar: React.FC = () => {
                   </a>
                 </li>
               </ul>
-            
+
             </li>
 
             <li className="sidebar-item">
@@ -307,9 +303,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isUserProfileOpen}
-                className={`collapse first-level ${
-                  isUserProfileOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isUserProfileOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <a
