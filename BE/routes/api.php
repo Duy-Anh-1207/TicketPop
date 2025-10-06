@@ -10,8 +10,6 @@ Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
 Route::apiResource('vai_tro', PhimController::class);
 
-
-
 Route::get('/banners', [BannerController::class, 'index']);
 Route::post('/banners', [BannerController::class, 'store']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
