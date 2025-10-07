@@ -1,8 +1,11 @@
-<?php 
+<?php
+
+use App\Http\Controllers\BannerController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PhimController;
 use App\Http\Controllers\UserController;
-
+use App\Http\Controllers\Api\V1\TheLoaiController;
+use Illuminate\Http\Request;
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);
@@ -25,3 +28,14 @@ Route::post('/banners', [BannerController::class, 'store']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
 Route::put('/banners/{id}', [BannerController::class, 'update']);
 Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
+
+
+
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});
+
+Route::prefix('v1')->group(function () {
+    Route::apiResource('the-loai', TheLoaiController::class);
+});
