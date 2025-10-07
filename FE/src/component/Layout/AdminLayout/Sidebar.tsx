@@ -85,6 +85,14 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Quản lý phim</span>
                   </Link>
                 </li>
+
+                <li className="sidebar-item">
+                  <Link to="/admin/nguoi-dung" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Quản lý người dùng</span>
+                  </Link>
+                </li>
+
                 <li className="sidebar-item">
                   <a
                     href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-aboutpage.html"
@@ -94,6 +102,7 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">About Us</span>
                   </a>
                 </li>
+
                 <li className="sidebar-item">
                   <a
                     href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-blogpage.html"
