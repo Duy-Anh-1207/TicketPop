@@ -1,8 +1,10 @@
-// import React, { useEffect } from 'react';
+// filepath: e:\laragon\www\DATN\TicketPop\FE\src\App.tsx
+import React from "react";
 import { BrowserRouter as Router } from 'react-router-dom';
 import Sidebar from './component/Sidebar';
 import Header from './component/Header';
 import './App.css';
+import PhimList from "./PhimList";
 
 const App: React.FC = () => {
   return (
@@ -15,6 +17,7 @@ const App: React.FC = () => {
               <Header />
               <div className="mt-4">
                 {/* <h1>TicketPop</h1> */}
+                <PhimList />
               </div>
             </div>
           </div>
