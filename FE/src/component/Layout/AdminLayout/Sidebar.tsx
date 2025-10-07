@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify/react";
+import { Link } from "react-router-dom";
 
 const Sidebar: React.FC = () => {
   const [isFrontPagesOpen, setIsFrontPagesOpen] = useState(false);
@@ -67,7 +68,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">Front Pages</span>
+                <span className="hide-menu ps-1">QTHT</span>
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
@@ -75,13 +76,10 @@ const Sidebar: React.FC = () => {
                   }`}
               >
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-landingpage.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/phim" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Homepage</span>
-                  </a>
+                    <span className="hide-menu">Quản lý phim</span>
+                  </Link>
                 </li>
                 <li className="sidebar-item">
                   <a

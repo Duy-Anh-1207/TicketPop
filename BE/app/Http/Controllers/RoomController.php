@@ -63,17 +63,6 @@ class RoomController extends Controller
     }
     public function destroy(string $id)
     {
-        // $room = Room::find($id);
-        // if (!$room) {
-        //     return response()->json([
-        //         'message' => 'Không tìm thấy phòng chiếu'
-        //     ], 404);
-        // }
-        // $room->delete();
-        // return response()->json([
-        //     'message' => 'Xóa phòng chiếu thành công',
-        //     'data' => $room
-        // ], 200);
         $room = Room::find($id);
         if (!$room){
             return response()->json([

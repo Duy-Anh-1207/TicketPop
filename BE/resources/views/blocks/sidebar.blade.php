@@ -44,7 +44,7 @@
                              <iconify-icon icon="solar:smart-speaker-minimalistic-line-duotone"
                                  class="fs-6"></iconify-icon>
                          </span>
-                         <span class="hide-menu ps-1">Front Pages</span>
+                         <span class="hide-menu ps-1">QTHT</span>
                      </a>
                      <ul aria-expanded="false" class="collapse first-level">
                          <li class="sidebar-item">
