@@ -10,12 +10,17 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    // Nếu bảng không phải là "users", cần chỉ định rõ
+    protected $table = 'nguoi_dung';
+
     protected $fillable = [
-        'name',
+        'ten',
         'email',
+        'so_dien_thoai',
         'password',
-        'is_active',
-        'email_verified_at',
+        'anh_dai_dien',
+        'trang_thai',
+        'vai_tro_id',
     ];
 
     protected $hidden = [
@@ -23,11 +28,14 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+    public $timestamps = true; // hoặc không cần khai báo vì mặc định là true
+    public function vaiTro()
+{
+    return $this->belongsTo(VaiTro::class, 'vai_tro_id');
+}
 }

@@ -22,14 +22,17 @@ Route::put('/room/{id}', [RoomController::class, 'update']);
 Route::delete('/room/{id}', [RoomController::class, 'destroy']); 
 
 
-Route::get('/users', [UserController::class, 'index']);
-Route::get('/users/{id}', [UserController::class, 'show']);
-Route::post('/users', [UserController::class, 'store']);
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
-Route::put('/users/{id}', [UserController::class, 'update']);
-Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
-Route::patch('/users/{id}/role', [UserController::class, 'assignRole']);
-Route::patch('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);           // GET /api/users
+    Route::get('/{id}', [UserController::class, 'show']);        // GET /api/users/{id}
+    Route::post('/', [UserController::class, 'store']);          // POST /api/users
+    Route::patch('/{id}', [UserController::class, 'update']);      // PUT /api/users/{id}
+    Route::delete('/{id}', [UserController::class, 'destroy']);  // DELETE /api/users/{id}
+    Route::patch('/{id}/status', [UserController::class, 'updateStatus']);   // Đổi trạng thái (active/inactive)
+    Route::patch('/{id}/role', [UserController::class, 'updateRole']);              // Gán vai trò mới
+    Route::patch('/{id}/reset-password', [UserController::class, 'resetPassword']); // Đặt lại mật khẩu
+    
+});
 
 
 Route::get('/banners', [BannerController::class, 'index']);
