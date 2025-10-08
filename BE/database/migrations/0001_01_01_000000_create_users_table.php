@@ -15,15 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('role')->default('user'); 
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->boolean('is_active')->default(true); // Thêm tại đây
+            $table->boolean('is_active')->default(true);
             $table->rememberToken();
             $table->timestamps();
         });
-        Schema::table('users', function (Blueprint $table) {
-        $table->boolean('is_active')->default(true)->after('password');
-    });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
@@ -39,11 +37,6 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
-         Schema::table('users', function (Blueprint $table) {
-        $table->string('role')->default('user')->after('email');
-    });
-
-   
     }
 
     /**
@@ -54,6 +47,5 @@ return new class extends Migration
         Schema::dropIfExists('users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
-        
     }
 };
