@@ -13,19 +13,15 @@ const Sidebar: React.FC = () => {
       <div className="brand-logo d-flex align-items-center justify-content-between">
         <a
           href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
-          className="text-nowrap logo-img"
-        >
+          className="text-nowrap logo-img">
           <img
             src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
-            className="dark-logo"
-            alt="Logo-Dark"
-          />
+            className="dark-logo" alt="Logo-Dark" />
         </a>
         <a
           href="#"
           className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-          onClick={(e) => e.preventDefault()}
-        >
+          onClick={(e) => e.preventDefault()}>
           <i className="ti ti-x"></i>
         </a>
       </div>

@@ -1,11 +1,14 @@
 <?php
 
-use App\Http\Controllers\BannerController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\PhimController;
+use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\TheLoaiController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PhimController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\Api\V1\TheLoaiController;
 use Illuminate\Http\Request;
+
+
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);
@@ -13,14 +16,26 @@ Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
 Route::apiResource('vai_tro', PhimController::class);
 
-Route::get('/users', [UserController::class, 'index']);
-Route::get('/users/{id}', [UserController::class, 'show']);
-Route::post('/users', [UserController::class, 'store']);
-Route::delete('/users/{id}', [UserController::class, 'destroy']);
-Route::put('/users/{id}', [UserController::class, 'update']);
-Route::patch('/users/{id}/toggle-status', [UserController::class, 'toggleStatus']);
-Route::patch('/users/{id}/role', [UserController::class, 'assignRole']);
-Route::patch('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
+
+//  API Room
+Route::get('/room', [RoomController::class, 'index']);
+Route::post('/room', [RoomController::class, 'store']);          
+Route::get('/room/{id}', [RoomController::class, 'show']);              
+Route::put('/room/{id}', [RoomController::class, 'update']);   
+Route::delete('/room/{id}', [RoomController::class, 'destroy']); 
+
+
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);           // GET /api/users
+    Route::get('/{id}', [UserController::class, 'show']);        // GET /api/users/{id}
+    Route::post('/', [UserController::class, 'store']);          // POST /api/users
+    Route::patch('/{id}', [UserController::class, 'update']);      // PUT /api/users/{id}
+    Route::delete('/{id}', [UserController::class, 'destroy']);  // DELETE /api/users/{id}
+    Route::patch('/{id}/status', [UserController::class, 'updateStatus']);   // Đổi trạng thái (active/inactive)
+    Route::patch('/{id}/role', [UserController::class, 'updateRole']);              // Gán vai trò mới
+    Route::patch('/{id}/reset-password', [UserController::class, 'resetPassword']); // Đặt lại mật khẩu
+    
+});
 
 
 Route::get('/banners', [BannerController::class, 'index']);
@@ -28,9 +43,6 @@ Route::post('/banners', [BannerController::class, 'store']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
 Route::put('/banners/{id}', [BannerController::class, 'update']);
 Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
-
-
-
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
