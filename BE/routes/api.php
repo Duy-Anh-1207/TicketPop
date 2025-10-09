@@ -45,6 +45,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('v1')->group(function () {
-    Route::apiResource('the-loai', TheLoaiController::class);
-});
+Route::get('/the-loai', [TheLoaiController::class, 'index']);
+Route::post('/the-loai', [TheLoaiController::class, 'store']);
+Route::get('/the-loai/{id}', [TheLoaiController::class, 'show']);
+Route::put('/the-loai/{id}', [TheLoaiController::class, 'update']);
+Route::delete('/the-loai/{id}', [TheLoaiController::class, 'destroy']);
