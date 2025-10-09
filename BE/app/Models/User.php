@@ -12,7 +12,7 @@ class User extends Authenticatable
 
     // Nếu bảng không phải là "users", cần chỉ định rõ
     protected $table = 'nguoi_dung';
-
+    protected $appends = ['ten_vai_tro'];
     protected $fillable = [
         'ten',
         'email',
@@ -31,11 +31,15 @@ class User extends Authenticatable
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'password' => 'hashed',
+        
     ];
-    public $timestamps = true; // hoặc không cần khai báo vì mặc định là true
+    public $timestamps = true; 
     public function vaiTro()
 {
     return $this->belongsTo(VaiTro::class, 'vai_tro_id');
+}
+public function getTenVaiTroAttribute()
+{
+    return $this->vaiTro->ten_vai_tro ?? null;
 }
 }
