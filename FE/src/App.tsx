@@ -1,31 +1,18 @@
-// filepath: e:\laragon\www\DATN\TicketPop\FE\src\App.tsx
-import React from "react";
-import { BrowserRouter as Router } from 'react-router-dom';
-import Sidebar from './component/Sidebar';
-import Header from './component/Header';
-import './App.css';
-import PhimList from "./PhimList";
+import "antd/dist/reset.css";
+import Routermain from "./component/Router";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
-const App: React.FC = () => {
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Tạo client của React Query
+const queryClient = new QueryClient();
+
+function App() {
   return (
-    <Router>
-      <div id="main-wrapper" className="flex flex-col min-h-screen">
-        <Sidebar />
-        <div className="page-wrapper flex-1 ml-64">
-          <div className="body-wrapper">
-            <div className="container-fluid">
-              <Header />
-              <div className="mt-4">
-                {/* <h1>TicketPop</h1> */}
-                <PhimList />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="dark-transparent sidebartoggler"></div>
-      </div>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <Routermain />
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;
