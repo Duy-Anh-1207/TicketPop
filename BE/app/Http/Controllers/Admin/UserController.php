@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
@@ -117,37 +117,37 @@ class UserController extends Controller
         return response()->json(['message' => 'Đã xóa người dùng']);
     }
     
-//     public function updateStatus(Request $request, $id)
-// {
-//     $validated = $request->validate([
-//         'trang_thai' => 'required|string|in:active,inactive'
-//     ]);
+    public function updateStatus(Request $request, $id)
+{
+    $validated = $request->validate([
+        'trang_thai' => 'required|string|in:active,inactive'
+    ]);
 
-//     $user = User::findOrFail($id);
-//     $user->trang_thai = $validated['trang_thai'];
-//     $user->save();
+    $user = User::findOrFail($id);
+    $user->trang_thai = $validated['trang_thai'];
+    $user->save();
 
-//     return response()->json([
-//         'message' => 'Trạng thái đã được cập nhật',
-//         'trang_thai_moi' => $user->trang_thai
-//     ]);
-// }
+    return response()->json([
+        'message' => 'Trạng thái đã được cập nhật',
+        'trang_thai_moi' => $user->trang_thai
+    ]);
+}
 
-// public function updateRole(Request $request, $id)
-// {
-//     $validated = $request->validate([
-//         'vai_tro_id' => 'required|integer|exists:vai_tro.id'
-//     ]);
+public function updateRole(Request $request, $id)
+{
+    $validated = $request->validate([
+        'vai_tro_id' => 'required|integer|exists:vai_tro.id'
+    ]);
 
-//     $user = User::findOrFail($id);
-//     $user->vai_tro_id = $validated['vai_tro_id'];
-//     $user->save();
+    $user = User::findOrFail($id);
+    $user->vai_tro_id = $validated['vai_tro_id'];
+    $user->save();
 
-//     return response()->json([
-//         'message' => 'Vai trò đã được cập nhật',
-//         'vai_tro_moi' => $user->vai_tro_id
-//     ]);
-// }
+    return response()->json([
+        'message' => 'Vai trò đã được cập nhật',
+        'vai_tro_moi' => $user->vai_tro_id
+    ]);
+}
 
 
 }

@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\BannerController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\PhimController;
+use App\Http\Controllers\Admin\RoomController;
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PhimController;
-use App\Http\Controllers\RoomController;
-use App\Http\Controllers\UserController;
+
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
