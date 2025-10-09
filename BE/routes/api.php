@@ -15,9 +15,9 @@ Route::apiResource('vai_tro', PhimController::class);
 
 
 //  API Room
-Route::get('/room', [RoomController::class, 'index']);          
-Route::get('/room/{id}', [RoomController::class, 'show']);     
-Route::post('/room', [RoomController::class, 'store']);         
+Route::get('/room', [RoomController::class, 'index']);
+Route::post('/room', [RoomController::class, 'store']);          
+Route::get('/room/{id}', [RoomController::class, 'show']);              
 Route::put('/room/{id}', [RoomController::class, 'update']);   
 Route::delete('/room/{id}', [RoomController::class, 'destroy']); 
 
