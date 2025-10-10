@@ -13,30 +13,15 @@ const Sidebar: React.FC = () => {
       <div className="brand-logo d-flex align-items-center justify-content-between">
         <a
           href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
-<<<<<<< HEAD
-          className="text-nowrap logo-img"
-        >
-          <img
-            src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
-            className="dark-logo"
-            alt="Logo-Dark"
-          />
-=======
           className="text-nowrap logo-img">
           <img
             src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
             className="dark-logo" alt="Logo-Dark" />
->>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
         </a>
         <a
           href="#"
           className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-<<<<<<< HEAD
-          onClick={(e) => e.preventDefault()}
-        >
-=======
           onClick={(e) => e.preventDefault()}>
->>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
           <i className="ti ti-x"></i>
         </a>
       </div>
@@ -83,7 +68,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">QTHT</span>
+                <span className="hide-menu ps-1">Quản lý phim</span>
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
@@ -96,17 +81,14 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Quản lý phim</span>
                   </Link>
                 </li>
-<<<<<<< HEAD
-=======
 
                 <li className="sidebar-item">
-                  <Link to="/admin/nguoi-dung" className="sidebar-link">
+                  <Link to="/admin/the-loai" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Quản lý người dùng</span>
+                    <span className="hide-menu">Quản lý thể loại</span>
                   </Link>
                 </li>
 
->>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
                 <li className="sidebar-item">
                   <a
                     href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-aboutpage.html"
@@ -116,66 +98,8 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">About Us</span>
                   </a>
                 </li>
-<<<<<<< HEAD
-=======
-
->>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-blogpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Blog</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-blogdetailpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Blog Details</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-contactpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Contact Us</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-portfoliopage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Portfolio</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-pricingpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Pricing</span>
-                  </a>
-                </li>
               </ul>
             </li>
-
-            <li className="nav-small-cap">
-              <Icon
-                icon="solar:menu-dots-bold-duotone"
-                className="nav-small-cap-icon fs-5"
-              />
-              <span className="hide-menu">Apps</span>
-            </li>
-
             <li className="sidebar-item">
               <a
                 className="sidebar-link has-arrow success-hover-bg"
@@ -189,7 +113,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">Ecommerce</span>
+                <span className="hide-menu ps-1">Quản lý người dùng</span>
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
@@ -197,13 +121,10 @@ const Sidebar: React.FC = () => {
                   }`}
               >
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-shop.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/nguoi-dung" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Shop One</span>
-                  </a>
+                    <span className="hide-menu">Quản lý người dùng</span>
+                  </Link>
                 </li>
                 <li className="sidebar-item">
                   <a

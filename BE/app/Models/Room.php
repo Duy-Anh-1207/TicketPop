@@ -15,6 +15,10 @@ class Room extends Model
         'hang_thuong',
         'hang_vip',
         'trang_thai',
-        
     ];
+
+    public function ghes()
+    {
+        return $this->hasMany(Ghe::class, 'phong_id');
+    }
 }
