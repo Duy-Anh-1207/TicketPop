@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\LichChieuController;
 use App\Http\Controllers\Admin\PhimController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\UserController;
@@ -31,6 +32,13 @@ Route::prefix('users')->group(function () {
     Route::patch('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
+
+    Route::get('/lich-chieu', [LichChieuController::class, 'index']);
+    Route::post('/lich-chieu', [LichChieuController::class, 'store']);
+    Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
+    Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
+    Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
+
 
 
 Route::get('/banners', [BannerController::class, 'index']);
