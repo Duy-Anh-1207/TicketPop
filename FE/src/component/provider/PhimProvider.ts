@@ -1,6 +1,9 @@
 import axios from "axios";
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
 const axiosClient = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
 });

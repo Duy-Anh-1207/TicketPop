@@ -52,6 +52,12 @@ return new class extends Migration
             $table->softDeletes();
         });
 
+        Schema::create('phien_ban', function (Blueprint $table) {
+            $table->id();
+            $table->string('the_loai', 100);
+            $table->timestamps();
+        });
+
         Schema::create('phim', function (Blueprint $table) {
             $table->id();
             $table->string('ten_phim', 255);
@@ -60,22 +66,18 @@ return new class extends Migration
             $table->string('trailer', 255)->nullable();
             $table->string('ngon_ngu', 100);
             $table->string('quoc_gia', 100);
-            $table->string('anh_poster', 255)->nullable();
+            $table->string('anh_poster', length: 255)->nullable();
             $table->date('ngay_cong_chieu');
             $table->date('ngay_ket_thuc')->nullable();
             $table->string('do_tuoi_gioi_han', 50);
             $table->enum('loai_suat_chieu', ['Thường', 'Đặc biệt', 'Sớm']);
-            $table->json('phien_ban_id')->nullable();
-            $table->json('the_loai_id')->nullable();
+            $table->foreignId('phien_ban_id')->constrained('phien_ban')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('the_loai_id')->constrained('the_loai')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });
 
-        Schema::create('phien_ban', function (Blueprint $table) {
-            $table->id();
-            $table->string('the_loai', 100);
-            $table->timestamps();
-        });
+        
 
         Schema::create('danh_gia', function (Blueprint $table) {
             $table->id();

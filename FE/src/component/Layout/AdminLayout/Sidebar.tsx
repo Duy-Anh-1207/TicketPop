@@ -13,6 +13,7 @@ const Sidebar: React.FC = () => {
       <div className="brand-logo d-flex align-items-center justify-content-between">
         <a
           href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
+<<<<<<< HEAD
           className="text-nowrap logo-img"
         >
           <img
@@ -20,12 +21,22 @@ const Sidebar: React.FC = () => {
             className="dark-logo"
             alt="Logo-Dark"
           />
+=======
+          className="text-nowrap logo-img">
+          <img
+            src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
+            className="dark-logo" alt="Logo-Dark" />
+>>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
         </a>
         <a
           href="#"
           className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
+<<<<<<< HEAD
           onClick={(e) => e.preventDefault()}
         >
+=======
+          onClick={(e) => e.preventDefault()}>
+>>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
           <i className="ti ti-x"></i>
         </a>
       </div>
@@ -85,6 +96,17 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Quản lý phim</span>
                   </Link>
                 </li>
+<<<<<<< HEAD
+=======
+
+                <li className="sidebar-item">
+                  <Link to="/admin/nguoi-dung" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Quản lý người dùng</span>
+                  </Link>
+                </li>
+
+>>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
                 <li className="sidebar-item">
                   <a
                     href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-aboutpage.html"
@@ -94,6 +116,10 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">About Us</span>
                   </a>
                 </li>
+<<<<<<< HEAD
+=======
+
+>>>>>>> cfed1d3e82ae3a6ee389aaddb71003236ff80442
                 <li className="sidebar-item">
                   <a
                     href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-blogpage.html"
