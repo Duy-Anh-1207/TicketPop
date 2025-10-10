@@ -4,6 +4,7 @@ import DanhSachNguoiDung from "../Admin/User/ListUser";
 import AdminLayout from "../Layout/AdminLayout/Admin";
 import DetailUser from "../Admin/User/DetailUser";
 import CreateUser from "../Admin/User/CreateUser";
+import DanhSachTheLoai from "../Admin/TheLoai/ListTheLoai";
 const Routermain = () => {
   const element = useRoutes([
     {
@@ -13,7 +14,8 @@ const Routermain = () => {
         { path: "phim", element: <DanhSachPhim /> },
         { path: "nguoi-dung", element: <DanhSachNguoiDung /> },
         { path: "nguoi-dung/:id", element: <DetailUser /> },
-        { path: "nguoi-dung/them-moi", element: <CreateUser/> }
+        { path: "nguoi-dung/them-moi", element: <CreateUser/> },
+        { path: "the-loai", element: <DanhSachTheLoai /> },
       ],
     },
   ]);
