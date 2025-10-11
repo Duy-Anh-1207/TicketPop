@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { User } from "../../../types/User";
+import type { User } from "../../../types/user";
 import Swal from "sweetalert2";
 import { createUser } from "../../../provider/UserProviders";
 

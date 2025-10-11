@@ -19,7 +19,7 @@ class StorePhimRequest extends FormRequest
             'trailer' => 'nullable|string|max:255',
             'ngon_ngu' => 'required|string|max:100',
             'quoc_gia' => 'required|string|max:100',
-            'anh_poster' => 'nullable|string|max:255',
+            'anh_poster' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:6000',
             'ngay_cong_chieu' => 'required|date',
             'ngay_ket_thuc' => 'nullable|date',
             'do_tuoi_gioi_han' => 'required|string|max:50',
