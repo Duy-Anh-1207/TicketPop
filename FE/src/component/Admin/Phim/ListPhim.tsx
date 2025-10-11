@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Swal from "sweetalert2";
-import { useListPhim, useDeletePhim, useCreatePhim, useUpdatePhim } from "../../hook/PhimHook";
+import { useListPhim, useDeletePhim, useCreatePhim, useUpdatePhim } from "../../../hook/PhimHook";
 import CreatePhim from "./CreatePhim";
 
 

@@ -7,4 +7,7 @@ export interface Phim {
   loai_suat_chieu: string;
   ngay_cong_chieu: Date; 
   ngay_ket_thuc: Date;
+  trailer: string;
+  quoc_gia:string;
+  ngon_ngu:string;
 }

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import type { User } from "../../types/User";
+import type { User } from "../../../types/User";
 import Swal from "sweetalert2";
-import { createUser } from "../../provider/UserProviders";
+import { createUser } from "../../../provider/UserProviders";
 
 export default function CreateUser() {
   const navigate = useNavigate();

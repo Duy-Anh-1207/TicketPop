@@ -4,8 +4,8 @@ import {
   useListUsers,
   useToggleStatus,
   useAssignRole,
-} from "../../hook/UserHook";
-import type { User } from "../../types/User";
+} from "../../../hook/UserHook";
+import type { User } from "../../../types/user";
 
 export default function UserList() {
   const navigate = useNavigate();

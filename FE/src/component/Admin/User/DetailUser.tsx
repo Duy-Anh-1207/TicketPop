@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useUserDetail } from "../../hook/UserHook";
+import { useUserDetail } from "../../../hook/UserHook";
 // import type { User } from "../../types/user";
 
 export default function DetailUser() {
