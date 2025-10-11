@@ -23,7 +23,7 @@ class UpdateTheLoaiRequest extends FormRequest
     public function rules(): array
     {
         // Lấy ID của thể loại đang được cập nhật từ route
-        $theLoaiId = $this->route('the_loai')->id;
+        $theLoaiId = $this->route('the_loai')->id ?? $this->route('id');
 
         return [
             'ten_the_loai' => [

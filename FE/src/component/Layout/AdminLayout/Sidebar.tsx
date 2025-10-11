@@ -68,7 +68,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">QTHT</span>
+                <span className="hide-menu ps-1">Quản lý phim</span>
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
@@ -83,9 +83,9 @@ const Sidebar: React.FC = () => {
                 </li>
 
                 <li className="sidebar-item">
-                  <Link to="/admin/nguoi-dung" className="sidebar-link">
+                  <Link to="/admin/the-loai" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Quản lý người dùng</span>
+                    <span className="hide-menu">Quản lý thể loại</span>
                   </Link>
                 </li>
 
@@ -98,63 +98,8 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">About Us</span>
                   </a>
                 </li>
-
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-blogpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Blog</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-blogdetailpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Blog Details</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-contactpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Contact Us</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-portfoliopage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Portfolio</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-pricingpage.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Pricing</span>
-                  </a>
-                </li>
               </ul>
             </li>
-
-            <li className="nav-small-cap">
-              <Icon
-                icon="solar:menu-dots-bold-duotone"
-                className="nav-small-cap-icon fs-5"
-              />
-              <span className="hide-menu">Apps</span>
-            </li>
-
             <li className="sidebar-item">
               <a
                 className="sidebar-link has-arrow success-hover-bg"
@@ -168,7 +113,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">Ecommerce</span>
+                <span className="hide-menu ps-1">Quản lý người dùng</span>
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
@@ -176,13 +121,10 @@ const Sidebar: React.FC = () => {
                   }`}
               >
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-shop.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/nguoi-dung" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Shop One</span>
-                  </a>
+                    <span className="hide-menu">Người dùng</span>
+                  </Link>
                 </li>
                 <li className="sidebar-item">
                   <a
@@ -202,51 +144,6 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Details One</span>
                   </a>
                 </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-shop-detail2.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Details Two</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-product-list.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">List</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-checkout.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Checkout</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-add-product.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Add Product</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-edit-product.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Edit Product</span>
-                  </a>
-                </li>
               </ul>
 
             </li>
@@ -264,30 +161,33 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">Blog</span>
+                <span className="hide-menu ps-1">Quản lý phòng chiếu</span>
               </a>
               <ul
                 aria-expanded={isBlogOpen}
                 className={`collapse first-level ${isBlogOpen ? "show" : ""}`}
               >
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/blog-posts.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/roomxb" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Posts</span>
-                  </a>
+                    <span className="hide-menu">Phòng chiếu đã xuất bản</span>
+                  </Link>
                 </li>
+
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/blog-detail.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/roomcxb" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Details</span>
-                  </a>
+                    <span className="hide-menu">Phòng chiếu chưa xuất bản</span>
+                  </Link>
                 </li>
+
+                <li className="sidebar-item">
+                  <Link to="/admin/room/them-moi" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Thêm mới phòng chiếu</span>
+                  </Link>
+                </li>
+
               </ul>
             </li>
 

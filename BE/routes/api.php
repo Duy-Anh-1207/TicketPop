@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\FoodController;
+use App\Http\Controllers\Admin\LichChieuController;
 use App\Http\Controllers\Admin\PhimController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\TheLoaiController;
@@ -19,23 +21,27 @@ Route::apiResource('vai_tro', PhimController::class);
 
 //  API Room
 Route::get('/room', [RoomController::class, 'index']);
-Route::post('/room', [RoomController::class, 'store']);          
-Route::get('/room/{id}', [RoomController::class, 'show']);              
-Route::put('/room/{id}', [RoomController::class, 'update']);   
-Route::delete('/room/{id}', [RoomController::class, 'destroy']); 
+Route::post('/room', [RoomController::class, 'store']);
+Route::get('/room/{id}', [RoomController::class, 'show']);
+Route::put('/room/{id}', [RoomController::class, 'update']);
+Route::delete('/room/{id}', [RoomController::class, 'destroy']);
 
 
 Route::prefix('users')->group(function () {
-    Route::get('/', [UserController::class, 'index']);           // GET /api/users
-    Route::get('/{id}', [UserController::class, 'show']);        // GET /api/users/{id}
-    Route::post('/', [UserController::class, 'store']);          // POST /api/users
-    Route::patch('/{id}', [UserController::class, 'update']);      // PUT /api/users/{id}
-    Route::delete('/{id}', [UserController::class, 'destroy']);  // DELETE /api/users/{id}
-    Route::patch('/{id}/status', [UserController::class, 'updateStatus']);   // Đổi trạng thái (active/inactive)
-    Route::patch('/{id}/role', [UserController::class, 'updateRole']);              // Gán vai trò mới
-    Route::patch('/{id}/reset-password', [UserController::class, 'resetPassword']); // Đặt lại mật khẩu
-    
+    Route::get('/', [UserController::class, 'index']);
+    Route::post('/', [UserController::class, 'store']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::patch('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
 });
+
+Route::get('/lich-chieu', [LichChieuController::class, 'index']);
+Route::post('/lich-chieu', [LichChieuController::class, 'store']);
+Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
+Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
+Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
+
 
 
 Route::get('/banners', [BannerController::class, 'index']);
@@ -49,9 +55,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function () {
+    // Route cho chức năng Quản lý Thể loại
     Route::apiResource('the-loai', TheLoaiController::class);
 
-        Route::apiResource('vai-tro', VaiTroController::class);
+    // Route cho chức năng Quản lý Vai trò
+    Route::apiResource('vai-tro', VaiTroController::class);
 });
-
-

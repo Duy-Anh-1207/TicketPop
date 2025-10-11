@@ -11,20 +11,17 @@ class VaiTro extends Model
 {
     use HasFactory;
 
-
     protected $table = 'vai_tro';
 
-    
     protected $fillable = [
         'ten_vai_tro',
         'mo_ta',
     ];
+
     public $timestamps = true;
 
     /**
-     * Mối quan hệ nhiều-nhiều với QuyenHan (Permissions).
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * Mối quan hệ nhiều-nhiều với Quyenhan (Permissions).
      */
     public function quyenHans(): BelongsToMany
     {
@@ -32,13 +29,10 @@ class VaiTro extends Model
     }
 
     /**
-     * Mối quan hệ một-nhiều với NguoiDung.
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     * Quan hệ 1 vai trò có nhiều người dùng.
      */
     public function nguoiDungs(): HasMany
     {
-        // Sửa User::class thành NguoiDung::class (nếu bạn có model này)
         return $this->hasMany(NguoiDung::class, 'vai_tro_id');
     }
 }

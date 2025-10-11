@@ -9,9 +9,24 @@ use Illuminate\Http\Request;
 class RoomController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        return Room::all();
+        // Lấy giá trị query param 'status' (vd: /room?status=1)
+        $status = $request->query('status');
+
+        // Nếu có truyền status thì lọc, ngược lại trả toàn bộ
+        $query = Room::query();
+
+        if (!is_null($status)) {
+            $query->where('trang_thai', $status);
+        }
+
+        $rooms = $query->orderByDesc('id')->get();
+
+        return response()->json([
+            'message' => 'Danh sách phòng chiếu',
+            'data' => $rooms
+        ], 200);
     }
     public function store(Request $request)
     {
