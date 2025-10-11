@@ -91,7 +91,6 @@ const DanhSachPhimTable = () => {
             </thead>
             <tbody>
               {phims.map((phim: any, index: number) => {
-                // Lấy tên thể loại theo id
                 const theLoai = danhSachTheLoai.find(
                   (tl) => tl.id === Number(phim.the_loai_id)
                 );
@@ -102,12 +101,16 @@ const DanhSachPhimTable = () => {
                     <td className="border px-4 py-2 font-semibold">
                       {phim.ten_phim}
                     </td>
-                    <td className="border px-4 py-2">
+                    <td className="border px-4 py-2 text-center">
                       {phim.anh_poster ? (
                         <img
-                          src={phim.anh_poster}
+                          src={
+                            phim.anh_poster?.startsWith("http")
+                              ? phim.anh_poster
+                              : `http://localhost:8000/storage/${phim.anh_poster}`
+                          }
                           alt="poster"
-                          className="w-16 h-24 object-cover rounded"
+                          className="w-20 h-28 object-cover rounded-lg shadow-md border mx-auto"
                         />
                       ) : (
                         "—"
@@ -138,7 +141,7 @@ const DanhSachPhimTable = () => {
                           )
                         : "—"}
                     </td>
-                    <td className="border px-4 py-2 flex gap-2">
+                    <td className="border px-4 py-2 flex gap-2 justify-center">
                       <button
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                         onClick={() => handleEdit(phim)}
