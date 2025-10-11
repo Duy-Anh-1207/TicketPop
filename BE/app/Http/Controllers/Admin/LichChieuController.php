@@ -4,14 +4,17 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\LichChieu;
+use App\Models\Phim;
+use Carbon\Carbon as CarbonCarbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class LichChieuController extends Controller
 {
-   // Lấy danh sách lịch chiếu
+    // Lấy danh sách lịch chiếu
     public function index()
     {
-        $lichChieu = LichChieu::with(['phim', 'phong','phienBan'])->get();
+        $lichChieu = LichChieu::with(['phim', 'phong', 'phienBan'])->get();
         return response()->json($lichChieu);
     }
 
@@ -23,17 +26,38 @@ class LichChieuController extends Controller
             'phong_id' => 'required|integer',
             'phien_ban_id' => 'nullable|integer',
             'gio_chieu' => 'required|date',
-            'gio_ket_thuc' => 'required|date|after:gio_chieu',
-        ]);
+            'gio_ket_thuc' => 'prohibited',
 
-        $lichChieu = LichChieu::create($request->all());
+        ]);
+        // Lấy phim tương ứng
+        $phim = Phim::findOrFail($request->phim_id);
+
+
+        //Convert giờ chiếu sang múi giờ Việt Nam để so sánh chính xác
+        $gioChieu = Carbon::parse($request->gio_chieu, 'Asia/Ho_Chi_Minh');
+
+        // Nếu giờ chiếu < thời điểm hiện tại => báo lỗi
+        if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+            return response()->json([
+                'error' => 'Không thể tạo lịch chiếu trong quá khứ!'
+            ], 422);
+        }
+        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong);
+        $phienBanId = $phim->phien_ban_id ?? null;
+        $lichChieu = LichChieu::create([
+            'phim_id'       => $request->phim_id,
+            'phong_id'      => $request->phong_id,
+            'phien_ban_id'  => $phienBanId,
+            'gio_chieu'     => $gioChieu,
+            'gio_ket_thuc'  => $gioKetThuc,
+        ]);
         return response()->json(['message' => 'Thêm lịch chiếu thành công', 'data' => $lichChieu], 201);
     }
 
     // Lấy chi tiết lịch chiếu theo ID
     public function show($id)
     {
-        $lichChieu = LichChieu::with(['phim', 'phong','phienBan'])->findOrFail($id);
+        $lichChieu = LichChieu::with(['phim', 'phong', 'phienBan'])->findOrFail($id);
         return response()->json($lichChieu);
     }
 
@@ -43,20 +67,42 @@ class LichChieuController extends Controller
         $lichChieu = LichChieu::findOrFail($id);
 
         $request->validate([
-        'phim_id' => 'sometimes|integer|exists:phim,id',
-        'phong_id' => 'sometimes|integer|exists:phong_chieu,id',
-        'phien_ban_id' => 'nullable|integer|exists:phien_ban,id',
-        'gio_chieu' => 'sometimes|date',
-        'gio_ket_thuc' => 'sometimes|date|after:gio_chieu',
+            'phim_id' => 'sometimes|integer|exists:phim,id',
+            'phong_id' => 'sometimes|integer|exists:phong_chieu,id',
+            'phien_ban_id' => 'nullable|integer|exists:phien_ban,id',
+            'gio_chieu' => 'sometimes|date',
+            'gio_ket_thuc' => 'prohibited',
         ]);
 
-        $lichChieu->update($request->only([
-        'phim_id',
-        'phong_id',
-        'phien_ban_id',
-        'gio_chieu',
-        'gio_ket_thuc',
-    ]));
+        $phim = Phim::findOrFail($request->phim_id ?? $lichChieu->phim_id);
+
+        if ($request->has('gio_chieu')) {
+            $gioChieu = Carbon::parse($request->gio_chieu, 'Asia/Ho_Chi_Minh');
+
+
+            if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+                return response()->json([
+                    'error' => 'Không thể đổi lịch chiếu sang thời gian trong quá khứ!'
+                ], 422);
+            }
+        } else {
+
+            $gioChieu = Carbon::parse($lichChieu->gio_chieu, 'Asia/Ho_Chi_Minh');
+        }
+
+
+        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong);
+
+
+        $phienBanId = $phim->phien_ban_id ?? null;
+
+        $lichChieu->update([
+            'phim_id' => $request->phim_id ?? $lichChieu->phim_id,
+            'phong_id' => $request->phong_id ?? $lichChieu->phong_id,
+            'phien_ban_id' => $phienBanId,
+            'gio_chieu' => $gioChieu,
+            'gio_ket_thuc' => $gioKetThuc,
+        ]);
 
         return response()->json(['message' => 'Cập nhật lịch chiếu thành công', 'data' => $lichChieu]);
     }
