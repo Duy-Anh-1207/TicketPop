@@ -4,23 +4,41 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class VaiTro extends Model
 {
-    //
     use HasFactory;
 
-    protected $table = 'vai_tro'; // Tên bảng trong database
 
+    protected $table = 'vai_tro';
+
+    
     protected $fillable = [
-        'ten', // Tên vai trò (ví dụ: Quản trị viên, Người dùng, Biên tập viên)
+        'ten_vai_tro',
+        'mo_ta',
     ];
+    public $timestamps = true;
 
-    public $timestamps = true; // Nếu bảng có cột created_at và updated_at
-
-    // Quan hệ ngược với người dùng
-    public function nguoiDungs()
+    /**
+     * Mối quan hệ nhiều-nhiều với QuyenHan (Permissions).
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function quyenHans(): BelongsToMany
     {
-        return $this->hasMany(User::class, 'vai_tro_id');
+        return $this->belongsToMany(QuyenHan::class, 'quyen_truy_cap', 'vai_tro_id', 'quyen_han_id');
+    }
+
+    /**
+     * Mối quan hệ một-nhiều với NguoiDung.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function nguoiDungs(): HasMany
+    {
+        // Sửa User::class thành NguoiDung::class (nếu bạn có model này)
+        return $this->hasMany(NguoiDung::class, 'vai_tro_id');
     }
 }

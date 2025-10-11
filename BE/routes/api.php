@@ -7,7 +7,7 @@ use App\Http\Controllers\Admin\TheLoaiController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-
+use App\Http\Controllers\Admin\VaiTroController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -50,4 +50,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     Route::apiResource('the-loai', TheLoaiController::class);
+
+        Route::apiResource('vai-tro', VaiTroController::class);
 });
+
+
