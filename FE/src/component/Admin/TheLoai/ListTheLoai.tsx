@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useListTheLoai, useCreateTheLoai, useDeleteTheLoai } from "../../hook/TheLoaiHook";
+import { useListTheLoai, useCreateTheLoai, useDeleteTheLoai } from "../../../hook/TheLoaiHook";
 import Swal from "sweetalert2";
-import type { TheLoai } from "../../types/theloai";
+import type { TheLoai } from "../../../types/theloai";
 
 export default function TheLoaiList() {
   const { data: theloais, isLoading } = useListTheLoai();

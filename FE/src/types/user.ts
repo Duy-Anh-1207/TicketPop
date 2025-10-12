@@ -1,8 +1,8 @@
 export interface User {
   id: number;
-  name: string;
+  ten: string;
   email: string;
-  role: string;
+  vai_tro_id: number;
   is_active: number;
   email_verified_at: string | null;
   created_at: string;

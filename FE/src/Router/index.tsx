@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { useRoutes } from "react-router-dom";
 import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
@@ -6,27 +6,38 @@ import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
 import UserList from "../component/Admin/User/ListUser";
 import DetailUser from "../component/Admin/User/DetailUser";
 import CreateUser from "../component/Admin/User/CreateUser";
+import DanhSachTheLoai from "../component/Admin/TheLoai/ListTheLoai";
+import PhongChieuChuaXuatBanList from "../component/Admin/Phongchieu/PhongChieuChuaXB";
+import CreatePhongChieu from "../component/Admin/Phongchieu/CreatePhongChieu";
+import PhongChieuList from "../component/Admin/Phongchieu/PhongChieuXB";
 
 const Routermain = () => {
-  return (
-    <Routes>
-      {/* Client layout */}
-      <Route path="/" element={<LayoutWeb />}>
-        <Route index element={<HomePage />} />
-      </Route>
+  const element = useRoutes([
+    {
+      path: "/",
+      element: <LayoutWeb />,
+      children: [
+        { index: true, element: <HomePage /> },
+      ],
+    },
+    {
+      path: "/admin",
+      element: <AdminLayout />,
+      children: [
+        { path: "phim", element: <DanhSachPhimTable /> },
+        { path: "nguoi-dung", element: <UserList /> },
+        { path: "nguoi-dung/:id", element: <DetailUser /> },
+        { path: "nguoi-dung/them-moi", element: <CreateUser /> },
+        { path: "the-loai", element: <DanhSachTheLoai /> },
+        { path: "roomxb", element: <PhongChieuList /> },
+        { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> },
+        { path: "room/them-moi", element: <CreatePhongChieu /> },
+        { path: "room/:id", element: <CreatePhongChieu /> },
+      ],
+    },
+  ]);
 
-      {/* Admin layout */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route path="phim" element={<DanhSachPhimTable />} />
-        <Route path="nguoi-dung" element={<UserList />} />
-        <Route path="nguoi-dung/:id" element={<DetailUser />} />
-        <Route path="nguoi-dung/them-moi" element={<CreateUser />} />
-      </Route>
-
-      {/* 404 */}
-      <Route path="*" element={<div>404 - Page not found</div>} />
-    </Routes>
-  );
+  return element;
 };
 
 export default Routermain;

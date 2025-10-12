@@ -87,7 +87,7 @@ class UserController extends Controller
             'so_dien_thoai' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
             'anh_dai_dien' => 'nullable|string|max:255',
-            'trang_thai' => 'nullable|in:online,offline', // ✅ vì DB là tinyint(1)
+            'trang_thai' => 'nullable|in:online,offline',
             'vai_tro_id' => 'sometimes|required|integer|exists:vai_tro,id',
         ]);
 

@@ -4,7 +4,7 @@ import { useListBanners } from "../../../../hook/BannerHook";
 const Banner: React.FC = () => {
   const { data: banners, isLoading } = useListBanners();
 
-  if (isLoading) return <div>Đang tải banners...</div>;
+  if (isLoading) return <div style={{ textAlign:'center' }}>Đang tải banners...</div>;
   if (!banners || banners.length === 0) return <div>Không có banner nào</div>;
 
   const banner = banners[0];

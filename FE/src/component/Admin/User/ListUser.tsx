@@ -45,9 +45,9 @@ export default function UserList() {
             {users?.map((user: User) => (
               <tr key={user.id}>
                 <td className="text-center">{user.id}</td>
-                <td className="text-center">{user.name}</td>
+                <td className="text-center">{user.ten}</td>
                 <td className="text-center">{user.email}</td>
-                <td className="text-center">{user.role}</td>
+                <td className="text-center">{user.vai_tro_id}</td>
                 <td className="text-center">
                   {user.is_active === 1 ? "Hoạt động" : "Khóa"}
                 </td>
@@ -93,7 +93,7 @@ export default function UserList() {
                         <div className="d-flex gap-1">
                           <select
                             className="form-select form-select-sm"
-                            value={roleInput[user.id] ?? user.role}
+                            value={roleInput[user.id] ?? user.vai_tro_id}
                             onChange={(e) =>
                               setRoleInput({
                                 ...roleInput,
@@ -110,7 +110,7 @@ export default function UserList() {
                             onClick={() => {
                               assignRole.mutate({
                                 id: user.id,
-                                role: roleInput[user.id] ?? user.role,
+                                role: roleInput[user.id] ?? user.vai_tro_id,
                               });
                             }}
                           >
