@@ -4,14 +4,13 @@ import axios, { AxiosError } from "axios";
 // CẤU HÌNH AXIOS CLIENT
 // ==========================
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-//Gắn token tự động nếu có
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {

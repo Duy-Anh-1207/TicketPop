@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useCreatePhongChieu } from "../../hook/PhongChieuHook";
+import { useCreatePhongChieu } from "../../../hook/PhongChieuHook";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import type { PhongChieu } from "../../types/phongchieu";
+import type { PhongChieu } from "../../../types/phongchieu";
 
 export default function CreatePhongChieu() {
     const navigate = useNavigate();
