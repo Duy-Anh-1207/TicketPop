@@ -78,7 +78,7 @@ export default function CreatePhongChieu() {
                         name="loai_so_do"
                         value={form.loai_so_do}
                         onChange={handleChange}
-                        placeholder="Ví dụ: 2D, 3D, IMAX..."
+                        placeholder="6x6, 8x8,... , 16x16"
                     />
                 </div>
 

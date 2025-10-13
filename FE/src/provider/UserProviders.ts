@@ -66,7 +66,8 @@ export const toggleUserStatus = async (id: number | string) => {
 };
 
 export const assignUserRole = async (id: number | string, role: string) => {
-  const { data } = await axiosClient.patch(`/users/${id}/role`, { role });
+  // backend expects 'vai_tro_id' field (integer)
+  const { data } = await axiosClient.patch(`/users/${id}/role`, { vai_tro_id: Number(role) });
   return data;
 };
 

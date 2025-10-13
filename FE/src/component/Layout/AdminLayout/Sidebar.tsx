@@ -127,13 +127,10 @@ const Sidebar: React.FC = () => {
                   </Link>
                 </li>
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-shop2.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/vai-tro" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Shop Two</span>
-                  </a>
+                    <span className="hide-menu">Vai trò</span>
+                  </Link>
                 </li>
                 <li className="sidebar-item">
                   <a
