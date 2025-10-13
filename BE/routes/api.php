@@ -9,7 +9,7 @@ use App\Http\Controllers\Admin\TheLoaiController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
-
+use App\Http\Controllers\Admin\VaiTroController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -21,10 +21,10 @@ Route::apiResource('vai_tro', PhimController::class);
 
 //  API Room
 Route::get('/room', [RoomController::class, 'index']);
-Route::post('/room', [RoomController::class, 'store']);          
-Route::get('/room/{id}', [RoomController::class, 'show']);              
-Route::put('/room/{id}', [RoomController::class, 'update']);   
-Route::delete('/room/{id}', [RoomController::class, 'destroy']); 
+Route::post('/room', [RoomController::class, 'store']);
+Route::get('/room/{id}', [RoomController::class, 'show']);
+Route::put('/room/{id}', [RoomController::class, 'update']);
+Route::delete('/room/{id}', [RoomController::class, 'destroy']);
 
 
 Route::prefix('users')->group(function () {
@@ -36,11 +36,11 @@ Route::prefix('users')->group(function () {
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
-    Route::get('/lich-chieu', [LichChieuController::class, 'index']);
-    Route::post('/lich-chieu', [LichChieuController::class, 'store']);
-    Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
-    Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
-    Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
+Route::get('/lich-chieu', [LichChieuController::class, 'index']);
+Route::post('/lich-chieu', [LichChieuController::class, 'store']);
+Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
+Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
+Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 
 
 
@@ -54,14 +54,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/the-loai', [TheLoaiController::class, 'index']);
-Route::post('/the-loai', [TheLoaiController::class, 'store']);
-Route::get('/the-loai/{id}', [TheLoaiController::class, 'show']);
-Route::put('/the-loai/{id}', [TheLoaiController::class, 'update']);
-Route::delete('/the-loai/{id}', [TheLoaiController::class, 'destroy']);
+Route::prefix('v1')->group(function () {
+    // Route cho chức năng Quản lý Thể loại
+    Route::apiResource('the-loai', TheLoaiController::class);
 
-Route::get('/foods', [FoodController::class, 'index']);
-Route::post('/foods', [FoodController::class, 'store']);
-Route::get('/foods/{id}', [FoodController::class, 'show']);
-Route::put('/foods/{id}', [FoodController::class, 'update']);
-Route::delete('/foods/{id}', [FoodController::class, 'destroy']);
+    // Route cho chức năng Quản lý Vai trò
+    Route::apiResource('vai-tro', VaiTroController::class);
+});
