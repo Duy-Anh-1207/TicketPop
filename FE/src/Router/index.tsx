@@ -11,6 +11,8 @@ import PhongChieuChuaXuatBanList from "../component/Admin/Phongchieu/PhongChieuC
 import CreatePhongChieu from "../component/Admin/Phongchieu/CreatePhongChieu";
 import PhongChieuList from "../component/Admin/Phongchieu/PhongChieuXB";
 import VaiTroList from "../component/Admin/VaiTro/ListVaiTro";
+import FoodList from "../component/Admin/Food/ListFood";
+import FoodCreate from "../component/Admin/Food/CreateFood";
 
 const Routermain = () => {
   const element = useRoutes([
@@ -35,6 +37,8 @@ const Routermain = () => {
         { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> },
         { path: "room/them-moi", element: <CreatePhongChieu /> },
         { path: "room/:id", element: <CreatePhongChieu /> },
+        { path: "foods", element: <FoodList /> },
+        { path: "foods/them-moi", element: <FoodCreate /> },
       ],
     },
   ]);
