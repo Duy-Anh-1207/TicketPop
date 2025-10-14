@@ -22,8 +22,17 @@ class RoomController extends Controller
             'trang_thai' => 'required|string',
         ], [
             'loai_so_do.regex' => 'Sơ đồ phải có dạng NxM, ví dụ: 8x8 hoặc 10x12.',
+            'ten_phong.unique' => 'Tên phòng đã tồn tại.',
         ]);
+
         [$rows, $cols] = explode('x', $data['loai_so_do']);
+
+        if ((int)$rows !== (int)$cols) {
+            return response()->json([
+                'message' => "Sơ đồ phòng chiếu phải là hình vuông (N x N), ví dụ: 8x8 hoặc 10x10.",
+                'error' => "Giá trị hiện tại là {$data['loai_so_do']} (không phải hình vuông)"
+            ], 422);
+        }
         $tong_hang = (int)$rows;
         $tong_so_hang = $data['hang_thuong'] + $data['hang_vip'];
         if ($tong_hang !== $tong_so_hang) {
@@ -32,13 +41,15 @@ class RoomController extends Controller
                 'error' => "Tổng hàng thường ({$data['hang_thuong']}) + hàng VIP ({$data['hang_vip']}) phải = {$tong_hang}"
             ], 422);
         }
-        $room = Room::create($data);
 
+        $room = Room::create($data);
+        
         return response()->json([
             'message' => 'Thêm phòng chiếu thành công!',
             'data' => $room
         ], 201);
     }
+
     public function show(string $id)
     {
         $room = Room::find($id);
@@ -75,6 +86,14 @@ class RoomController extends Controller
         $hangThuong = $data['hang_thuong'] ?? $room->hang_thuong;
         $hangVip = $data['hang_vip'] ?? $room->hang_vip;
         [$rows, $cols] = explode('x', $loaiSoDo);
+        
+        if ((int)$rows !== (int)$cols) {
+            return response()->json([
+                'message' => "Sơ đồ phòng chiếu phải là hình vuông (N x N), ví dụ: 8x8 hoặc 10x10.",
+                'error' => "Giá trị hiện tại là {$loaiSoDo} (không phải hình vuông)"
+            ], 422);
+        }
+
         $tong_hang = (int)$rows;
         $tong_so_hang = $hangThuong + $hangVip;
         if ($tong_hang !== $tong_so_hang) {
