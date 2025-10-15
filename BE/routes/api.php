@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
+use App\Http\Controllers\Admin\PhienBanController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -56,8 +57,14 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::prefix('v1')->group(function () {
     // Route cho chức năng Quản lý Thể loại
-    Route::apiResource('the-loai', TheLoaiController::class);
+    
 
     // Route cho chức năng Quản lý Vai trò
     Route::apiResource('vai-tro', VaiTroController::class);
 });
+
+
+Route::apiResource('the-loai', App\Http\Controllers\Admin\TheLoaiController::class);
+Route::apiResource('phien-ban', App\Http\Controllers\Admin\PhienBanController::class);
+
+
