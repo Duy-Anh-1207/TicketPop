@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LoaiGhe;
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class RoomController extends Controller
 {
@@ -38,8 +40,17 @@ class RoomController extends Controller
             'trang_thai' => 'required|string',
         ], [
             'loai_so_do.regex' => 'Sơ đồ phải có dạng NxM, ví dụ: 8x8 hoặc 10x12.',
+            'ten_phong.unique' => 'Tên phòng đã tồn tại.',
         ]);
+
         [$rows, $cols] = explode('x', $data['loai_so_do']);
+
+        if ((int)$rows !== (int)$cols) {
+            return response()->json([
+                'message' => "Sơ đồ phòng chiếu phải là hình vuông (N x N), ví dụ: 8x8 hoặc 10x10.",
+                'error' => "Giá trị hiện tại là {$data['loai_so_do']} (không phải hình vuông)"
+            ], 422);
+        }
         $tong_hang = (int)$rows;
         $tong_so_hang = $data['hang_thuong'] + $data['hang_vip'];
         if ($tong_hang !== $tong_so_hang) {
@@ -48,13 +59,43 @@ class RoomController extends Controller
                 'error' => "Tổng hàng thường ({$data['hang_thuong']}) + hàng VIP ({$data['hang_vip']}) phải = {$tong_hang}"
             ], 422);
         }
+
         $room = Room::create($data);
+        
+        $loaiThuong = LoaiGhe::firstOrCreate(['ten_loai_ghe' => 'Ghế Thường']);
+        $loaiVIP = LoaiGhe::firstOrCreate(['ten_loai_ghe' => 'Ghế Vip']);
+
+        $gheData = [];
+        $alphabet = range('A', 'Z');
+        $hangThuong = $data['hang_thuong'];
+
+        for ($i = 0; $i < $rows; $i++) {
+            $hang = $alphabet[$i];
+            $loai_ghe_id = ($i < $hangThuong) ? $loaiThuong->id : $loaiVIP->id;
+
+            for ($j = 1; $j <= $cols; $j++) {
+                $gheData[] = [
+                    'phong_id' => $room->id,
+                    'loai_ghe_id' => $loai_ghe_id,
+                    'so_ghe' => $hang . $j,
+                    'hang' => $hang,
+                    'cot' => $j,
+                    'trang_thai' => true,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+        }
+
+        DB::table('ghe')->insert($gheData);
 
         return response()->json([
             'message' => 'Thêm phòng chiếu thành công!',
-            'data' => $room
+            'data' => $room,
+            'tong_so_ghe' => count($gheData)
         ], 201);
     }
+
     public function show(string $id)
     {
         $room = Room::find($id);
@@ -91,6 +132,14 @@ class RoomController extends Controller
         $hangThuong = $data['hang_thuong'] ?? $room->hang_thuong;
         $hangVip = $data['hang_vip'] ?? $room->hang_vip;
         [$rows, $cols] = explode('x', $loaiSoDo);
+
+        if ((int)$rows !== (int)$cols) {
+            return response()->json([
+                'message' => "Sơ đồ phòng chiếu phải là hình vuông (N x N), ví dụ: 8x8 hoặc 10x10.",
+                'error' => "Giá trị hiện tại là {$loaiSoDo} (không phải hình vuông)"
+            ], 422);
+        }
+
         $tong_hang = (int)$rows;
         $tong_so_hang = $hangThuong + $hangVip;
         if ($tong_hang !== $tong_so_hang) {

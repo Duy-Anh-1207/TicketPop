@@ -27,50 +27,70 @@ export const useUserDetail = (id: number | string | null) =>
     enabled: !!id, // chỉ chạy khi có id
   });
 
-// 🔹 Thêm user
+// 🔹 Thêm người dùng
 export const useCreateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (
-      values: Omit<User, "id" | "created_at" | "updated_at"> & { password: string }
-    ) =>
-      createUser({
-        ...values,
-        email_verified_at: values.email_verified_at ?? undefined, // chuyển null => undefined
-      }),
-    onSuccess: () => {
-      Swal.fire("✅ Thành công!", "Đã thêm người dùng.", "success");
+    mutationFn: (values: {
+      ten: string;
+      email: string;
+      password: string;
+      so_dien_thoai?: string;
+      anh_dai_dien?: string;
+      trang_thai?: string;
+      vai_tro_id: number | string;
+    }) => {
+      // Map 'ten' to 'name' for API compatibility
+      const { ten, ...rest } = values;
+      return createUser({ name: ten, ...rest });
+    },
+
+    onSuccess: (res) => {
+      Swal.fire("✅ Thành công!", res.message || "Đã thêm người dùng mới!", "success");
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["vai-tro"] });
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể thêm.", "error");
+      Swal.fire(
+        "❌ Lỗi!",
+        err.response?.data?.message || "Không thể thêm người dùng.",
+        "error"
+      );
     },
   });
 };
 
-
-
-// 🔹 Cập nhật user
+// 🔹 Cập nhật người dùng
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, values }: { id: string | number; values: Partial<User> }) =>
-      updateUser(id, values),
-    onSuccess: () => {
-      Swal.fire("✅ Thành công!", "Đã cập nhật người dùng.", "success");
+    mutationFn: ({
+      id,
+      values,
+    }: {
+      id: string | number;
+      values: Partial<Omit<User, "id" | "created_at" | "updated_at">>;
+    }) => updateUser(id, values),
+
+    onSuccess: (res) => {
+      Swal.fire("✅ Thành công!", res.message || "Đã cập nhật người dùng.", "success");
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể cập nhật.", "error");
+      Swal.fire(
+        "❌ Lỗi!",
+        err.response?.data?.message || "Không thể cập nhật người dùng.",
+        "error"
+      );
     },
   });
 };
 
-// 🔹 Xóa user
+// 🔹 Xóa người dùng
 export const useDeleteUser = () => {
   const queryClient = useQueryClient();
 
@@ -82,51 +102,42 @@ export const useDeleteUser = () => {
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể xóa.", "error");
+      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể xóa người dùng.", "error");
     },
   });
 };
 
+// 🔹 Đổi trạng thái hoạt động
 export const useToggleStatus = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: number | string) => toggleUserStatus(id),
     onSuccess: (data) => {
-      // Sử dụng thông báo từ API trả về
       Swal.fire("Cập nhật!", data.message || "Trạng thái người dùng đã thay đổi.", "success");
-
-      // Làm mới danh sách người dùng
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (error: any) => {
-      Swal.fire(
-        "Lỗi!",
-        error?.response?.data?.message,
-        "error"
-      );
+      Swal.fire("Lỗi!", error?.response?.data?.message || "Không thể cập nhật trạng thái.", "error");
     },
   });
 };
 
-// 🔹 Gán vai trò
+// 🔹 Gán vai trò người dùng
 export const useAssignRole = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, role }: { id: string | number; role: string }) =>
-      assignUserRole(id, role),
+    mutationFn: ({ id, vai_tro_id }: { id: string | number; vai_tro_id: number | string }) =>
+      assignUserRole(String(id), String(vai_tro_id)),
+
     onSuccess: (res) => {
       Swal.fire("Cập nhật!", res.message || "Vai trò người dùng đã được thay đổi.", "success");
       queryClient.invalidateQueries({ queryKey: ["users"] });
+      queryClient.invalidateQueries({ queryKey: ["vai-tro"] });
     },
     onError: (err: any) => {
-      Swal.fire(
-        "❌ Lỗi!",
-        err.response?.data?.message || "Không thể thay đổi vai trò.",
-        "error"
-      );
+      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể thay đổi vai trò.", "error");
     },
   });
 };
-

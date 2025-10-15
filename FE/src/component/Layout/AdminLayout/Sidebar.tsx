@@ -113,7 +113,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">Quản lý người dùng</span>
+                <span className="hide-menu ps-1">Quản lý tài khoản</span>
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
@@ -127,22 +127,10 @@ const Sidebar: React.FC = () => {
                   </Link>
                 </li>
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-shop2.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/vai-tro" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Shop Two</span>
-                  </a>
-                </li>
-                <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/eco-shop-detail.html"
-                    className="sidebar-link"
-                  >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Details One</span>
-                  </a>
+                    <span className="hide-menu">Vai trò</span>
+                  </Link>
                 </li>
               </ul>
 
@@ -204,7 +192,7 @@ const Sidebar: React.FC = () => {
                     className="fs-6"
                   />
                 </span>
-                <span className="hide-menu ps-1">User Profile</span>
+                <span className="hide-menu ps-1">Quản lý dịch vụ</span>
               </a>
               <ul
                 aria-expanded={isUserProfileOpen}
@@ -212,22 +200,16 @@ const Sidebar: React.FC = () => {
                   }`}
               >
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/page-user-profile.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/foods" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Profile One</span>
-                  </a>
+                    <span className="hide-menu">Quản lý đồ ăn</span>
+                  </Link>
                 </li>
                 <li className="sidebar-item">
-                  <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/page-user-profile2.html"
-                    className="sidebar-link"
-                  >
+                  <Link to="/admin/foods/them-moi" className="sidebar-link">
                     <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Profile Two</span>
-                  </a>
+                    <span className="hide-menu">Thêm mới đồ ăn</span>
+                  </Link>
                 </li>
               </ul>
             </li>

@@ -3,23 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\TheLoai;
 use App\Http\Requests\StoreTheLoaiRequest;
 use App\Http\Requests\UpdateTheLoaiRequest;
-use App\Models\TheLoai;
 use Illuminate\Http\JsonResponse;
 
 class TheLoaiController extends Controller
 {
-
+    // Lấy danh sách thể loại
     public function index(): JsonResponse
     {
-       $data = TheLoai::orderBy('id', 'asc')->get();
-        return response()->json([
-            'data' => $data
-        ]);
+        $data = TheLoai::latest()->paginate(10);
+        return response()->json($data);
     }
 
-   
+    // Tạo thể loại mới
     public function store(StoreTheLoaiRequest $request): JsonResponse
     {
         $theLoai = TheLoai::create($request->validated());
@@ -29,28 +27,28 @@ class TheLoaiController extends Controller
         ], 201);
     }
 
-    
-    public function show(TheLoai $theLoai): JsonResponse
+    // Xem chi tiết thể loại
+    public function show(TheLoai $the_loai): JsonResponse
     {
         return response()->json([
-            'data' => $theLoai
+            'data' => $the_loai
         ]);
     }
 
-    
-    public function update(UpdateTheLoaiRequest $request, TheLoai $theLoai): JsonResponse
+    // Cập nhật thể loại
+    public function update(UpdateTheLoaiRequest $request, TheLoai $the_loai): JsonResponse
     {
-        $theLoai->update($request->validated());
+        $the_loai->update($request->validated());
         return response()->json([
             'message' => 'Cập nhật thể loại thành công!',
-            'data' => $theLoai
+            'data' => $the_loai
         ]);
     }
 
-   
-    public function destroy(TheLoai $theLoai): JsonResponse
+    // Xoá thể loại
+    public function destroy(TheLoai $the_loai): JsonResponse
     {
-        $theLoai->delete();
-        return response()->json(null, 204);
+        $the_loai->delete();
+        return response()->json(['message' => 'Xoá thể loại thành công!']);
     }
 }

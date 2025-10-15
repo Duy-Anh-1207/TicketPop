@@ -10,6 +10,9 @@ import DanhSachTheLoai from "../component/Admin/TheLoai/ListTheLoai";
 import PhongChieuChuaXuatBanList from "../component/Admin/Phongchieu/PhongChieuChuaXB";
 import CreatePhongChieu from "../component/Admin/Phongchieu/CreatePhongChieu";
 import PhongChieuList from "../component/Admin/Phongchieu/PhongChieuXB";
+import VaiTroList from "../component/Admin/VaiTro/ListVaiTro";
+import FoodList from "../component/Admin/Food/ListFood";
+import FoodCreate from "../component/Admin/Food/CreateFood";
 
 const Routermain = () => {
   const element = useRoutes([
@@ -25,14 +28,17 @@ const Routermain = () => {
       element: <AdminLayout />,
       children: [
         { path: "phim", element: <DanhSachPhimTable /> },
-        { path: "nguoi-dung", element: <UserList /> },
+        { path: "nguoi-dung", element: <UserList/> },
         { path: "nguoi-dung/:id", element: <DetailUser /> },
         { path: "nguoi-dung/them-moi", element: <CreateUser /> },
+        { path: "vai-tro", element: <VaiTroList /> },
         { path: "the-loai", element: <DanhSachTheLoai /> },
         { path: "roomxb", element: <PhongChieuList /> },
         { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> },
         { path: "room/them-moi", element: <CreatePhongChieu /> },
         { path: "room/:id", element: <CreatePhongChieu /> },
+        { path: "foods", element: <FoodList /> },
+        { path: "foods/them-moi", element: <FoodCreate /> },
       ],
     },
   ]);

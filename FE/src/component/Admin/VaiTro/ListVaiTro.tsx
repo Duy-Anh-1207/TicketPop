@@ -1,13 +1,12 @@
 import { useState } from "react";
-import { useListTheLoai, useCreateTheLoai, useUpdateTheLoai, useDeleteTheLoai } from "../../../hook/TheLoaiHook";
+import { useListVaiTro, useCreateVaiTro, useDeleteVaiTro } from "../../../hook/VaiTroHook";
 import Swal from "sweetalert2";
-import type { TheLoai } from "../../../types/theloai";
+import type { VaiTro } from "../../../types/vaitro";
 
-export default function TheLoaiList() {
-  const { data: theloais, isLoading } = useListTheLoai();
-  const createTheLoai = useCreateTheLoai();
-  const updateTheLoai = useUpdateTheLoai();
-  const deleteTheLoai = useDeleteTheLoai();
+export default function VaiTroList() {
+  const { data: vaitros, isLoading } = useListVaiTro();
+  const createVaiTro = useCreateVaiTro();
+  const deleteVaiTro = useDeleteVaiTro();
 
   // form input cho thêm mới
   const [newTen, setNewTen] = useState("");
@@ -15,12 +14,12 @@ export default function TheLoaiList() {
 
   const handleAdd = () => {
     if (!newTen.trim()) {
-      Swal.fire("⚠️ Lỗi!", "Tên thể loại không được để trống.", "warning");
+      Swal.fire("⚠️ Lỗi!", "Tên vai trò không được để trống.", "warning");
       return;
     }
 
-    createTheLoai.mutate(
-      { ten_the_loai: newTen },
+    createVaiTro.mutate(
+      { ten_vai_tro: newTen },
       {
         onSuccess: () => {
           setNewTen("");
@@ -38,52 +37,23 @@ export default function TheLoaiList() {
       confirmButtonText: "Xóa",
       cancelButtonText: "Hủy",
     }).then((result) => {
-      if (result.isConfirmed) deleteTheLoai.mutate(id);
-    });
-  };
-
-  const handleEdit = (tl: TheLoai) => {
-    Swal.fire({
-      title: "✏️ Sửa tên thể loại",
-      input: "text",
-      inputLabel: "Tên thể loại",
-      inputValue: tl.ten_the_loai,
-      showCancelButton: true,
-      confirmButtonText: "Cập nhật",
-      cancelButtonText: "Hủy",
-      preConfirm: (value) => {
-        if (!value || !value.trim()) {
-          Swal.showValidationMessage("Tên thể loại không được để trống");
-        }
-        return value;
-      },
-    }).then((result) => {
-      if (result.isConfirmed) {
-        updateTheLoai.mutate(
-          { id: tl.id, values: { ten_the_loai: result.value } },
-          {
-            onSuccess: () => {
-              Swal.fire("✅ Đã cập nhật!", "", "success");
-            },
-          }
-        );
-      }
+      if (result.isConfirmed) deleteVaiTro.mutate(id);
     });
   };
 
   return (
     <div className="container p-4">
-      <h4 className="mb-4 text-center">📚 Quản lý thể loại</h4>
+      <h4 className="mb-4 text-center">🧩 Quản lý vai trò</h4>
 
       {/* --- Form thêm nhanh --- */}
       <div className="card shadow-sm p-3 mb-4">
-        <h6>➕ Thêm thể loại mới</h6>
+        <h6>➕ Thêm vai trò mới</h6>
         <div className="row g-2 align-items-center">
           <div className="col-md-4">
             <input
               type="text"
               className="form-control"
-              placeholder="Tên thể loại..."
+              placeholder="Tên vai trò..."
               value={newTen}
               onChange={(e) => setNewTen(e.target.value)}
             />
@@ -92,9 +62,9 @@ export default function TheLoaiList() {
             <button
               className="btn btn-success"
               onClick={handleAdd}
-              disabled={createTheLoai.isPending}
+              disabled={createVaiTro.isPending}
             >
-              {createTheLoai.isPending ? "Đang thêm..." : "Thêm mới"}
+              {createVaiTro.isPending ? "Đang thêm..." : "Thêm mới"}
             </button>
           </div>
         </div>
@@ -106,27 +76,29 @@ export default function TheLoaiList() {
           <thead className="table-light text-center">
             <tr>
               <th>ID</th>
-              <th>Tên thể loại</th>
+              <th>Tên vai trò</th>
               <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {theloais?.length ? (
-              theloais.map((tl: TheLoai) => (
-                <tr key={tl.id}>
-                  <td className="text-center">{tl.id}</td>
-                  <td>{tl.ten_the_loai}</td>
+            {vaitros?.length ? (
+              vaitros.map((vt: VaiTro) => (
+                <tr key={vt.id}>
+                  <td className="text-center">{vt.id}</td>
+                  <td>{vt.ten_vai_tro}</td>
                   <td className="text-center">
                     <div className="btn-group">
                       <button
                         className="btn btn-outline-primary btn-sm"
-                        onClick={() => handleEdit(tl)}
+                        onClick={() =>
+                          Swal.fire("✏️ Chưa làm!", "Phần sửa sẽ thêm sau.", "info")
+                        }
                       >
                         Cập nhật
                       </button>
                       <button
                         className="btn btn-outline-danger btn-sm"
-                        onClick={() => handleDelete(tl.id)}
+                        onClick={() => handleDelete(vt.id)}
                       >
                         Xóa
                       </button>
@@ -136,8 +108,8 @@ export default function TheLoaiList() {
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="text-center text-muted py-3">
-                  Không có thể loại nào.
+                <td colSpan={4} className="text-center text-muted py-3">
+                  Không có vai trò nào.
                 </td>
               </tr>
             )}

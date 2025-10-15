@@ -4,10 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\VaiTro;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -22,11 +20,10 @@ class UserController extends Controller
                 'ten' => $user->ten,
                 'email' => $user->email,
                 'password' => $user->password,
-                'trang_thai' => $user->trang_thai,
+                'trang_thai' => (int) $user->trang_thai,
                 'vai_tro_id' => $user->vai_tro_id,
                 'so_dien_thoai' => $user->so_dien_thoai,
                 'anh_dai_dien' => $user->anh_dai_dien,
-
             ];
         });
 
@@ -42,7 +39,7 @@ class UserController extends Controller
             'so_dien_thoai' => 'nullable|string|max:20',
             'password' => 'required|string|min:6',
             'anh_dai_dien' => 'nullable|string|max:255',
-           'trang_thai' => 'nullable|in:online,offline',
+            'trang_thai' => 'nullable|in:0,1',
             'vai_tro_id' => 'required|integer|exists:vai_tro,id',
         ]);
 
@@ -52,14 +49,14 @@ class UserController extends Controller
             'so_dien_thoai' => $validated['so_dien_thoai'] ?? null,
             'password' => Hash::make($validated['password']),
             'anh_dai_dien' => $validated['anh_dai_dien'] ?? null,
-            'trang_thai' => $request->trang_thai ?? 'offline',
+            'trang_thai' => $validated['trang_thai'] ?? 0,
             'vai_tro_id' => $validated['vai_tro_id'],
         ]);
 
-       return response()->json(['message' => 'Tạo người dùng thành công!', 'data' => $user], 201);
+        return response()->json(['message' => 'Tạo người dùng thành công!', 'data' => $user], 201);
     }
 
-    // Xem chi tiết người dùng
+    // Xem chi tiết
     public function show($id)
     {
         $user = User::with('vaiTro')->findOrFail($id);
@@ -68,15 +65,14 @@ class UserController extends Controller
             'id' => $user->id,
             'ten' => $user->ten,
             'email' => $user->email,
-            'trang_thai' => $user->trang_thai,
+            'trang_thai' => (int) $user->trang_thai,
             'vai_tro_id' => $user->vai_tro_id,
             'so_dien_thoai' => $user->so_dien_thoai,
             'anh_dai_dien' => $user->anh_dai_dien,
-            
         ]);
     }
 
-    // Cập nhật người dùng
+    // Cập nhật
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -87,7 +83,7 @@ class UserController extends Controller
             'so_dien_thoai' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
             'anh_dai_dien' => 'nullable|string|max:255',
-            'trang_thai' => 'nullable|in:online,offline',
+            'trang_thai' => 'nullable|in:0,1',
             'vai_tro_id' => 'sometimes|required|integer|exists:vai_tro,id',
         ]);
 
@@ -98,27 +94,62 @@ class UserController extends Controller
             $user->save();
         }
 
-        $user->load('vaiTro');
-
         return response()->json([
             'message' => 'Người dùng đã được cập nhật',
-            'user' => [
-                'id' => $user->id,
-                'ten' => $user->ten,
-                'email' => $user->email,
-                'so_dien_thoai' => $user->so_dien_thoai,
-                'trang_thai' => $user->trang_thai,
-                'vai_tro_id' => $user->vai_tro_id,
-                'anh_dai_dien' => $user->anh_dai_dien,
-            ]
+            'user' => $user
         ]);
     }
 
-
-    // Xóa người dùng
+    // Xóa
     public function destroy($id)
     {
         User::destroy($id);
         return response()->json(['message' => 'Đã xóa người dùng']);
+    }
+
+    // ✅ BẬT / TẮT trạng thái người dùng
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->trang_thai = $user->trang_thai ? 0 : 1;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Trạng thái người dùng đã được thay đổi',
+            'trang_thai' => $user->trang_thai,
+        ]);
+    }
+
+    // ✅ Gán vai trò cho người dùng
+    public function assignRole(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'vai_tro_id' => 'required|integer|exists:vai_tro,id'
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->vai_tro_id = $validated['vai_tro_id'];
+        $user->save();
+
+        return response()->json([
+            'message' => 'Gán vai trò thành công',
+            'vai_tro_id' => $user->vai_tro_id
+        ]);
+    }
+
+
+    // ✅ Reset mật khẩu người dùng
+    public function resetPassword($id)
+    {
+        $user = User::findOrFail($id);
+        $newPassword = '123456'; // hoặc random nếu muốn
+
+        $user->password = Hash::make($newPassword);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Mật khẩu đã được đặt lại',
+            'new_password' => $newPassword, // chỉ nên hiển thị tạm cho admin
+        ]);
     }
 }
