@@ -35,6 +35,20 @@ class LichChieuController extends Controller
 
         //Convert giờ chiếu sang múi giờ Việt Nam để so sánh chính xác
         $gioChieu = Carbon::parse($request->gio_chieu, 'Asia/Ho_Chi_Minh');
+        $lichCu = LichChieu::where('phong_id', $request->phong_id)
+    ->orderBy('gio_ket_thuc', 'desc')
+    ->first();
+
+if ($lichCu) {
+    $gioKetThucCu = Carbon::parse($lichCu->gio_ket_thuc, 'Asia/Ho_Chi_Minh')->addMinutes(15);
+
+    // Nếu giờ chiếu mới nhỏ hơn giờ kết thúc cũ + 15 phút → báo lỗi
+    if ($gioChieu->lt($gioKetThucCu)) {
+        return response()->json([
+            'error' => 'Phòng này chưa sẵn sàng! Giờ chiếu mới phải sau suất trước ít nhất 15 phút.'
+        ], 422);
+    }
+}
 
         // Nếu giờ chiếu < thời điểm hiện tại => báo lỗi
         if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
@@ -42,7 +56,7 @@ class LichChieuController extends Controller
                 'error' => 'Không thể tạo lịch chiếu trong quá khứ!'
             ], 422);
         }
-        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong);
+        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
         $phienBanId = $phim->phien_ban_id ?? null;
         $lichChieu = LichChieu::create([
             'phim_id'       => $request->phim_id,
@@ -91,8 +105,21 @@ class LichChieuController extends Controller
         }
 
 
-        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong);
+        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
+        $lichCu = LichChieu::where('phong_id', $request->phong_id ?? $lichChieu->phong_id)
+    ->where('id', '!=', $id)
+    ->orderBy('gio_ket_thuc', 'desc')
+    ->first();
 
+if ($lichCu) {
+    $gioKetThucCu = Carbon::parse($lichCu->gio_ket_thuc, 'Asia/Ho_Chi_Minh')->addMinutes(15);
+
+    if ($gioChieu->lt($gioKetThucCu)) {
+        return response()->json([
+            'error' => 'Phòng này chưa sẵn sàng! Giờ chiếu mới phải sau suất trước ít nhất 15 phút.'
+        ], 422);
+    }
+}
 
         $phienBanId = $phim->phien_ban_id ?? null;
 
