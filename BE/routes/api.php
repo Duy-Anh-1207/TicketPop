@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
+use App\Http\Controllers\Admin\MaGiamGiaController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -70,3 +71,9 @@ Route::delete('/foods/{id}', [FoodController::class, 'destroy']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/ma-giam-gia', [MaGiamGiaController::class, 'index']);
+Route::post('/ma-giam-gia', [MaGiamGiaController::class, 'store']);
+Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
+Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
+Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
