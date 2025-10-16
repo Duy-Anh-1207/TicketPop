@@ -13,22 +13,21 @@ import PhongChieuList from "../component/Admin/Phongchieu/PhongChieuXB";
 import VaiTroList from "../component/Admin/VaiTro/ListVaiTro";
 import FoodList from "../component/Admin/Food/ListFood";
 import FoodCreate from "../component/Admin/Food/CreateFood";
-
+import Create from "../component/Admin/LichChieu/Create";
+import LichChieuList from "../component/Admin/LichChieu/List";
 const Routermain = () => {
   const element = useRoutes([
     {
       path: "/",
       element: <LayoutWeb />,
-      children: [
-        { index: true, element: <HomePage /> },
-      ],
+      children: [{ index: true, element: <HomePage /> }],
     },
     {
       path: "/admin",
       element: <AdminLayout />,
       children: [
         { path: "phim", element: <DanhSachPhimTable /> },
-        { path: "nguoi-dung", element: <UserList/> },
+        { path: "nguoi-dung", element: <UserList /> },
         { path: "nguoi-dung/:id", element: <DetailUser /> },
         { path: "nguoi-dung/them-moi", element: <CreateUser /> },
         { path: "vai-tro", element: <VaiTroList /> },
@@ -39,6 +38,8 @@ const Routermain = () => {
         { path: "room/:id", element: <CreatePhongChieu /> },
         { path: "foods", element: <FoodList /> },
         { path: "foods/them-moi", element: <FoodCreate /> },
+        { path: "lich-chieu/them-moi", element: <Create /> },
+        { path: "lich-chieu", element: <LichChieuList /> },
       ],
     },
   ]);
