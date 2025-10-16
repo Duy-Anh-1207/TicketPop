@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\LichChieuController;
+use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PhimController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\TheLoaiController;
@@ -35,6 +36,14 @@ Route::prefix('users')->group(function () {
     Route::patch('/{id}', [UserController::class, 'update']);
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
+Route::prefix('menu')->group(function () {
+    Route::get('/',        [MenuController::class, 'index']);   // GET /api/menus
+    Route::get('/tree',    [MenuController::class, 'tree']);    // GET /api/menus/tree
+    Route::post('/',       [MenuController::class, 'store']);   // POST /api/menus
+    Route::get('/{menu}',  [MenuController::class, 'show']);    // GET /api/menus/{id}
+    Route::match(['put','patch'],'/{menu}', [MenuController::class,'update']); // PUT/PATCH
+    Route::delete('/{menu}',[MenuController::class, 'destroy']); // DELETE
+});
 
     Route::get('/lich-chieu', [LichChieuController::class, 'index']);
     Route::post('/lich-chieu', [LichChieuController::class, 'store']);
@@ -65,3 +74,7 @@ Route::post('/foods', [FoodController::class, 'store']);
 Route::get('/foods/{id}', [FoodController::class, 'show']);
 Route::put('/foods/{id}', [FoodController::class, 'update']);
 Route::delete('/foods/{id}', [FoodController::class, 'destroy']);
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
+});

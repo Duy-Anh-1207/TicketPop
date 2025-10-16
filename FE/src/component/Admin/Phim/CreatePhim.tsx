@@ -13,91 +13,85 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
     thoi_luong: "",
     ngon_ngu: "",
     quoc_gia: "",
-    anh_poster: "",
+    anh_poster: null,
     anh_poster_preview: "",
     ngay_cong_chieu: "",
     ngay_ket_thuc: "",
     do_tuoi_gioi_han: "",
     loai_suat_chieu: "",
-    phien_ban_id: "",
-    the_loai_id: "",
+    phien_ban_id: [] as number[],
+    the_loai_id: [] as number[],
   });
 
-  // objectURL để revoke khi unmount/đổi file
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-
-  const danhSachTheLoai = [
-    { id: 1, ten_the_loai: "Hành động" },
-    { id: 2, ten_the_loai: "Hài" },
-    { id: 3, ten_the_loai: "Tình cảm" },
-    { id: 4, ten_the_loai: "Kinh dị" },
-    { id: 5, ten_the_loai: "Hoạt hình" },
-  ];
-
+  const [danhSachTheLoai, setDanhSachTheLoai] = useState<
+    Array<{ id: number; ten_the_loai: string }>
+  >([]);
   const danhSachPhienBan = [
-    { id: 1, ten_phien_ban: "2D" },
-    { id: 2, ten_phien_ban: "3D" },
+    { id: 1, ten_phien_ban: "Lồng tiếng" },
+    { id: 2, ten_phien_ban: "Thuyết minh" },
+    { id: 3, ten_phien_ban: "Vietsub" },
   ];
-
   const danhSachLoaiSuat = ["Thường", "Đặc biệt", "Sớm"] as const;
   type LoaiSuat = (typeof danhSachLoaiSuat)[number] | "";
 
-  // Chuẩn hóa date -> bỏ giờ để so sánh theo ngày
-  const toDateOnly = (val: string | Date | null | undefined) => {
-    if (!val) return null;
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return null;
-    d.setHours(0, 0, 0, 0);
-    return d;
+  // 🧩 Helper parse array từ dữ liệu backend
+  const safeParseArray = (v: any) => {
+    if (!v && v !== 0) return [];
+    if (Array.isArray(v)) return v.map((x) => Number(x));
+    if (typeof v === "string") {
+      try {
+        const p = JSON.parse(v);
+        if (Array.isArray(p)) return p.map((x) => Number(x));
+      } catch (e) {
+        return (
+          v
+            .split?.(",")
+            .map((x: string) => Number(x.trim()))
+            .filter(Boolean) || []
+        );
+      }
+    }
+    return [];
   };
 
-  // created_at: khi sửa lấy từ phim, khi thêm mới dùng ngày hôm nay
-  const createdAtDate = React.useMemo(() => {
-    const base = phim?.created_at ? new Date(phim.created_at) : new Date();
-    base.setHours(0, 0, 0, 0);
-    return base;
-  }, [phim?.created_at]);
+  // 🧠 Lấy danh sách thể loại từ API
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const res = await fetch("hhttp://localhost:5173/admin/the-loai"); 
+        if (!res.ok) throw new Error("Không lấy được danh sách thể loại");
+        const json = await res.json();
+        if (mounted && json.data && Array.isArray(json.data)) {
+          setDanhSachTheLoai(json.data);
+        }
+      } catch (err) {
+        console.warn("Fetch thể loại lỗi:", err);
+        setDanhSachTheLoai([]);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  // gợi ý min/max cho input date tùy theo loại suất
-  const dateConstraints = React.useMemo(() => {
-    const loai: LoaiSuat = formData.loai_suat_chieu || "";
-    const d = new Date(createdAtDate);
-    const toISO = (x: Date) => x.toISOString().slice(0, 10);
-
-    // Thường: Ngày chiếu > Ngày tạo  => min = created_at + 1
-    if (loai === "Thường") {
-      const min = new Date(d);
-      min.setDate(min.getDate() + 1);
-      return { minNgayChieu: toISO(min), maxNgayChieu: undefined as string | undefined };
-    }
-
-    // Đặc biệt: Ngày chiếu ≥ Ngày tạo => min = created_at
-    if (loai === "Đặc biệt") {
-      return { minNgayChieu: toISO(d), maxNgayChieu: undefined };
-    }
-
-    // Sớm: Ngày chiếu < Ngày tạo => max = created_at - 1
-    if (loai === "Sớm") {
-      const max = new Date(d);
-      max.setDate(max.getDate() - 1);
-      return { minNgayChieu: undefined, maxNgayChieu: toISO(max) };
-    }
-
-    return { minNgayChieu: undefined, maxNgayChieu: undefined };
-  }, [formData.loai_suat_chieu, createdAtDate]);
-
-  // Prefill khi sửa
+  // 🧩 Khi có phim (chế độ sửa)
   useEffect(() => {
     if (phim) {
       setFormData((prev: any) => ({
         ...prev,
         ...phim,
-        anh_poster_preview: phim.anh_poster ? phim.anh_poster : "",
+        anh_poster_preview: phim.anh_poster
+          ? phim.anh_poster
+          : prev.anh_poster_preview,
+        the_loai_id: safeParseArray(phim.the_loai_id),
+        phien_ban_id: safeParseArray(phim.phien_ban_id),
       }));
     }
   }, [phim]);
 
-  // Revoke objectURL khi đổi file/ unmount
+  // cleanup preview URL
   useEffect(() => {
     return () => {
       if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -107,10 +101,8 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const url = URL.createObjectURL(file);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-
     setPreviewUrl(url);
     setFormData((s: any) => ({
       ...s,
@@ -119,6 +111,42 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
     }));
   };
 
+  const toDateOnly = (val: string | Date | null | undefined) => {
+    if (!val) return null;
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return null;
+    d.setHours(0, 0, 0, 0);
+    return d;
+  };
+
+  const createdAtDate = React.useMemo(() => {
+    const base = phim?.created_at ? new Date(phim.created_at) : new Date();
+    base.setHours(0, 0, 0, 0);
+    return base;
+  }, [phim?.created_at]);
+
+  const dateConstraints = React.useMemo(() => {
+    const loai: LoaiSuat = formData.loai_suat_chieu || "";
+    const d = new Date(createdAtDate);
+    const toISO = (x: Date) => x.toISOString().slice(0, 10);
+
+    if (loai === "Thường") {
+      const min = new Date(d);
+      min.setDate(min.getDate() + 1);
+      return { minNgayChieu: toISO(min), maxNgayChieu: undefined as string | undefined };
+    }
+    if (loai === "Đặc biệt") {
+      return { minNgayChieu: toISO(d), maxNgayChieu: undefined };
+    }
+    if (loai === "Sớm") {
+      const max = new Date(d);
+      max.setDate(max.getDate() - 1);
+      return { minNgayChieu: undefined, maxNgayChieu: toISO(max) };
+    }
+    return { minNgayChieu: undefined, maxNgayChieu: undefined };
+  }, [formData.loai_suat_chieu, createdAtDate]);
+
+  // ✅ Validate ngày chiếu theo loại suất
   const validateDates = () => {
     const loai: LoaiSuat = formData.loai_suat_chieu || "";
     const ngayChieu = toDateOnly(formData.ngay_cong_chieu);
@@ -154,21 +182,42 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
     return true;
   };
 
+  const toggleArrayValue = (key: "the_loai_id" | "phien_ban_id", id: number) => {
+    setFormData((s: any) => {
+      const arr = Array.isArray(s[key]) ? [...s[key]] : [];
+      const idx = arr.indexOf(id);
+      if (idx === -1) arr.push(id);
+      else arr.splice(idx, 1);
+      return { ...s, [key]: arr };
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateDates()) return;
 
     const data = new FormData();
     Object.keys(formData).forEach((key) => {
-      if (formData[key] && key !== "anh_poster_preview") {
-        data.append(key, formData[key]);
+      const value = formData[key];
+      if (key === "anh_poster_preview") return;
+      if (value === undefined || value === null || value === "") return;
+
+      if (value instanceof File) {
+        data.append(key, value);
+        return;
       }
+
+      if (Array.isArray(value)) {
+        value.forEach((v) => data.append(`${key}[]`, String(v)));
+        return;
+      }
+
+      data.append(key, String(value));
     });
 
     onSubmit(data);
   };
 
-  // Gợi ý nhanh rule hiển thị theo loại suất
   const RuleHint = () => {
     const loai: LoaiSuat = formData.loai_suat_chieu || "";
     if (!loai) return null;
@@ -182,6 +231,7 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
     return null;
   };
 
+  // ===================== JSX =====================
   return (
     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
       <div className="bg-white p-6 rounded-2xl w-[500px] max-h-[90vh] overflow-y-auto shadow-lg">
@@ -309,13 +359,14 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
               />
               {formData.ngay_cong_chieu && (
                 <p className="text-xs text-gray-500 mt-1">
-                  Gợi ý: Nên đặt ≥ {new Date(formData.ngay_cong_chieu).toLocaleDateString("vi-VN")}
+                  Gợi ý: Nên đặt ≥{" "}
+                  {new Date(formData.ngay_cong_chieu).toLocaleDateString("vi-VN")}
                 </p>
               )}
             </div>
           </div>
 
-          {/* Selects */}
+          {/* Loại suất & Phiên bản */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium text-gray-700">Loại suất chiếu</label>
@@ -325,7 +376,6 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
                   setFormData({
                     ...formData,
                     loai_suat_chieu: e.target.value,
-                    // reset ngày chiếu khi đổi loại để tránh vi phạm min/max cũ
                     ngay_cong_chieu: "",
                   })
                 }
@@ -340,56 +390,65 @@ const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
                 ))}
               </select>
             </div>
+
             <div>
-              <label className="text-sm font-medium text-gray-700">Phiên bản</label>
-              <select
-                value={formData.phien_ban_id || ""}
-                onChange={(e) => setFormData({ ...formData, phien_ban_id: e.target.value })}
-                className="border px-3 py-2 rounded w-full"
-                required
-              >
-                <option value="">-- Chọn phiên bản --</option>
+              <label className="text-sm font-medium text-gray-700">Phiên bản (chọn nhiều)</label>
+              <div className="border px-3 py-2 rounded w-full max-h-36 overflow-y-auto">
                 {danhSachPhienBan.map((pb) => (
-                  <option key={pb.id} value={pb.id}>
-                    {pb.ten_phien_ban}
-                  </option>
+                  <label key={pb.id} className="flex items-center gap-2 mb-1">
+                    <input
+                      type="checkbox"
+                      checked={
+                        Array.isArray(formData.phien_ban_id) &&
+                        formData.phien_ban_id.includes(pb.id)
+                      }
+                      onChange={() => toggleArrayValue("phien_ban_id", pb.id)}
+                    />
+                    <span className="text-sm">{pb.ten_phien_ban}</span>
+                  </label>
                 ))}
-              </select>
+              </div>
             </div>
           </div>
 
           {/* Thể loại */}
           <div>
-            <label className="text-sm font-medium text-gray-700">Thể loại</label>
-            <select
-              value={formData.the_loai_id || ""}
-              onChange={(e) => setFormData({ ...formData, the_loai_id: e.target.value })}
-              className="border px-3 py-2 rounded w-full"
-              required
-            >
-              <option value="">-- Chọn thể loại --</option>
-              {danhSachTheLoai.map((tl) => (
-                <option key={tl.id} value={tl.id}>
-                  {tl.ten_the_loai}
-                </option>
-              ))}
-            </select>
+            <label className="text-sm font-medium text-gray-700">Thể loại (chọn nhiều)</label>
+            <div className="border px-3 py-2 rounded w-full max-h-36 overflow-y-auto">
+              {danhSachTheLoai.length === 0 ? (
+                <p className="text-sm text-gray-500">Đang tải thể loại...</p>
+              ) : (
+                danhSachTheLoai.map((tl) => (
+                  <label key={tl.id} className="flex items-center gap-2 mb-1">
+                    <input
+                      type="checkbox"
+                      checked={
+                        Array.isArray(formData.the_loai_id) &&
+                        formData.the_loai_id.includes(tl.id)
+                      }
+                      onChange={() => toggleArrayValue("the_loai_id", tl.id)}
+                    />
+                    <span className="text-sm">{tl.ten_the_loai}</span>
+                  </label>
+                ))
+              )}
+            </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex justify-end gap-3 mt-5">
+          {/* Nút hành động */}
+          <div className="flex justify-end gap-3 mt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded border border-gray-300 text-gray-600 hover:bg-gray-100"
+              className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
             >
               Hủy
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded"
             >
-              {phim ? "Cập nhật" : "Thêm mới"}
+              {phim ? "Cập nhật" : "Thêm phim"}
             </button>
           </div>
         </form>
