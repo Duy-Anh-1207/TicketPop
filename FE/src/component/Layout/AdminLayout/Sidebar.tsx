@@ -7,21 +7,26 @@ const Sidebar: React.FC = () => {
   const [isEcommerceOpen, setIsEcommerceOpen] = useState(false);
   const [isBlogOpen, setIsBlogOpen] = useState(false);
   const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
+  const [isLichChieuOpen, setIsLichChieuOpen] = useState(false);
 
   return (
     <aside className="left-sidebar with-vertical">
       <div className="brand-logo d-flex align-items-center justify-content-between">
         <a
           href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
-          className="text-nowrap logo-img">
+          className="text-nowrap logo-img"
+        >
           <img
             src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
-            className="dark-logo" alt="Logo-Dark" />
+            className="dark-logo"
+            alt="Logo-Dark"
+          />
         </a>
         <a
           href="#"
           className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-          onClick={(e) => e.preventDefault()}>
+          onClick={(e) => e.preventDefault()}
+        >
           <i className="ti ti-x"></i>
         </a>
       </div>
@@ -29,7 +34,6 @@ const Sidebar: React.FC = () => {
       <div className="scroll-sidebar" data-simplebar>
         <nav className="sidebar-nav">
           <ul id="sidebarnav" className="mb-0">
-
             <li className="nav-small-cap">
               <Icon
                 icon="solar:menu-dots-bold-duotone"
@@ -72,8 +76,9 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
-                className={`collapse first-level ${isFrontPagesOpen ? "show" : ""
-                  }`}
+                className={`collapse first-level ${
+                  isFrontPagesOpen ? "show" : ""
+                }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/phim" className="sidebar-link">
@@ -117,8 +122,9 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
-                className={`collapse first-level ${isEcommerceOpen ? "show" : ""
-                  }`}
+                className={`collapse first-level ${
+                  isEcommerceOpen ? "show" : ""
+                }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/nguoi-dung" className="sidebar-link">
@@ -133,7 +139,6 @@ const Sidebar: React.FC = () => {
                   </Link>
                 </li>
               </ul>
-
             </li>
 
             <li className="sidebar-item">
@@ -175,7 +180,6 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Thêm mới phòng chiếu</span>
                   </Link>
                 </li>
-
               </ul>
             </li>
 
@@ -196,8 +200,9 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isUserProfileOpen}
-                className={`collapse first-level ${isUserProfileOpen ? "show" : ""
-                  }`}
+                className={`collapse first-level ${
+                  isUserProfileOpen ? "show" : ""
+                }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/foods" className="sidebar-link">
@@ -216,43 +221,42 @@ const Sidebar: React.FC = () => {
 
             <li className="sidebar-item">
               <a
-                className="sidebar-link indigo-hover-bg"
-                href="https://bootstrapdemos.wrappixel.com/spike/dist/main/app-email.html"
-                aria-expanded="false"
+                className="sidebar-link has-arrow danger-hover-bg"
+                href="#"
+                aria-expanded={isLichChieuOpen}
+                onClick={() => setIsLichChieuOpen(!isLichChieuOpen)}
               >
-                <span className="aside-icon p-2 bg-indigo-subtle rounded-1">
-                  <Icon icon="solar:mailbox-line-duotone" className="fs-6" />
+                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
+                  <Icon
+                    icon="solar:calendar-mark-line-duotone"
+                    className="fs-6"
+                  />
                 </span>
-                <span className="hide-menu ps-1">Email</span>
+                <span className="hide-menu ps-1">Quản lý lịch chiếu</span>
               </a>
-            </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link success-hover-bg"
-                href="https://bootstrapdemos.wrappixel.com/spike/dist/main/app-contact.html"
-                aria-expanded="false"
+              <ul
+                aria-expanded={isLichChieuOpen}
+                className={`collapse first-level ${
+                  isLichChieuOpen ? "show" : ""
+                }`}
               >
-                <span className="aside-icon p-2 bg-success-subtle rounded-1">
-                  <Icon icon="solar:phone-line-duotone" className="fs-6" />
-                </span>
-                <span className="hide-menu ps-1">Contact Table</span>
-              </a>
+                <li className="sidebar-item">
+                  <Link to="/admin/lich-chieu" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Danh sách lịch chiếu</span>
+                  </Link>
+                </li>
+                <li className="sidebar-item">
+                  <Link
+                    to="/admin/lich-chieu/them-moi"
+                    className="sidebar-link"
+                  >
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Thêm mới lịch chiếu</span>
+                  </Link>
+                </li>
+              </ul>
             </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link warning-hover-bg"
-                href="https://bootstrapdemos.wrappixel.com/spike/dist/main/app-contact2.html"
-                aria-expanded="false"
-              >
-                <span className="aside-icon p-2 bg-warning-subtle rounded-1">
-                  <Icon icon="solar:list-check-line-duotone" className="fs-6" />
-                </span>
-                <span className="hide-menu ps-1">Contact List</span>
-              </a>
-            </li>
-
           </ul>
         </nav>
       </div>
