@@ -16,5 +16,10 @@ class Phim extends Model
         'loai_suat_chieu', 'phien_ban_id', 'the_loai_id'
     ];
 
-    
+    protected $casts = [
+        'phien_ban_id' => 'array',
+        'the_loai_id' => 'array',
+        'ngay_cong_chieu' => 'date',
+        'ngay_ket_thuc' => 'date',
+    ];
 }
