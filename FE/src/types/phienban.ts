@@ -1,6 +1,6 @@
 export interface PhienBan {
   id: number;
-  ten_phien_ban: string;
+  the_loai: string;
   created_at?: string;
   updated_at?: string;
 }
