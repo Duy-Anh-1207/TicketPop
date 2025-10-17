@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
+use App\Http\Controllers\Admin\MaGiamGiaController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -37,6 +38,15 @@ Route::prefix('users')->group(function () {
     Route::patch('/{id}/toggle-status', [UserController::class, 'toggleStatus']);
     Route::patch('/{id}/role', [UserController::class, 'assignRole']);
     Route::patch('/{id}/reset-password', [UserController::class, 'resetPassword']);
+});
+
+Route::prefix('menu')->group(function () {
+    Route::get('/',        [MenuController::class, 'index']);   
+    Route::get('/tree',    [MenuController::class, 'tree']);    
+    Route::post('/',       [MenuController::class, 'store']);   
+    Route::get('/{menu}',  [MenuController::class, 'show']);    
+    Route::match(['put','patch'],'/{menu}', [MenuController::class,'update']); 
+    Route::delete('/{menu}',[MenuController::class, 'destroy']); 
 });
 
 Route::get('/lich-chieu', [LichChieuController::class, 'index']);
@@ -72,4 +82,12 @@ Route::delete('/foods/{id}', [FoodController::class, 'destroy']);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::apiResource('ghe', GheController::class);
+
+
+Route::get('/ma-giam-gia', [MaGiamGiaController::class, 'index']);
+Route::post('/ma-giam-gia', [MaGiamGiaController::class, 'store']);
+Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
+Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
+Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
