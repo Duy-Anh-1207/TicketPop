@@ -2,9 +2,9 @@ import {
     useDeletePhongChieu,
     useUpdatePhongChieu,
     useListPhongChieuTH0,
-} from "../../hook/PhongChieuHook";
+} from "../../../hook/PhongChieuHook";
 import Swal from "sweetalert2";
-import type { PhongChieu } from "../../types/phongchieu";
+import type { PhongChieu } from "../../../types/phongchieu";
 
 export default function PhongChieuChuaXuatBanList() {
     const { data: phongchieus, isLoading } = useListPhongChieuTH0();

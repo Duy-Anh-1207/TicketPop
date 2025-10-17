@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { useListTheLoai, useCreateTheLoai, useDeleteTheLoai } from "../../hook/TheLoaiHook";
+import { useListTheLoai, useCreateTheLoai, useUpdateTheLoai, useDeleteTheLoai } from "../../../hook/TheLoaiHook";
 import Swal from "sweetalert2";
-import type { TheLoai } from "../../types/theloai";
+import type { TheLoai } from "../../../types/theloai";
 
 export default function TheLoaiList() {
   const { data: theloais, isLoading } = useListTheLoai();
   const createTheLoai = useCreateTheLoai();
+  const updateTheLoai = useUpdateTheLoai();
   const deleteTheLoai = useDeleteTheLoai();
 
   // form input cho thêm mới
@@ -19,7 +20,7 @@ export default function TheLoaiList() {
     }
 
     createTheLoai.mutate(
-      { ten_the_loai: newTen},
+      { ten_the_loai: newTen },
       {
         onSuccess: () => {
           setNewTen("");
@@ -38,6 +39,35 @@ export default function TheLoaiList() {
       cancelButtonText: "Hủy",
     }).then((result) => {
       if (result.isConfirmed) deleteTheLoai.mutate(id);
+    });
+  };
+
+  const handleEdit = (tl: TheLoai) => {
+    Swal.fire({
+      title: "✏️ Sửa tên thể loại",
+      input: "text",
+      inputLabel: "Tên thể loại",
+      inputValue: tl.ten_the_loai,
+      showCancelButton: true,
+      confirmButtonText: "Cập nhật",
+      cancelButtonText: "Hủy",
+      preConfirm: (value) => {
+        if (!value || !value.trim()) {
+          Swal.showValidationMessage("Tên thể loại không được để trống");
+        }
+        return value;
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateTheLoai.mutate(
+          { id: tl.id, values: { ten_the_loai: result.value } },
+          {
+            onSuccess: () => {
+              Swal.fire("✅ Đã cập nhật!", "", "success");
+            },
+          }
+        );
+      }
     });
   };
 
@@ -90,9 +120,7 @@ export default function TheLoaiList() {
                     <div className="btn-group">
                       <button
                         className="btn btn-outline-primary btn-sm"
-                        onClick={() =>
-                          Swal.fire("✏️ Chưa làm!", "Phần sửa sẽ thêm sau.", "info")
-                        }
+                        onClick={() => handleEdit(tl)}
                       >
                         Cập nhật
                       </button>
@@ -108,7 +136,7 @@ export default function TheLoaiList() {
               ))
             ) : (
               <tr>
-                <td colSpan={4} className="text-center text-muted py-3">
+                <td colSpan={3} className="text-center text-muted py-3">
                   Không có thể loại nào.
                 </td>
               </tr>

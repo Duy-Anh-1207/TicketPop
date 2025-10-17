@@ -1,5 +1,5 @@
-import { useListPhongChieuTH1 } from "../../hook/PhongChieuHook";
-import type { PhongChieu } from "../../types/phongchieu";
+import { useListPhongChieuTH1 } from "../../../hook/PhongChieuHook";
+import type { PhongChieu } from "../../../types/phongchieu";
 
 export default function PhongChieuList() {
   const { data: phongchieus, isLoading } = useListPhongChieuTH1();

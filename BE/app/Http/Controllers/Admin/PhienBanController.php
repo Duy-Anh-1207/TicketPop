@@ -28,6 +28,7 @@ class PhienBanController extends Controller
             'data' => $phienBan
         ], 201);
     }
+    
 
     public function show(PhienBan $phienBan): JsonResponse
     {

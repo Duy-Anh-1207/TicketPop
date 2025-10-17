@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -20,13 +19,11 @@ class UserController extends Controller
                 'id' => $user->id,
                 'ten' => $user->ten,
                 'email' => $user->email,
+                'password' => $user->password,
+                'trang_thai' => (int) $user->trang_thai,
+                'vai_tro_id' => $user->vai_tro_id,
                 'so_dien_thoai' => $user->so_dien_thoai,
-                'trang_thai' => $user->trang_thai,
-                'vai_tro' => $user->vaiTro ? $user->vaiTro->ten_vai_tro : null,
-                'anh_dai_dien' => $user->anh_dai_dien
-                    ? Storage::url($user->anh_dai_dien)
-                    : null,
-                'created_at' => $user->created_at,
+                'anh_dai_dien' => $user->anh_dai_dien,
             ];
         });
 
@@ -41,34 +38,25 @@ class UserController extends Controller
             'email' => 'required|email|unique:nguoi_dung,email',
             'so_dien_thoai' => 'nullable|string|max:20',
             'password' => 'required|string|min:6',
-            'trang_thai' => 'required|in:online,offline',
+            'anh_dai_dien' => 'nullable|string|max:255',
+            'trang_thai' => 'nullable|in:0,1',
             'vai_tro_id' => 'required|integer|exists:vai_tro,id',
-            'anh_dai_dien' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-
-        // Lưu ảnh nếu có
-        $path = null;
-        if ($request->hasFile('anh_dai_dien')) {
-            $path = $request->file('anh_dai_dien')->store('uploads/avatar', 'public');
-        }
 
         $user = User::create([
             'ten' => $validated['ten'],
             'email' => $validated['email'],
             'so_dien_thoai' => $validated['so_dien_thoai'] ?? null,
             'password' => Hash::make($validated['password']),
-            'trang_thai' => $validated['trang_thai'],
+            'anh_dai_dien' => $validated['anh_dai_dien'] ?? null,
+            'trang_thai' => $validated['trang_thai'] ?? 0,
             'vai_tro_id' => $validated['vai_tro_id'],
-            'anh_dai_dien' => $path,
         ]);
 
-        return response()->json([
-            'message' => 'Tạo người dùng thành công!',
-            'data' => $user,
-        ], 201);
+        return response()->json(['message' => 'Tạo người dùng thành công!', 'data' => $user], 201);
     }
 
-    // Xem chi tiết người dùng
+    // Xem chi tiết
     public function show($id)
     {
         $user = User::with('vaiTro')->findOrFail($id);
@@ -77,86 +65,91 @@ class UserController extends Controller
             'id' => $user->id,
             'ten' => $user->ten,
             'email' => $user->email,
+            'trang_thai' => (int) $user->trang_thai,
+            'vai_tro_id' => $user->vai_tro_id,
             'so_dien_thoai' => $user->so_dien_thoai,
-            'trang_thai' => $user->trang_thai,
-            'vai_tro' => $user->vaiTro ? $user->vaiTro->ten_vai_tro : null,
-            'anh_dai_dien' => $user->anh_dai_dien
-                ? asset('storage/' . $user->anh_dai_dien)
-                : null,
-            'created_at' => $user->created_at,
+            'anh_dai_dien' => $user->anh_dai_dien,
         ]);
     }
 
-    // Cập nhật người dùng
+    // Cập nhật
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
 
-        $request->validate([
-            'ten' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:nguoi_dung,email,' . $user->id,
+        $validated = $request->validate([
+            'ten' => 'sometimes|required|string|max:255',
+            'email' => 'sometimes|required|email|unique:nguoi_dung,email,' . $user->id,
             'so_dien_thoai' => 'nullable|string|max:20',
             'password' => 'nullable|string|min:6',
-            'trang_thai' => 'nullable|in:online,offline',
-            'vai_tro_id' => 'nullable|integer|exists:vai_tro,id',
-            'anh_dai_dien' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'anh_dai_dien' => 'nullable|string|max:255',
+            'trang_thai' => 'nullable|in:0,1',
+            'vai_tro_id' => 'sometimes|required|integer|exists:vai_tro,id',
         ]);
 
-        if ($request->filled('ten')) $user->ten = $request->ten;
-        if ($request->filled('email')) $user->email = $request->email;
-        if ($request->filled('so_dien_thoai')) $user->so_dien_thoai = $request->so_dien_thoai;
-        if ($request->filled('trang_thai')) $user->trang_thai = $request->trang_thai;
-        if ($request->filled('vai_tro_id')) $user->vai_tro_id = $request->vai_tro_id;
-        if ($request->filled('password')) $user->password = Hash::make($request->password);
-        // Nếu user hiện tại là khách hàng thì không được thay đổi vai trò
-        if ($user->vaiTro && strtolower($user->vaiTro->ten_vai_tro) !== 'client') {
-            if ($request->filled('vai_tro_id')) {
-                $user->vai_tro_id = $request->vai_tro_id;
-            }
-        }
+        $user->update(array_filter($validated, fn($key) => $key !== 'password', ARRAY_FILTER_USE_KEY));
 
-
-        // Cập nhật password mới nếu có
         if ($request->filled('password')) {
-            $user->password = Hash::make($request->password);
+            $user->password = Hash::make($validated['password']);
+            $user->save();
         }
-        if ($request->hasFile('anh_dai_dien')) {
-            if ($user->anh_dai_dien && Storage::disk('public')->exists($user->anh_dai_dien)) {
-                Storage::disk('public')->delete($user->anh_dai_dien);
-            }
-            $user->anh_dai_dien = $request->file('anh_dai_dien')->store('uploads/avatar', 'public');
-        }
-
-        $user->save();
-        $user->load('vaiTro');
 
         return response()->json([
-            'message' => 'Cập nhật người dùng thành công!',
-            'data' => [
-                'id' => $user->id,
-                'ten' => $user->ten,
-                'email' => $user->email,
-                'so_dien_thoai' => $user->so_dien_thoai,
-                'trang_thai' => $user->trang_thai,
-                'vai_tro' => $user->vaiTro ? $user->vaiTro->ten_vai_tro : null,
-                'anh_dai_dien' => $user->anh_dai_dien ? asset('storage/' . $user->anh_dai_dien) : null,
-            ],
+            'message' => 'Người dùng đã được cập nhật',
+            'user' => $user
+        ]);
+    }
+
+    // Xóa
+    public function destroy($id)
+    {
+        User::destroy($id);
+        return response()->json(['message' => 'Đã xóa người dùng']);
+    }
+
+    // ✅ BẬT / TẮT trạng thái người dùng
+    public function toggleStatus($id)
+    {
+        $user = User::findOrFail($id);
+        $user->trang_thai = $user->trang_thai ? 0 : 1;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Trạng thái người dùng đã được thay đổi',
+            'trang_thai' => $user->trang_thai,
+        ]);
+    }
+
+    // ✅ Gán vai trò cho người dùng
+    public function assignRole(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'vai_tro_id' => 'required|integer|exists:vai_tro,id'
+        ]);
+
+        $user = User::findOrFail($id);
+        $user->vai_tro_id = $validated['vai_tro_id'];
+        $user->save();
+
+        return response()->json([
+            'message' => 'Gán vai trò thành công',
+            'vai_tro_id' => $user->vai_tro_id
         ]);
     }
 
 
-
-    // Xóa người dùng
-    public function destroy($id)
+    // ✅ Reset mật khẩu người dùng
+    public function resetPassword($id)
     {
         $user = User::findOrFail($id);
+        $newPassword = '123456'; // hoặc random nếu muốn
 
-        if ($user->anh_dai_dien && Storage::disk('public')->exists($user->anh_dai_dien)) {
-            Storage::disk('public')->delete($user->anh_dai_dien);
-        }
+        $user->password = Hash::make($newPassword);
+        $user->save();
 
-        $user->delete();
-
-        return response()->json(['message' => 'Xóa người dùng thành công!']);
+        return response()->json([
+            'message' => 'Mật khẩu đã được đặt lại',
+            'new_password' => $newPassword, // chỉ nên hiển thị tạm cho admin
+        ]);
     }
 }

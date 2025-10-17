@@ -4,14 +4,13 @@ import axios, { AxiosError } from "axios";
 // CẤU HÌNH AXIOS CLIENT
 // ==========================
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api",
+  baseURL: import.meta.env.VITE_API_URL,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-//Gắn token tự động nếu có
 axiosClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -67,7 +66,8 @@ export const toggleUserStatus = async (id: number | string) => {
 };
 
 export const assignUserRole = async (id: number | string, role: string) => {
-  const { data } = await axiosClient.patch(`/users/${id}/role`, { role });
+  // backend expects 'vai_tro_id' field (integer)
+  const { data } = await axiosClient.patch(`/users/${id}/role`, { vai_tro_id: Number(role) });
   return data;
 };
 

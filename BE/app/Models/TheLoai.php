@@ -9,6 +9,6 @@ class TheLoai extends Model
 
     use HasFactory, SoftDeletes;
     protected $table = 'the_loai';
-    protected $fillable = ['ten_the_loai'];
+    protected $fillable = ['ten_the_loai', 'mo_ta'];
 
 }

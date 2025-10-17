@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useCreatePhongChieu } from "../../hook/PhongChieuHook";
+import { useCreatePhongChieu } from "../../../hook/PhongChieuHook";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import type { PhongChieu } from "../../types/phongchieu";
+import type { PhongChieu } from "../../../types/phongchieu";
 
 export default function CreatePhongChieu() {
     const navigate = useNavigate();
@@ -78,7 +78,7 @@ export default function CreatePhongChieu() {
                         name="loai_so_do"
                         value={form.loai_so_do}
                         onChange={handleChange}
-                        placeholder="Ví dụ: 2D, 3D, IMAX..."
+                        placeholder="6x6, 8x8,... , 16x16"
                     />
                 </div>
 

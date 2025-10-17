@@ -1,62 +1,93 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import type { User } from "../../types/user";
 import Swal from "sweetalert2";
-import { createUser } from "../../provider/UserProviders";
+import { createUser } from "../../../provider/UserProviders";
+import { getListVaiTro } from "../../../provider/VaiTroProvider";
 
 export default function CreateUser() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState<
-    Omit<User, "id" | "created_at" | "updated_at"> & { password: string }
-  >({
-    name: "",
+  const [formData, setFormData] = useState({
+    ten: "",
     email: "",
-    role: "user",
-    is_active: 1,
-    email_verified_at: null,
+    so_dien_thoai: "",
     password: "",
+    anh_dai_dien: "",
+    trang_thai: 1, // ✅ 1 = Đã kích hoạt mặc định
+    vai_tro_id: "",
   });
 
+  type Role = { id: number; ten_vai_tro: string };
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Xử lý thay đổi input
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  // 🔹 Lấy danh sách vai trò khi load trang
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await getListVaiTro();
+        const roleList = Array.isArray(res.data) ? res.data : res;
+        setRoles(roleList);
+        // Nếu chưa chọn vai trò, chọn mặc định là vai trò đầu tiên
+        if (roleList && roleList.length > 0 && !formData.vai_tro_id) {
+          setFormData((prev) => ({ ...prev, vai_tro_id: String(roleList[0].id) }));
+        }
+      } catch (error) {
+        console.error("❌ Lỗi khi tải vai trò:", error);
+        Swal.fire("Lỗi", "Không thể tải danh sách vai trò", "error");
+      }
+    };
+    fetchRoles();
+  }, []);
+
+  // 🔹 Xử lý thay đổi input
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === "is_active" ? Number(value) : value,
-    });
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "trang_thai" ? Number(value) : value, // ✅ ép kiểu sang number
+    }));
   };
 
-  // Submit form
-  const handleSubmit = async (e: React.FormEvent) => {
+  // 🔹 Submit form
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
+    // Client-side guard: vai_tro_id is required
+    if (!formData.vai_tro_id) {
+      setLoading(false);
+      Swal.fire("❗ Thiếu vai trò", "Vui lòng chọn vai trò cho người dùng.", "warning");
+      return;
+    }
+
     try {
-      const res = await await createUser({
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        email_verified_at: formData.email_verified_at ?? undefined, 
-      });
+      const { ten, ...rest } = formData;
+
+      const payload: any = {
+        ...rest,
+        ten,
+        name: ten, 
+        trang_thai: Number(formData.trang_thai), // ✅ đảm bảo gửi 0 hoặc 1
+        vai_tro_id: Number(formData.vai_tro_id),
+      };
+
+      const res = await createUser(payload);
 
       Swal.fire({
         icon: "success",
-        title: "Thành công!",
-        text: res.message ,
+        title: "🎉 Thành công!",
+        text: res.message || "Tạo người dùng thành công!",
       });
 
       navigate("/admin/nguoi-dung");
     } catch (err: any) {
+      console.error("❌ Lỗi tạo người dùng:", err);
       Swal.fire({
         icon: "error",
-        title: "❌ Lỗi!",
-        text:
-          err.response?.data?.message,
+        title: "Thất bại!",
+        text: err.response?.data?.message || "Không thể tạo người dùng",
       });
     } finally {
       setLoading(false);
@@ -67,20 +98,20 @@ export default function CreateUser() {
     <div className="container mt-4">
       <div className="card shadow-sm border-0">
         <div className="card-header bg-primary text-white fw-semibold fs-5">
-          Thêm Người Dùng Mới
+          ➕ Thêm Người Dùng Mới
         </div>
 
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            {/* Họ và tên */}
+            {/* Họ tên */}
             <div className="mb-3">
               <label className="form-label fw-bold">Họ và tên</label>
               <input
                 type="text"
-                name="name"
+                name="ten"
                 className="form-control"
                 placeholder="Nhập họ tên..."
-                value={formData.name}
+                value={formData.ten}
                 onChange={handleChange}
                 required
               />
@@ -100,6 +131,19 @@ export default function CreateUser() {
               />
             </div>
 
+            {/* Số điện thoại */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Số điện thoại</label>
+              <input
+                type="text"
+                name="so_dien_thoai"
+                className="form-control"
+                placeholder="Nhập số điện thoại..."
+                value={formData.so_dien_thoai}
+                onChange={handleChange}
+              />
+            </div>
+
             {/* Mật khẩu */}
             <div className="mb-3">
               <label className="form-label fw-bold">Mật khẩu</label>
@@ -114,17 +158,39 @@ export default function CreateUser() {
               />
             </div>
 
+            {/* Ảnh đại diện */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Ảnh đại diện (URL)</label>
+              <input
+                type="text"
+                name="anh_dai_dien"
+                className="form-control"
+                placeholder="Nhập đường dẫn ảnh..."
+                value={formData.anh_dai_dien}
+                onChange={handleChange}
+              />
+            </div>
+
             {/* Vai trò */}
             <div className="mb-3">
               <label className="form-label fw-bold">Vai trò</label>
               <select
-                name="role"
+                name="vai_tro_id"
                 className="form-select"
-                value={formData.role}
+                value={formData.vai_tro_id}
                 onChange={handleChange}
+                required
               >
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="">-- Chọn vai trò --</option>
+                {roles.length > 0 ? (
+                  roles.map((role) => (
+                    <option key={role.id} value={role.id}>
+                      {role.ten_vai_tro}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>Đang tải...</option>
+                )}
               </select>
             </div>
 
@@ -132,13 +198,13 @@ export default function CreateUser() {
             <div className="mb-3">
               <label className="form-label fw-bold">Trạng thái</label>
               <select
-                name="is_active"
+                name="trang_thai"
                 className="form-select"
-                value={formData.is_active}
+                value={formData.trang_thai}
                 onChange={handleChange}
               >
-                <option value={1}>✅ Hoạt động</option>
-                <option value={0}>⛔ Khóa</option>
+                <option value={1}>Đã kích hoạt</option>
+                <option value={0}>Ngừng kích hoạt</option>
               </select>
             </div>
 
@@ -146,18 +212,14 @@ export default function CreateUser() {
             <div className="text-end mt-4">
               <button
                 type="button"
-                className="btn btn-primary me-2"
+                className="btn btn-secondary me-2"
                 onClick={() => navigate(-1)}
                 disabled={loading}
               >
                 Quay lại
               </button>
 
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loading}
-              >
+              <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? "⏳ Đang lưu..." : "Lưu người dùng"}
               </button>
             </div>

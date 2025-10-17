@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useUserDetail } from "../../hook/UserHook";
+import { useUserDetail } from "../../../hook/UserHook";
 // import type { User } from "../../types/user";
 
 export default function DetailUser() {
@@ -35,7 +35,7 @@ export default function DetailUser() {
                   <div className="rounded-circle position-relative mb-9 mb-md-0 d-inline-block">
                     <img
                       src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/profile/user-1.jpg"
-                      alt={user.name}
+                      alt={user.ten}
                       className="img-fluid rounded-circle"
                       width={100}
                       height={100}
@@ -44,9 +44,9 @@ export default function DetailUser() {
 
                   <div className="ms-0 ms-md-3 mb-9 mb-md-0">
                     <div className="d-flex align-items-center justify-content-center justify-content-md-start mb-1">
-                      <h4 className="me-7 mb-0 fs-7">{user.name}</h4>
+                      <h4 className="me-7 mb-0 fs-7">{user.ten}</h4>
                       <span className="badge fs-2 fw-bold rounded-pill bg-primary-subtle text-primary border-primary border">
-                        {user.role}
+                        {user.vai_tro_id}
                       </span>
                     </div>
                     <div className="d-flex align-items-center justify-content-center justify-content-md-start">

@@ -24,7 +24,7 @@ class FoodController extends Controller
             'gia_nhap' => 'required|numeric|min:0',
             'gia_ban' => 'required|numeric|min:0',
             'so_luong_ton' => 'required|integer|min:0',
-            'image' => 'nullable|image|max:2048',
+            'image' => 'nullable|string|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
@@ -53,7 +53,7 @@ class FoodController extends Controller
         'gia_nhap' => 'sometimes|numeric|min:0',
         'gia_ban' => 'sometimes|numeric|min:0',
         'so_luong_ton' => 'sometimes|integer|min:0',
-        'image' => 'nullable|image|max:2048',
+        'image' => 'nullable|string|max:2048',
     ]);
 
     if ($request->hasFile('image')) {
