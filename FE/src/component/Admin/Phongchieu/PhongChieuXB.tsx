@@ -1,14 +1,23 @@
+import { useState } from "react";
 import { useListPhongChieuTH1 } from "../../../hook/PhongChieuHook";
 import type { PhongChieu } from "../../../types/phongchieu";
+import SoDoGhe from "./SoDoGhe";
 
 export default function PhongChieuList() {
   const { data: phongchieus, isLoading } = useListPhongChieuTH1();
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [open, setOpen] = useState(false);
 
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách phòng chiếu...</p>;
 
   // Lọc chỉ những phòng chiếu đã xuất bản
   const phongChieuDaXuatBan =
     phongchieus?.filter((pc: PhongChieu) => Number(pc.trang_thai) === 1) || [];
+
+  const viewSoDoGhe = (id: number) => {
+    setSelectedId(id);
+    setOpen(true);
+  };
 
   return (
     <div className="container p-4">
@@ -46,7 +55,9 @@ export default function PhongChieuList() {
                   <td className="text-center">
                     <div className="btn-group">
                       <button
-                        className="btn btn-outline-secondary btn-sm">
+                        onClick={() => viewSoDoGhe(pc.id)}
+                        className="btn btn-outline-secondary btn-sm"
+                      >
                         Xem bản đồ ghế
                       </button>
                     </div>
@@ -63,6 +74,10 @@ export default function PhongChieuList() {
           </tbody>
         </table>
       </div>
+      {/* ✅ chỉ hiển thị khi open = true */}
+      {open && selectedId && (
+        <SoDoGhe open={open} onClose={() => setOpen(false)} id={selectedId} />
+      )}
     </div>
   );
 }
