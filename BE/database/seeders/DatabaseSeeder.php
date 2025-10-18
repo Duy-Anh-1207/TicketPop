@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
     $this->call([
         TheLoaiSeeder::class,
         PhienBanSeeder::class,
+        VaiTroSeeder::class,
+        DoAnSeeder::class,
+        PhimSeeder::class,
+        MenuSeeder::class,
     ]);
 }
 }
