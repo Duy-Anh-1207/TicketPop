@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
+use App\Http\Controllers\Admin\TinTucController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -55,9 +56,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::prefix('v1')->group(function () {
-    // Route cho chức năng Quản lý Thể loại
     Route::apiResource('the-loai', TheLoaiController::class);
-
-    // Route cho chức năng Quản lý Vai trò
     Route::apiResource('vai-tro', VaiTroController::class);
+    Route::apiResource('tin-tuc', TinTucController::class);
 });
