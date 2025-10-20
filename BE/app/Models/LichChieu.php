@@ -14,7 +14,10 @@ class LichChieu extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'lich_chieu';
-
+    protected $casts = [
+        'gio_chieu' => 'datetime:Y-m-d H:i:s',
+        'gio_ket_thuc' => 'datetime:Y-m-d H:i:s',
+    ];
     protected $fillable = [
         'phim_id',
         'phong_id',
@@ -38,5 +41,4 @@ class LichChieu extends Model
     {
         return $this->belongsTo(PhienBan::class, 'phien_ban_id'); 
     }
-    
 }

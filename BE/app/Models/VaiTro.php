@@ -19,15 +19,6 @@ class VaiTro extends Model
     ];
 
     public $timestamps = true;
-
-    /**
-     * Mối quan hệ nhiều-nhiều với Quyenhan (Permissions).
-     */
-    public function quyenHans(): BelongsToMany
-    {
-        return $this->belongsToMany(QuyenHan::class, 'quyen_truy_cap', 'vai_tro_id', 'quyen_han_id');
-    }
-
     /**
      * Quan hệ 1 vai trò có nhiều người dùng.
      */

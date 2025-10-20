@@ -18,6 +18,24 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('menu', function (Blueprint $table) {
+            $table->id();
+            $table->string('ma_chuc_nang', 250);
+            $table->string('ma_cha', 250)->nullable();
+            $table->string('ten_chuc_nang', 250);
+            $table->text('state');
+            $table->string('stt')->nullable();
+            $table->boolean('trang_thai')->default(true);
+        });
+
+
+        Schema::create('quyen_truy_cap', function (Blueprint $table) {
+            $table->foreignId('vai_tro_id')->constrained('vai_tro')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('menu_id')->constrained('menu')->onUpdate('cascade')->onDelete('cascade');
+            $table->string('function')->nullable();
+            $table->timestamps();
+        });
+
 
         Schema::create('nguoi_dung', function (Blueprint $table) {
             $table->id();
@@ -31,19 +49,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        Schema::create('quyen_han', function (Blueprint $table) {
-            $table->id();
-            $table->string('quyen', 100);
-            $table->text('mo_ta')->nullable();
-            $table->timestamps();
-        });
+        
 
-        Schema::create('quyen_truy_cap', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('vai_tro_id')->constrained('vai_tro')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignId('quyen_han_id')->constrained('quyen_han')->onUpdate('cascade')->onDelete('cascade');
-            $table->timestamps();
-        });
+        
 
         Schema::create('the_loai', function (Blueprint $table) {
             $table->id();

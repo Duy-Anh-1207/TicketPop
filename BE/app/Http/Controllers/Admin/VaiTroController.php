@@ -12,39 +12,34 @@ use Exception;
 
 class VaiTroController extends Controller
 {
-    
     public function index(): JsonResponse
     {
-        $data = VaiTro::with('quyenHans')->latest()->paginate(10);
+        // Lấy danh sách vai trò, sắp xếp mới nhất, phân trang
+        $data = VaiTro::latest()->paginate(10);
         return response()->json($data);
     }
+
     public function store(StoreVaiTroRequest $request): JsonResponse
     {
         $validated = $request->validated();
 
         try {
-            // Bắt đầu một transaction để đảm bảo toàn vẹn dữ liệu
             DB::beginTransaction();
 
-            // Tạo vai trò chỉ với các trường của bảng vai_tro
+            // Tạo vai trò mới (không gán quyền hạn)
             $vaiTro = VaiTro::create([
                 'ten_vai_tro' => $validated['ten_vai_tro'],
                 'mo_ta' => $validated['mo_ta'] ?? null,
             ]);
 
-            // Gán các quyền hạn cho vai trò vừa tạo
-            $vaiTro->quyenHans()->attach($validated['quyen_han_ids']);
-
-            // Nếu mọi thứ thành công, commit transaction
             DB::commit();
 
             return response()->json([
                 'message' => 'Tạo vai trò thành công!',
-                'data' => $vaiTro->load('quyenHans') // Tải lại quan hệ để trả về
-            ], 201); // HTTP status 201: Created
+                'data' => $vaiTro
+            ], 201);
 
         } catch (Exception $e) {
-            // Nếu có lỗi, rollback tất cả các thay đổi
             DB::rollBack();
             return response()->json(['message' => 'Đã có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
@@ -53,37 +48,34 @@ class VaiTroController extends Controller
     public function show(VaiTro $vaiTro): JsonResponse
     {
         return response()->json([
-            'data' => $vaiTro->load('quyenHans') // Tải quan hệ quyenHans
+            'data' => $vaiTro
         ]);
     }
 
     public function update(UpdateVaiTroRequest $request, VaiTro $vaiTro): JsonResponse
     {
         $validated = $request->validated();
+
         try {
             DB::beginTransaction();
 
-            // Cập nhật các trường của vai trò
+            // Cập nhật thông tin vai trò (không quyền hạn)
             $vaiTro->update([
                 'ten_vai_tro' => $validated['ten_vai_tro'],
                 'mo_ta' => $validated['mo_ta'] ?? null,
             ]);
 
-            // sync() sẽ tự động thêm, xóa, hoặc giữ nguyên các quyền hạn
-            $vaiTro->quyenHans()->sync($validated['quyen_han_ids']);
-
             DB::commit();
 
             return response()->json([
                 'message' => 'Cập nhật vai trò thành công!',
-                'data' => $vaiTro->load('quyenHans')
+                'data' => $vaiTro
             ]);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Đã có lỗi xảy ra: ' . $e->getMessage()], 500);
         }
     }
-
 
     public function destroy(VaiTro $vaiTro): JsonResponse
     {
