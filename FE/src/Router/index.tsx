@@ -16,6 +16,10 @@ import FoodCreate from "../component/Admin/Food/CreateFood";
 import Create from "../component/Admin/LichChieu/Create";
 import LichChieuList from "../component/Admin/LichChieu/List";
 import LichChieuDetail from "../component/Admin/LichChieu/Show";
+import ListVoucher from "../component/Admin/Voucher/ListVoucher";
+import CreateVoucher from "../component/Admin/Voucher/CreateVoucher";
+import EditVoucher from "../component/Admin/Voucher/EditVoucher";
+import ViewVoucher from "../component/Admin/Voucher/ViewVoucher";
 const Routermain = () => {
   const element = useRoutes([
     {
@@ -41,7 +45,11 @@ const Routermain = () => {
         { path: "foods/them-moi", element: <FoodCreate /> },
         { path: "lich-chieu/them-moi", element: <Create /> },
         { path: "lich-chieu", element: <LichChieuList /> },
-        { path: "lich-chieu/chi-tiet/:id", element:<LichChieuDetail/> }
+        { path: "lich-chieu/chi-tiet/:id", element:<LichChieuDetail/> },
+        { path: "vouchers", element:<ListVoucher/>},
+        { path: "vouchers/them-moi", element:<CreateVoucher/>},
+        { path: "vouchers/edit/:id", element:<EditVoucher/>},
+        { path: "vouchers/view/:id", element:<ViewVoucher/>}
       ],
     },
   ]);
