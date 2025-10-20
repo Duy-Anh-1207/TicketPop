@@ -1,460 +1,292 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { useCreatePhim, useListPhienBan, useListTheLoai } from "../../../hook/PhimHook";
 
-interface ModalFormProps {
-  phim?: any;
-  onSubmit: (values: FormData) => void;
-  onClose: () => void;
-}
+type FormState = {
+  ten_phim: string;
+  the_loai: number[];
+  phien_ban: number[];
+  thoi_luong: number;
+  anh_poster?: File | null;
+  loai_suat_chieu: string;
+  ngay_cong_chieu: string;
+  ngay_ket_thuc: string;
+  do_tuoi_gioi_han: string;
+  trailer: string;
+  quoc_gia: string;
+  ngon_ngu: string;
+};
 
-const CreatePhim: React.FC<ModalFormProps> = ({ phim, onSubmit, onClose }) => {
-  const [formData, setFormData] = useState<any>({
+export default function CreatePhim() {
+  const navigate = useNavigate();
+  const createPhim = useCreatePhim({ resource: "phim" });
+
+  const { data: theLoaiList = [] } = useListTheLoai();
+  const { data: phienBanList = [] } = useListPhienBan();
+
+  const LOAI_SUAT_OPTIONS = ["Thường", "Đặc biệt", "Sớm"];
+
+  const [formValues, setFormValues] = useState<FormState>({
     ten_phim: "",
-    mo_ta: "",
-    thoi_luong: "",
-    ngon_ngu: "",
-    quoc_gia: "",
+    the_loai: [],
+    phien_ban: [],
+    thoi_luong: 90,
     anh_poster: null,
-    anh_poster_preview: "",
-    ngay_cong_chieu: "",
-    ngay_ket_thuc: "",
     do_tuoi_gioi_han: "",
     loai_suat_chieu: "",
-    phien_ban_id: [] as number[],
-    the_loai_id: [] as number[],
+    ngay_cong_chieu: "",
+    ngay_ket_thuc: "",
+    trailer: "",
+    quoc_gia: "",
+    ngon_ngu: "",
   });
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [danhSachTheLoai, setDanhSachTheLoai] = useState<
-    Array<{ id: number; ten_the_loai: string }>
-  >([]);
-  const danhSachPhienBan = [
-    { id: 1, ten_phien_ban: "Lồng tiếng" },
-    { id: 2, ten_phien_ban: "Thuyết minh" },
-    { id: 3, ten_phien_ban: "Vietsub" },
-  ];
-  const danhSachLoaiSuat = ["Thường", "Đặc biệt", "Sớm"] as const;
-  type LoaiSuat = (typeof danhSachLoaiSuat)[number] | "";
-
-  // 🧩 Helper parse array từ dữ liệu backend
-  const safeParseArray = (v: any) => {
-    if (!v && v !== 0) return [];
-    if (Array.isArray(v)) return v.map((x) => Number(x));
-    if (typeof v === "string") {
-      try {
-        const p = JSON.parse(v);
-        if (Array.isArray(p)) return p.map((x) => Number(x));
-      } catch (e) {
-        return (
-          v
-            .split?.(",")
-            .map((x: string) => Number(x.trim()))
-            .filter(Boolean) || []
-        );
-      }
-    }
-    return [];
-  };
-
-  // 🧠 Lấy danh sách thể loại từ API
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const res = await fetch("hhttp://localhost:5173/admin/the-loai"); 
-        if (!res.ok) throw new Error("Không lấy được danh sách thể loại");
-        const json = await res.json();
-        if (mounted && json.data && Array.isArray(json.data)) {
-          setDanhSachTheLoai(json.data);
-        }
-      } catch (err) {
-        console.warn("Fetch thể loại lỗi:", err);
-        setDanhSachTheLoai([]);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  // 🧩 Khi có phim (chế độ sửa)
-  useEffect(() => {
-    if (phim) {
-      setFormData((prev: any) => ({
-        ...prev,
-        ...phim,
-        anh_poster_preview: phim.anh_poster
-          ? phim.anh_poster
-          : prev.anh_poster_preview,
-        the_loai_id: safeParseArray(phim.the_loai_id),
-        phien_ban_id: safeParseArray(phim.phien_ban_id),
-      }));
-    }
-  }, [phim]);
-
-  // cleanup preview URL
-  useEffect(() => {
-    return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
-    };
-  }, [previewUrl]);
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = URL.createObjectURL(file);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(url);
-    setFormData((s: any) => ({
-      ...s,
-      anh_poster: file,
-      anh_poster_preview: url,
+  const handleSimpleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as any;
+    setFormValues((prev) => ({
+      ...prev,
+      [name]: type === "number" ? Number(value) : value,
     }));
   };
 
-  const toDateOnly = (val: string | Date | null | undefined) => {
-    if (!val) return null;
-    const d = new Date(val);
-    if (isNaN(d.getTime())) return null;
-    d.setHours(0, 0, 0, 0);
-    return d;
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormValues((prev) => ({ ...prev, anh_poster: file }));
   };
 
-  const createdAtDate = React.useMemo(() => {
-    const base = phim?.created_at ? new Date(phim.created_at) : new Date();
-    base.setHours(0, 0, 0, 0);
-    return base;
-  }, [phim?.created_at]);
-
-  const dateConstraints = React.useMemo(() => {
-    const loai: LoaiSuat = formData.loai_suat_chieu || "";
-    const d = new Date(createdAtDate);
-    const toISO = (x: Date) => x.toISOString().slice(0, 10);
-
-    if (loai === "Thường") {
-      const min = new Date(d);
-      min.setDate(min.getDate() + 1);
-      return { minNgayChieu: toISO(min), maxNgayChieu: undefined as string | undefined };
-    }
-    if (loai === "Đặc biệt") {
-      return { minNgayChieu: toISO(d), maxNgayChieu: undefined };
-    }
-    if (loai === "Sớm") {
-      const max = new Date(d);
-      max.setDate(max.getDate() - 1);
-      return { minNgayChieu: undefined, maxNgayChieu: toISO(max) };
-    }
-    return { minNgayChieu: undefined, maxNgayChieu: undefined };
-  }, [formData.loai_suat_chieu, createdAtDate]);
-
-  // ✅ Validate ngày chiếu theo loại suất
-  const validateDates = () => {
-    const loai: LoaiSuat = formData.loai_suat_chieu || "";
-    const ngayChieu = toDateOnly(formData.ngay_cong_chieu);
-    const ngayKetThuc = toDateOnly(formData.ngay_ket_thuc);
-    const ngayTao = createdAtDate;
-
-    if (!loai) {
-      alert("❌ Vui lòng chọn loại suất chiếu.");
-      return false;
-    }
-    if (!ngayChieu) {
-      alert("❌ Vui lòng nhập Ngày công chiếu hợp lệ.");
-      return false;
-    }
-
-    if (loai === "Thường" && !(ngayChieu > ngayTao)) {
-      alert("❌ Suất chiếu Thường: Ngày chiếu phải LỚN HƠN Ngày tạo.");
-      return false;
-    }
-    if (loai === "Đặc biệt" && !(ngayChieu >= ngayTao)) {
-      alert("❌ Suất chiếu Đặc biệt: Ngày chiếu phải LỚN HƠN HOẶC BẰNG Ngày tạo.");
-      return false;
-    }
-    if (loai === "Sớm" && !(ngayChieu < ngayTao)) {
-      alert("❌ Suất chiếu Sớm: Ngày chiếu phải NHỎ HƠN Ngày tạo.");
-      return false;
-    }
-
-    if (ngayKetThuc && !(ngayKetThuc >= ngayChieu)) {
-      alert("❌ Ngày kết thúc phải LỚN HƠN HOẶC BẰNG Ngày công chiếu.");
-      return false;
-    }
-    return true;
+  const handleMultiSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const name = e.target.name;
+    const selected = Array.from(e.target.selectedOptions, (opt) => Number(opt.value));
+    setFormValues((prev) => ({ ...prev, [name]: selected } as any));
   };
 
-  const toggleArrayValue = (key: "the_loai_id" | "phien_ban_id", id: number) => {
-    setFormData((s: any) => {
-      const arr = Array.isArray(s[key]) ? [...s[key]] : [];
-      const idx = arr.indexOf(id);
-      if (idx === -1) arr.push(id);
-      else arr.splice(idx, 1);
-      return { ...s, [key]: arr };
-    });
+  const RuleHint = () => {
+    const loai = formValues.loai_suat_chieu || "";
+    if (!loai) return null;
+    const todayStr = new Date().toLocaleDateString("vi-VN");
+    const ruleText =
+      loai === "Thường"
+        ? `Ngày chiếu > Ngày tạo (${todayStr})`
+        : loai === "Đặc biệt"
+          ? `Ngày chiếu ≥ Ngày tạo (${todayStr})`
+          : `Ngày chiếu < Ngày tạo (${todayStr})`;
+    return <small className="form-text text-muted">{`Quy tắc: ${ruleText}`}</small>;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateDates()) return;
 
-    const data = new FormData();
-    Object.keys(formData).forEach((key) => {
-      const value = formData[key];
-      if (key === "anh_poster_preview") return;
-      if (value === undefined || value === null || value === "") return;
+    if (!formValues.ten_phim.trim())
+      return Swal.fire({ icon: "warning", title: "Vui lòng nhập tên phim" });
+    if (!formValues.do_tuoi_gioi_han.trim())
+      return Swal.fire({ icon: "warning", title: "Vui lòng nhập độ tuổi giới hạn" });
+    if (!formValues.loai_suat_chieu)
+      return Swal.fire({ icon: "warning", title: "Vui lòng chọn loại suất chiếu" });
+    if (!formValues.ngay_cong_chieu)
+      return Swal.fire({ icon: "warning", title: "Vui lòng chọn ngày công chiếu" });
 
-      if (value instanceof File) {
-        data.append(key, value);
-        return;
-      }
+    const today = new Date();
+    const [y, m, d] = formValues.ngay_cong_chieu.split("-").map(Number);
+    const ngayChieu = new Date(y, m - 1, d);
+    const yDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
-      if (Array.isArray(value)) {
-        value.forEach((v) => data.append(`${key}[]`, String(v)));
-        return;
-      }
+    if (
+      (formValues.loai_suat_chieu === "Thường" && !(ngayChieu > yDate)) ||
+      (formValues.loai_suat_chieu === "Đặc biệt" && !(ngayChieu >= yDate)) ||
+      (formValues.loai_suat_chieu === "Sớm" && !(ngayChieu < yDate))
+    ) {
+      return Swal.fire({
+        icon: "warning",
+        title: "Ngày công chiếu không hợp lệ",
+      });
+    }
 
-      data.append(key, String(value));
-    });
-
-    onSubmit(data);
+    createPhim.mutate({ ...formValues }, { onSuccess: () => navigate("/admin/phim") });
   };
 
-  const RuleHint = () => {
-    const loai: LoaiSuat = formData.loai_suat_chieu || "";
-    if (!loai) return null;
-    const d = createdAtDate.toLocaleDateString("vi-VN");
-    if (loai === "Thường")
-      return <p className="text-xs text-gray-500 mt-1">Quy tắc: Ngày chiếu &gt; Ngày tạo ({d}).</p>;
-    if (loai === "Đặc biệt")
-      return <p className="text-xs text-gray-500 mt-1">Quy tắc: Ngày chiếu ≥ Ngày tạo ({d}).</p>;
-    if (loai === "Sớm")
-      return <p className="text-xs text-gray-500 mt-1">Quy tắc: Ngày chiếu &lt; Ngày tạo ({d}).</p>;
-    return null;
-  };
-
-  // ===================== JSX =====================
   return (
-    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-2xl w-[500px] max-h-[90vh] overflow-y-auto shadow-lg">
-        <h3 className="text-xl font-semibold mb-4 text-center text-gray-800">
-          {phim ? "✏️ Sửa phim" : "🎬 Thêm phim mới"}
-        </h3>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Tên phim */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Tên phim</label>
-            <input
-              type="text"
-              value={formData.ten_phim || ""}
-              onChange={(e) => setFormData({ ...formData, ten_phim: e.target.value })}
-              className="border px-3 py-2 rounded w-full"
-              required
-            />
-          </div>
-
-          {/* Mô tả */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Mô tả phim</label>
-            <textarea
-              value={formData.mo_ta || ""}
-              onChange={(e) => setFormData({ ...formData, mo_ta: e.target.value })}
-              className="border px-3 py-2 rounded w-full"
-            />
-          </div>
-
-          {/* Ngôn ngữ & Quốc gia */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Ngôn ngữ</label>
-              <input
-                type="text"
-                value={formData.ngon_ngu || ""}
-                onChange={(e) => setFormData({ ...formData, ngon_ngu: e.target.value })}
-                className="border px-3 py-2 rounded w-full"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Quốc gia</label>
-              <input
-                type="text"
-                value={formData.quoc_gia || ""}
-                onChange={(e) => setFormData({ ...formData, quoc_gia: e.target.value })}
-                className="border px-3 py-2 rounded w-full"
-              />
-            </div>
-          </div>
-
-          {/* Ảnh Poster */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Ảnh poster</label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="border px-3 py-2 rounded w-full"
-            />
-            {formData.anh_poster_preview && (
-              <div className="mt-2 flex justify-center">
-                <img
-                  src={formData.anh_poster_preview}
-                  alt="Poster preview"
-                  className="w-40 h-56 object-cover rounded-lg shadow"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = "/fallback-poster.png";
-                  }}
-                  loading="lazy"
+    <div className="container my-4">
+      <div className="card shadow-sm">
+        <div className="card-body">
+          <h3 className="card-title text-center mb-4">🎬 Thêm phim mới</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="row g-3">
+              <div className="col-md-6">
+                <label className="form-label">Tên phim</label>
+                <input
+                  type="text"
+                  name="ten_phim"
+                  value={formValues.ten_phim}
+                  onChange={handleSimpleChange}
+                  className="form-control"
+                  placeholder="Nhập tên phim"
+                  required
                 />
               </div>
-            )}
-          </div>
+              <div className="col-md-6">
+                <label className="form-label">Độ tuổi giới hạn</label>
+                <input
+                  type="text"
+                  name="do_tuoi_gioi_han"
+                  value={formValues.do_tuoi_gioi_han}
+                  onChange={handleSimpleChange}
+                  className="form-control"
+                  placeholder="VD: 13+, 16+, 18+"
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Thời lượng (phút)</label>
+                <input
+                  type="number"
+                  name="thoi_luong"
+                  value={formValues.thoi_luong || ""}
+                  onChange={handleSimpleChange}
+                  min={1}
+                  className="form-control"
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Loại suất chiếu</label>
+                <select
+                  name="loai_suat_chieu"
+                  value={formValues.loai_suat_chieu}
+                  onChange={handleSimpleChange}
+                  className="form-select"
+                  required
+                >
+                  <option value="">-- Chọn --</option>
+                  {LOAI_SUAT_OPTIONS.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt}
+                    </option>
+                  ))}
+                </select>
+                <RuleHint />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Thời gian</label>
+                <div className="d-flex gap-2">
+                  <input
+                    type="date"
+                    name="ngay_cong_chieu"
+                    value={formValues.ngay_cong_chieu}
+                    onChange={handleSimpleChange}
+                    className="form-control"
+                    required
+                  />
+                  <input
+                    type="date"
+                    name="ngay_ket_thuc"
+                    value={formValues.ngay_ket_thuc}
+                    onChange={handleSimpleChange}
+                    className="form-control"
+                  />
+                </div>
+              </div>
 
-          {/* Thời lượng & Độ tuổi */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Thời lượng (phút)</label>
-              <input
-                type="number"
-                value={formData.thoi_luong || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, thoi_luong: e.target.value ? Number(e.target.value) : "" })
-                }
-                className="border px-3 py-2 rounded w-full"
-                min={0}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Độ tuổi giới hạn</label>
-              <input
-                type="text"
-                placeholder="VD: 13+"
-                value={formData.do_tuoi_gioi_han || ""}
-                onChange={(e) => setFormData({ ...formData, do_tuoi_gioi_han: e.target.value })}
-                className="border px-3 py-2 rounded w-full"
-              />
-            </div>
-          </div>
+              <div className="col-md-6">
+                <label className="form-label">Thể loại</label>
+                <select
+                  name="the_loai"
+                  multiple
+                  value={formValues.the_loai.map(String)}
+                  onChange={handleMultiSelect}
+                  className="form-select"
+                  size={5}
+                >
+                  {theLoaiList.map((tl: any) => (
+                    <option key={tl.id} value={tl.id}>
+                      {tl.ten_the_loai}
+                    </option>
+                  ))}
+                </select>
+                <small className="form-text text-muted">Giữ Ctrl/Cmd để chọn nhiều</small>
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Phiên bản</label>
+                <select
+                  name="phien_ban"
+                  multiple
+                  value={formValues.phien_ban.map(String)}
+                  onChange={handleMultiSelect}
+                  className="form-select"
+                  size={5}
+                >
+                  {phienBanList.map((pb: any) => (
+                    <option key={pb.id} value={pb.id}>
+                      {pb.the_loai}
+                    </option>
+                  ))}
+                </select>
+                <small className="form-text text-muted">Chọn phiên bản (nếu có)</small>
+              </div>
 
-          {/* Ngày công chiếu & kết thúc */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Ngày công chiếu</label>
-              <input
-                type="date"
-                value={formData.ngay_cong_chieu || ""}
-                onChange={(e) => setFormData({ ...formData, ngay_cong_chieu: e.target.value })}
-                className="border px-3 py-2 rounded w-full"
-                min={dateConstraints.minNgayChieu}
-                max={dateConstraints.maxNgayChieu}
-                required
-              />
-              <RuleHint />
-            </div>
-            <div>
-              <label className="text-sm font-medium text-gray-700">Ngày kết thúc</label>
-              <input
-                type="date"
-                value={formData.ngay_ket_thuc || ""}
-                onChange={(e) => setFormData({ ...formData, ngay_ket_thuc: e.target.value })}
-                className="border px-3 py-2 rounded w-full"
-              />
-              {formData.ngay_cong_chieu && (
-                <p className="text-xs text-gray-500 mt-1">
-                  Gợi ý: Nên đặt ≥{" "}
-                  {new Date(formData.ngay_cong_chieu).toLocaleDateString("vi-VN")}
-                </p>
-              )}
-            </div>
-          </div>
+              <div className="col-md-6">
+                <label className="form-label">Quốc gia</label>
+                <input
+                  type="text"
+                  name="quoc_gia"
+                  value={formValues.quoc_gia}
+                  onChange={handleSimpleChange}
+                  className="form-control"
+                />
+              </div>
+              <div className="col-md-6">
+                <label className="form-label">Ngôn ngữ</label>
+                <input
+                  type="text"
+                  name="ngon_ngu"
+                  value={formValues.ngon_ngu}
+                  onChange={handleSimpleChange}
+                  className="form-control"
+                />
+              </div>
 
-          {/* Loại suất & Phiên bản */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium text-gray-700">Loại suất chiếu</label>
-              <select
-                value={formData.loai_suat_chieu || ""}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    loai_suat_chieu: e.target.value,
-                    ngay_cong_chieu: "",
-                  })
-                }
-                className="border px-3 py-2 rounded w-full"
-                required
-              >
-                <option value="">-- Chọn loại suất chiếu --</option>
-                {danhSachLoaiSuat.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="col-12">
+                <label className="form-label">Trailer (URL)</label>
+                <input
+                  type="text"
+                  name="trailer"
+                  value={formValues.trailer}
+                  onChange={handleSimpleChange}
+                  className="form-control"
+                  placeholder="https://..."
+                />
+              </div>
 
-            <div>
-              <label className="text-sm font-medium text-gray-700">Phiên bản (chọn nhiều)</label>
-              <div className="border px-3 py-2 rounded w-full max-h-36 overflow-y-auto">
-                {danhSachPhienBan.map((pb) => (
-                  <label key={pb.id} className="flex items-center gap-2 mb-1">
-                    <input
-                      type="checkbox"
-                      checked={
-                        Array.isArray(formData.phien_ban_id) &&
-                        formData.phien_ban_id.includes(pb.id)
-                      }
-                      onChange={() => toggleArrayValue("phien_ban_id", pb.id)}
-                    />
-                    <span className="text-sm">{pb.ten_phien_ban}</span>
-                  </label>
-                ))}
+              <div className="col-12">
+                <label className="form-label">Ảnh Poster</label>
+                <input
+                  type="file"
+                  name="anh_poster"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="form-control"
+                />
+                {formValues.anh_poster instanceof Blob && (
+                  <img
+                    src={URL.createObjectURL(formValues.anh_poster)}
+                    alt="Poster Preview"
+                    className="img-thumbnail mt-2"
+                    style={{ width: 150, height: 220, objectFit: "cover" }}
+                  />
+                )}
+              </div>
+
+              <div className="col-12 text-end mt-3">
+                <button
+                  type="submit"
+                  disabled={createPhim.isPending}
+                  className="btn btn-primary"
+                >
+                  {createPhim.isPending ? "Đang thêm..." : "Thêm phim"}
+                </button>
               </div>
             </div>
-          </div>
-
-          {/* Thể loại */}
-          <div>
-            <label className="text-sm font-medium text-gray-700">Thể loại (chọn nhiều)</label>
-            <div className="border px-3 py-2 rounded w-full max-h-36 overflow-y-auto">
-              {danhSachTheLoai.length === 0 ? (
-                <p className="text-sm text-gray-500">Đang tải thể loại...</p>
-              ) : (
-                danhSachTheLoai.map((tl) => (
-                  <label key={tl.id} className="flex items-center gap-2 mb-1">
-                    <input
-                      type="checkbox"
-                      checked={
-                        Array.isArray(formData.the_loai_id) &&
-                        formData.the_loai_id.includes(tl.id)
-                      }
-                      onChange={() => toggleArrayValue("the_loai_id", tl.id)}
-                    />
-                    <span className="text-sm">{tl.ten_the_loai}</span>
-                  </label>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* Nút hành động */}
-          <div className="flex justify-end gap-3 mt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-green-600 text-white hover:bg-green-700 rounded"
-            >
-              {phim ? "Cập nhật" : "Thêm phim"}
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   );
-};
-
-export default CreatePhim;
+}

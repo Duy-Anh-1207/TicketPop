@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Modal } from "antd";
+import { Modal, message } from "antd";
 import axios from "axios";
 
 interface SoDoGheProps {
@@ -11,7 +11,9 @@ interface SoDoGheProps {
 const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
+  // Lấy danh sách ghế
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
@@ -21,6 +23,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
         setData(res.data.data || []);
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu ghế:", error);
+        message.error("Lỗi khi lấy dữ liệu ghế!");
       } finally {
         setLoading(false);
       }
@@ -34,13 +37,47 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
     return acc;
   }, {} as Record<string, any[]>);
 
+  // Click đổi loại ghế
+  const handleToggleLoaiGhe = async (ghe: any) => {
+    const newLoai = ghe.loai_ghe_id === 1 ? 2 : 1;
+
+    // Cập nhật UI tạm thời
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === ghe.id ? { ...item, loai_ghe_id: newLoai } : item
+      )
+    );
+
+    try {
+      setUpdating(true);
+      await axios.put(`http://127.0.0.1:8000/api/ghe/${ghe.id}`, {
+        loai_ghe_id: newLoai,
+      });
+      message.success(`Ghế ${ghe.so_ghe} đã đổi loại thành ${newLoai}`);
+    } catch (error: any) {
+      console.error("Lỗi khi cập nhật ghế:", error);
+      message.error(
+        error.response?.data?.message || "Cập nhật ghế thất bại!"
+      );
+
+      // Revert lại UI nếu lỗi
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === ghe.id ? { ...item, loai_ghe_id: ghe.loai_ghe_id } : item
+        )
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   return (
     <Modal
       open={open}
       onCancel={onClose}
       footer={null}
       width="100%"
-     style={{ maxWidth: 1030 }}
+      style={{ maxWidth: 1030 }}
       title="Sơ đồ ghế"
     >
       {loading ? (
@@ -55,6 +92,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
                   justifyContent: "center",
                   gap: 8,
                   marginTop: 5,
+                  flexWrap: "wrap",
                 }}
               >
                 {hangList[hang]
@@ -74,7 +112,12 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
                         background: "#fff",
                         color: "#000",
                         fontWeight: "bold",
+                        cursor: updating ? "not-allowed" : "pointer",
+                        opacity: updating ? 0.6 : 1,
                       }}
+                      onClick={() =>
+                        !updating ? handleToggleLoaiGhe(ghe) : null
+                      }
                     >
                       {ghe.so_ghe}
                     </div>

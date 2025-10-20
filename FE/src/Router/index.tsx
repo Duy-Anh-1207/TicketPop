@@ -15,6 +15,7 @@ import FoodList from "../component/Admin/Food/ListFood";
 import FoodCreate from "../component/Admin/Food/CreateFood";
 import Create from "../component/Admin/LichChieu/Create";
 import LichChieuList from "../component/Admin/LichChieu/List";
+import CreatePhim from "../component/Admin/Phim/CreatePhim";
 const Routermain = () => {
   const element = useRoutes([
     {
@@ -27,6 +28,10 @@ const Routermain = () => {
       element: <AdminLayout />,
       children: [
         { path: "phim", element: <DanhSachPhimTable /> },
+        {
+          path: "/admin/phim/create",
+          element: <CreatePhim />,
+        },
         { path: "nguoi-dung", element: <UserList /> },
         { path: "nguoi-dung/:id", element: <DetailUser /> },
         { path: "nguoi-dung/them-moi", element: <CreateUser /> },

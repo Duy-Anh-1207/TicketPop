@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
 use App\Http\Controllers\Admin\MaGiamGiaController;
+use App\Http\Controllers\Admin\PhienBanController;
 use App\Http\Controllers\Admin\TinTucController;
 
 Route::get('/phim', [PhimController::class, 'index']);
@@ -99,3 +100,5 @@ Route::post('/tin-tucs', [VaiTroController::class, 'store']);
 Route::get('/tin-tucs/{id}', [VaiTroController::class, 'show']);
 Route::put('/tin-tucs/{id}', [VaiTroController::class, 'update']);
 Route::delete('/tin-tucs/{id}', [VaiTroController::class, 'destroy']);
+
+Route::get('/phien-ban', [PhienBanController::class, 'index']);
