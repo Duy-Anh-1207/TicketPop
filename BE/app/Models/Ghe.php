@@ -17,4 +17,9 @@ class Ghe extends Model
         'cot',
         'trang_thai',
     ];
+
+    public function phongChieu()
+    {
+        return $this->belongsTo(Room::class, 'phong_id', 'id');
+    }
 }

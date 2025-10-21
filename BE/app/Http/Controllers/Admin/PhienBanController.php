@@ -12,11 +12,8 @@ class PhienBanController extends Controller
 {
     public function index(): JsonResponse
     {
-        $data = PhienBan::orderBy('id', 'asc')->get();
-
-        return response()->json([
-            'data' => $data
-        ]);
+        $data = PhienBan::latest()->paginate(10);
+        return response()->json($data);
     }
 
     public function store(StorePhienBanRequest $request): JsonResponse

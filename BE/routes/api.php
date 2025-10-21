@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
 use App\Http\Controllers\Admin\MaGiamGiaController;
+use App\Http\Controllers\Admin\TinTucController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -42,12 +43,12 @@ Route::prefix('users')->group(function () {
 });
 
 Route::prefix('menu')->group(function () {
-    Route::get('/',        [MenuController::class, 'index']);   
-    Route::get('/tree',    [MenuController::class, 'tree']);    
-    Route::post('/',       [MenuController::class, 'store']);   
-    Route::get('/{menu}',  [MenuController::class, 'show']);    
-    Route::match(['put','patch'],'/{menu}', [MenuController::class,'update']); 
-    Route::delete('/{menu}',[MenuController::class, 'destroy']); 
+    Route::get('/',        [MenuController::class, 'index']);
+    Route::get('/tree',    [MenuController::class, 'tree']);
+    Route::post('/',       [MenuController::class, 'store']);
+    Route::get('/{menu}',  [MenuController::class, 'show']);
+    Route::match(['put', 'patch'], '/{menu}', [MenuController::class, 'update']);
+    Route::delete('/{menu}', [MenuController::class, 'destroy']);
 });
 
 Route::get('/lich-chieu', [LichChieuController::class, 'index']);
@@ -94,3 +95,12 @@ Route::post('/ma-giam-gia', [MaGiamGiaController::class, 'store']);
 Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
 Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
 Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
+
+
+Route::get('/tin-tuc', [TinTucController::class, 'index']);
+Route::post('/tin-tucs', [VaiTroController::class, 'store']);
+Route::get('/tin-tucs/{id}', [VaiTroController::class, 'show']);
+Route::put('/tin-tucs/{id}', [VaiTroController::class, 'update']);
+Route::delete('/tin-tucs/{id}', [VaiTroController::class, 'destroy']);
+
+Route::get('/phien-ban', [PhienBanController::class, 'index']);

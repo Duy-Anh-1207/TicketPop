@@ -20,6 +20,7 @@ import ListVoucher from "../component/Admin/Voucher/ListVoucher";
 import CreateVoucher from "../component/Admin/Voucher/CreateVoucher";
 import EditVoucher from "../component/Admin/Voucher/EditVoucher";
 import ViewVoucher from "../component/Admin/Voucher/ViewVoucher";
+import CreatePhim from "../component/Admin/Phim/CreatePhim";
 const Routermain = () => {
   const element = useRoutes([
     {
@@ -32,6 +33,10 @@ const Routermain = () => {
       element: <AdminLayout />,
       children: [
         { path: "phim", element: <DanhSachPhimTable /> },
+        {
+          path: "/admin/phim/create",
+          element: <CreatePhim />,
+        },
         { path: "nguoi-dung", element: <UserList /> },
         { path: "nguoi-dung/:id", element: <DetailUser /> },
         { path: "nguoi-dung/them-moi", element: <CreateUser /> },
