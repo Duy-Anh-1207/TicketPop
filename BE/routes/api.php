@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\VaiTroController;
 use App\Http\Controllers\Admin\MaGiamGiaController;
 use App\Http\Controllers\Admin\PhienBanController;
 use App\Http\Controllers\Admin\TinTucController;
+use App\Http\Controllers\Admin\DangKyController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -102,3 +103,6 @@ Route::put('/tin-tucs/{id}', [VaiTroController::class, 'update']);
 Route::delete('/tin-tucs/{id}', [VaiTroController::class, 'destroy']);
 
 Route::get('/phien-ban', [PhienBanController::class, 'index']);
+
+Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
+
