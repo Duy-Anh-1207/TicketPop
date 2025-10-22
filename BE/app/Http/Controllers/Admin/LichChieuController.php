@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\GiaVe;
 use App\Models\LichChieu;
 use App\Models\Phim;
 use Carbon\Carbon as CarbonCarbon;
@@ -20,53 +21,76 @@ class LichChieuController extends Controller
 
     // Thêm lịch chiếu mới
     public function store(Request $request)
-    {
-        $request->validate([
-            'phim_id' => 'required|integer',
-            'phong_id' => 'required|integer',
-            'phien_ban_id' => 'nullable|integer',
-            'gio_chieu' => 'required|date',
-            'gio_ket_thuc' => 'prohibited',
+{
+    $request->validate([
+        'phim_id' => 'required|integer',
+        'phong_id' => 'required|integer',
+        'phien_ban_id' => 'nullable|string',
+        'gio_chieu' => 'required|date',
+        'gio_ket_thuc' => 'nullable|date',
+         'gia_ve' => 'required|array', // FE gửi mảng giá vé [90000, 120000,...]
+        'gia_ve.*' => 'required|numeric|min:0',
+    ]);
 
-        ]);
-        // Lấy phim tương ứng
-        $phim = Phim::findOrFail($request->phim_id);
+    $phim = Phim::findOrFail($request->phim_id);
 
+    // Lấy giờ chiếu
+    $gioChieu = Carbon::parse($request->gio_chieu, 'Asia/Ho_Chi_Minh');
 
-        //Convert giờ chiếu sang múi giờ Việt Nam để so sánh chính xác
-        $gioChieu = Carbon::parse($request->gio_chieu, 'Asia/Ho_Chi_Minh');
-        $lichCu = LichChieu::where('phong_id', $request->phong_id)
-    ->orderBy('gio_ket_thuc', 'desc')
-    ->first();
+    // Kiểm tra lịch chiếu trước đó
+    $lichCu = LichChieu::where('phong_id', $request->phong_id)
+        ->orderBy('gio_ket_thuc', 'desc')
+        ->first();
 
-if ($lichCu) {
-    $gioKetThucCu = Carbon::parse($lichCu->gio_ket_thuc, 'Asia/Ho_Chi_Minh')->addMinutes(15);
-
-    // Nếu giờ chiếu mới nhỏ hơn giờ kết thúc cũ + 15 phút → báo lỗi
-    if ($gioChieu->lt($gioKetThucCu)) {
-        return response()->json([
-            'error' => 'Phòng này chưa sẵn sàng! Giờ chiếu mới phải sau suất trước ít nhất 15 phút.'
-        ], 422);
-    }
-}
-
-        // Nếu giờ chiếu < thời điểm hiện tại => báo lỗi
-        if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+    if ($lichCu) {
+        $gioKetThucCu = Carbon::parse($lichCu->gio_ket_thuc, 'Asia/Ho_Chi_Minh')->addMinutes(15);
+        if ($gioChieu->lt($gioKetThucCu)) {
             return response()->json([
-                'error' => 'Không thể tạo lịch chiếu trong quá khứ!'
+                'error' => 'Phòng này chưa sẵn sàng! Giờ chiếu mới phải sau suất trước ít nhất 15 phút.'
             ], 422);
         }
-        $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
-        $phienBanId = $phim->phien_ban_id ?? null;
-        $lichChieu = LichChieu::create([
-            'phim_id'       => $request->phim_id,
-            'phong_id'      => $request->phong_id,
-            'phien_ban_id'  => $phienBanId,
-            'gio_chieu'     => $gioChieu,
-            'gio_ket_thuc'  => $gioKetThuc,
-        ]);
-        return response()->json(['message' => 'Thêm lịch chiếu thành công', 'data' => $lichChieu], 201);
     }
+
+    if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+        return response()->json([
+            'error' => 'Không thể tạo lịch chiếu trong quá khứ!'
+        ], 422);
+    }
+
+    // ✅ Tính giờ kết thúc (phim + 15p dọn phòng)
+    $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
+     
+    // ✅ Lấy mảng phiên bản từ phim
+    $phienBanArr = is_string($phim->phien_ban_id)
+        ? json_decode($phim->phien_ban_id, true)
+        : $phim->phien_ban_id;
+
+    // ✅ Nếu frontend gửi phiên bản cụ thể (ví dụ chọn 1 trong số đó)
+    $phienBanId = $request->phien_ban_id ?? ($phienBanArr[1] ?? null);
+
+    $lichChieu = LichChieu::create([
+        'phim_id'       => $request->phim_id,
+        'phong_id'      => $request->phong_id,
+        'phien_ban_id'  => $phienBanArr ? json_encode([$phienBanId]) : null,
+        'gio_chieu'     => $gioChieu,
+        'gio_ket_thuc'  => $gioKetThuc,
+    ]);
+
+    // Tạo giá vé mặc định loại ghế id = 1
+    foreach ($request->gia_ve as $gia) {
+        GiaVe::create([
+            'lich_chieu_id' => $lichChieu->id,
+            'loai_ghe_id' => 1, // mặc định
+            'gia_ve' => $gia,
+        ]);
+    }
+
+    return response()->json([
+        'message' => 'Thêm lịch chiếu và giá vé thành công',
+        'data' => $lichChieu->load('giaVe')
+    ], 201);
+}
+
 
     // Lấy chi tiết lịch chiếu theo ID
     public function show($id)
@@ -83,9 +107,10 @@ if ($lichCu) {
         $request->validate([
             'phim_id' => 'sometimes|integer|exists:phim,id',
             'phong_id' => 'sometimes|integer|exists:phong_chieu,id',
-            'phien_ban_id' => 'nullable|integer|exists:phien_ban,id',
+            'phien_ban_id' => 'nullable|string',
             'gio_chieu' => 'sometimes|date',
-            'gio_ket_thuc' => 'prohibited',
+            'gio_ket_thuc' => 'nullable',
+            
         ]);
 
         $phim = Phim::findOrFail($request->phim_id ?? $lichChieu->phim_id);

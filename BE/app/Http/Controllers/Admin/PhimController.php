@@ -112,4 +112,21 @@ class PhimController extends Controller
         $phim->delete();
         return response()->json(null, 204);
     }
+    public function getPhienBanByPhim($id)
+{
+    $phim = Phim::find($id);
+
+    if (!$phim) {
+        return response()->json(['message' => 'Không tìm thấy phim'], 404);
+    }
+
+    // Giải mã chuỗi JSON lưu trong DB (["1","2"])
+    $phienBanIds = json_decode($phim->phien_ban_id, true) ?? [];
+
+    // Lấy thông tin chi tiết của các phiên bản đó
+    $phienBan = PhienBan::whereIn('id', $phienBanIds)->get();
+
+    return response()->json($phienBan);
+}
+
 }

@@ -106,3 +106,5 @@ Route::get('/phien-ban', [PhienBanController::class, 'index']);
 
 Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
 
+
+Route::get('/phim/{id}/phien-ban', [PhimController::class, 'getPhienBanByPhim']);
