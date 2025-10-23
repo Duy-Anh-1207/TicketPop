@@ -32,6 +32,10 @@ const Routermain = () => {
           path: "/admin/phim/create",
           element: <CreatePhim />,
         },
+        {
+          path: "/admin/phim/edit/:id",
+          element: <CreatePhim />,
+        },
         { path: "nguoi-dung", element: <UserList /> },
         { path: "nguoi-dung/:id", element: <DetailUser /> },
         { path: "nguoi-dung/them-moi", element: <CreateUser /> },

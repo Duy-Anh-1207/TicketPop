@@ -62,3 +62,8 @@ export const getUpdatePhim = async ({ resource = "phim", id, values }: any) => {
   const { data } = await axiosClient.put(`${resource}/${id}`, values);
   return data;
 };
+
+export const getPhimById = async (id: number) => {
+  const response = await axiosClient.get(`/phim/${id}`);
+  return response.data;
+};

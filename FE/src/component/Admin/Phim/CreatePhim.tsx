@@ -1,14 +1,21 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useCreatePhim, useListPhienBan, useListTheLoai } from "../../../hook/PhimHook";
+import {
+  useCreatePhim,
+  useUpdatePhim,
+  useGetPhimById,
+  useListPhienBan,
+  useListTheLoai,
+} from "../../../hook/PhimHook";
+import Select from "react-select";
 
 type FormState = {
   ten_phim: string;
   the_loai: number[];
   phien_ban: number[];
   thoi_luong: number;
-  anh_poster?: File | null;
+  anh_poster?: File | string | null;
   loai_suat_chieu: string;
   ngay_cong_chieu: string;
   ngay_ket_thuc: string;
@@ -16,11 +23,17 @@ type FormState = {
   trailer: string;
   quoc_gia: string;
   ngon_ngu: string;
+  mo_ta: string;
 };
 
 export default function CreatePhim() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEditMode = !!id;
+
   const createPhim = useCreatePhim({ resource: "phim" });
+  const updatePhim = useUpdatePhim({ resource: "phim" });
+  const { data: phimData, isLoading } = useGetPhimById(id ? Number(id) : undefined);
 
   const { data: theLoaiList = [] } = useListTheLoai();
   const { data: phienBanList = [] } = useListPhienBan();
@@ -40,10 +53,40 @@ export default function CreatePhim() {
     trailer: "",
     quoc_gia: "",
     ngon_ngu: "",
+    mo_ta: "",
   });
 
-  const handleSimpleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as any;
+  // ✅ Khi có id (edit mode), load dữ liệu để fill form
+  useEffect(() => {
+    if (phimData) {
+      setFormValues({
+        ten_phim: phimData.ten_phim || "",
+        // đảm bảo chuyển về mảng id
+        the_loai: Array.isArray(phimData.the_loai_ids)
+          ? phimData.the_loai_ids
+          : (phimData.the_loai?.map((tl: any) => tl.id) || []),
+        phien_ban: Array.isArray(phimData.phien_ban_ids)
+          ? phimData.phien_ban_ids
+          : (phimData.phien_ban?.map((pb: any) => pb.id) || []),
+        thoi_luong: phimData.thoi_luong || 90,
+        anh_poster: phimData.anh_poster || null,
+        do_tuoi_gioi_han: phimData.do_tuoi_gioi_han || "",
+        loai_suat_chieu: phimData.loai_suat_chieu || "",
+        ngay_cong_chieu: phimData.ngay_cong_chieu || "",
+        ngay_ket_thuc: phimData.ngay_ket_thuc || "",
+        trailer: phimData.trailer || "",
+        quoc_gia: phimData.quoc_gia || "",
+        ngon_ngu: phimData.ngon_ngu || "",
+        mo_ta: phimData.mo_ta || "",
+      });
+    }
+  }, [phimData]);
+
+
+  const handleSimpleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value, type } = e.target;
     setFormValues((prev) => ({
       ...prev,
       [name]: type === "number" ? Number(value) : value,
@@ -55,11 +98,11 @@ export default function CreatePhim() {
     setFormValues((prev) => ({ ...prev, anh_poster: file }));
   };
 
-  const handleMultiSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const name = e.target.name;
-    const selected = Array.from(e.target.selectedOptions, (opt) => Number(opt.value));
-    setFormValues((prev) => ({ ...prev, [name]: selected } as any));
-  };
+  // const handleMultiSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  //   const name = e.target.name;
+  //   const selected = Array.from(e.target.selectedOptions, (opt) => Number(opt.value));
+  //   setFormValues((prev) => ({ ...prev, [name]: selected } as any));
+  // };
 
   const RuleHint = () => {
     const loai = formValues.loai_suat_chieu || "";
@@ -102,16 +145,43 @@ export default function CreatePhim() {
       });
     }
 
-    createPhim.mutate({ ...formValues }, { onSuccess: () => navigate("/admin/phim") });
+    // ✅ Gộp logic submit chung cho create & edit
+    const mutateFn = isEditMode
+      ? updatePhim.mutateAsync({ id: Number(id), values: formValues })
+      : createPhim.mutateAsync(formValues);
+
+    mutateFn
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: isEditMode ? "Cập nhật thành công!" : "Thêm mới thành công!",
+          timer: 1200,
+          showConfirmButton: false,
+        });
+        navigate("/admin/phim");
+      })
+      .catch(() => {
+        Swal.fire({
+          icon: "error",
+          title: "Có lỗi xảy ra khi lưu dữ liệu!",
+        });
+      });
   };
+
+  if (isEditMode && isLoading) {
+    return <div className="text-center mt-4">Đang tải dữ liệu phim...</div>;
+  }
 
   return (
     <div className="container my-4">
       <div className="card shadow-sm">
         <div className="card-body">
-          <h3 className="card-title text-center mb-4">🎬 Thêm phim mới</h3>
+          <h3 className="card-title text-center mb-4">
+            {isEditMode ? "✏️ Chỉnh sửa phim" : "🎬 Thêm phim mới"}
+          </h3>
           <form onSubmit={handleSubmit}>
             <div className="row g-3">
+              {/* ====== Tên phim ====== */}
               <div className="col-md-6">
                 <label className="form-label">Tên phim</label>
                 <input
@@ -124,6 +194,7 @@ export default function CreatePhim() {
                   required
                 />
               </div>
+
               <div className="col-md-6">
                 <label className="form-label">Độ tuổi giới hạn</label>
                 <input
@@ -135,6 +206,21 @@ export default function CreatePhim() {
                   placeholder="VD: 13+, 16+, 18+"
                 />
               </div>
+
+              {/* ====== Mô tả ====== */}
+              <div className="col-12">
+                <label className="form-label">Mô tả phim</label>
+                <textarea
+                  name="mo_ta"
+                  value={formValues.mo_ta}
+                  onChange={handleSimpleChange}
+                  className="form-control"
+                  rows={3}
+                  placeholder="Nhập mô tả ngắn..."
+                ></textarea>
+              </div>
+
+              {/* ====== Thời lượng / loại suất / ngày ====== */}
               <div className="col-md-4">
                 <label className="form-label">Thời lượng (phút)</label>
                 <input
@@ -146,6 +232,7 @@ export default function CreatePhim() {
                   className="form-control"
                 />
               </div>
+
               <div className="col-md-4">
                 <label className="form-label">Loại suất chiếu</label>
                 <select
@@ -164,6 +251,7 @@ export default function CreatePhim() {
                 </select>
                 <RuleHint />
               </div>
+
               <div className="col-md-4">
                 <label className="form-label">Thời gian</label>
                 <div className="d-flex gap-2">
@@ -185,43 +273,59 @@ export default function CreatePhim() {
                 </div>
               </div>
 
+              {/* ====== Thể loại ====== */}
               <div className="col-md-6">
                 <label className="form-label">Thể loại</label>
-                <select
+                <Select
+                  isMulti
                   name="the_loai"
-                  multiple
-                  value={formValues.the_loai.map(String)}
-                  onChange={handleMultiSelect}
-                  className="form-select"
-                  size={5}
-                >
-                  {theLoaiList.map((tl: any) => (
-                    <option key={tl.id} value={tl.id}>
-                      {tl.ten_the_loai}
-                    </option>
-                  ))}
-                </select>
-                <small className="form-text text-muted">Giữ Ctrl/Cmd để chọn nhiều</small>
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Phiên bản</label>
-                <select
-                  name="phien_ban"
-                  multiple
-                  value={formValues.phien_ban.map(String)}
-                  onChange={handleMultiSelect}
-                  className="form-select"
-                  size={5}
-                >
-                  {phienBanList.map((pb: any) => (
-                    <option key={pb.id} value={pb.id}>
-                      {pb.the_loai}
-                    </option>
-                  ))}
-                </select>
-                <small className="form-text text-muted">Chọn phiên bản (nếu có)</small>
+                  options={theLoaiList.map((tl: any) => ({
+                    value: tl.id,
+                    label: tl.ten_the_loai,
+                  }))}
+                  value={theLoaiList
+                    .filter((tl: any) => formValues.the_loai.includes(tl.id))
+                    .map((tl: any) => ({ value: tl.id, label: tl.ten_the_loai }))}
+                  onChange={(selected: any) =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      the_loai: selected.map((s: any) => s.value),
+                    }))
+                  }
+                  classNamePrefix="select"
+                  placeholder="Chọn thể loại..."
+                />
               </div>
 
+              {/* ====== Phiên bản ====== */}
+              <div className="col-md-6">
+                <label className="form-label">Phiên bản</label>
+                <Select
+                  isMulti
+                  name="phien_ban"
+                  options={phienBanList.map((pb: any) => ({
+                    value: pb.id,
+                    label: pb.the_loai || "Không tên",
+                  }))}
+                  value={phienBanList
+                    .filter((pb: any) => formValues.phien_ban.includes(pb.id))
+                    .map((pb: any) => ({
+                      value: pb.id,
+                      label: pb.the_loai || "Không tên",
+                    }))}
+                  onChange={(selected: any) =>
+                    setFormValues((prev) => ({
+                      ...prev,
+                      phien_ban: selected.map((s: any) => s.value),
+                    }))
+                  }
+                  classNamePrefix="select"
+                  placeholder="Chọn phiên bản..."
+                />
+              </div>
+
+
+              {/* ====== Quốc gia, ngôn ngữ, trailer ====== */}
               <div className="col-md-6">
                 <label className="form-label">Quốc gia</label>
                 <input
@@ -232,6 +336,7 @@ export default function CreatePhim() {
                   className="form-control"
                 />
               </div>
+
               <div className="col-md-6">
                 <label className="form-label">Ngôn ngữ</label>
                 <input
@@ -255,6 +360,7 @@ export default function CreatePhim() {
                 />
               </div>
 
+              {/* ====== Ảnh Poster ====== */}
               <div className="col-12">
                 <label className="form-label">Ảnh Poster</label>
                 <input
@@ -264,23 +370,51 @@ export default function CreatePhim() {
                   onChange={handleFileChange}
                   className="form-control"
                 />
-                {formValues.anh_poster instanceof Blob && (
-                  <img
-                    src={URL.createObjectURL(formValues.anh_poster)}
-                    alt="Poster Preview"
-                    className="img-thumbnail mt-2"
-                    style={{ width: 150, height: 220, objectFit: "cover" }}
-                  />
+
+                {formValues.anh_poster && (
+                  <div className="mt-2">
+                    {(() => {
+                      let imageUrl = "";
+
+                      // Nếu là File mới upload
+                      if (formValues.anh_poster instanceof File) {
+                        imageUrl = URL.createObjectURL(formValues.anh_poster);
+                      }
+                      // Nếu là string (đường dẫn trong DB)
+                      else if (typeof formValues.anh_poster === "string") {
+                        imageUrl = formValues.anh_poster.startsWith("http")
+                          ? formValues.anh_poster
+                          : `${import.meta.env.VITE_API_BASE_URL}/storage/${formValues.anh_poster.replace("posters/", "posters/")}`;
+                      }
+
+                      return (
+                        <img
+                          src={imageUrl}
+                          alt="Poster"
+                          className="rounded border shadow-sm"
+                          style={{ width: 180, height: 260, objectFit: "cover" }}
+                        />
+                      );
+                    })()}
+                  </div>
                 )}
               </div>
 
+
+              {/* ====== Submit ====== */}
               <div className="col-12 text-end mt-3">
                 <button
                   type="submit"
-                  disabled={createPhim.isPending}
+                  disabled={createPhim.isPending || updatePhim.isPending}
                   className="btn btn-primary"
                 >
-                  {createPhim.isPending ? "Đang thêm..." : "Thêm phim"}
+                  {isEditMode
+                    ? updatePhim.isPending
+                      ? "Đang cập nhật..."
+                      : "Cập nhật"
+                    : createPhim.isPending
+                      ? "Đang thêm..."
+                      : "Thêm phim"}
                 </button>
               </div>
             </div>
