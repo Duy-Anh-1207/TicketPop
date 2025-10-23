@@ -31,15 +31,15 @@ class User extends Authenticatable
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        
+
     ];
-    public $timestamps = true; 
+    public $timestamps = true;
     public function vaiTro()
-{
-    return $this->belongsTo(VaiTro::class, 'vai_tro_id');
-}
-public function getTenVaiTroAttribute()
-{
-    return $this->vaiTro->ten_vai_tro ?? null;
-}
+    {
+        return $this->belongsTo(VaiTro::class, 'vai_tro_id');
+    }
+    public function getTenVaiTroAttribute()
+    {
+        return $this->vaiTro->ten_vai_tro ?? null;
+    }
 }

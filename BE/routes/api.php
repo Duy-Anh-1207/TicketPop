@@ -19,7 +19,7 @@ Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);
 Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
-Route::apiResource('vai_tro', PhimController::class);
+// Route::apiResource('vai_tro', PhimController::class);
 
 //  API Room
 Route::get('/room', [RoomController::class, 'index']);

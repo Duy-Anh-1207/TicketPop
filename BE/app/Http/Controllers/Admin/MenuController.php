@@ -63,7 +63,7 @@ class MenuController extends Controller
             'trang_thai'    => 'nullable|in:0,1',
         ]);
 
-        $menu = Menu::create($data);
+        $menu = Menu::create(attributes: $data);
         return response()->json($menu, 201);
     }
 
