@@ -11,10 +11,10 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     // Nếu bảng không phải là "users", cần chỉ định rõ
-    protected $table = 'nguoi_dung';
+    protected $table = 'users';
     protected $appends = ['ten_vai_tro'];
     protected $fillable = [
-        'ten',
+        'name',
         'email',
         'so_dien_thoai',
         'password',
@@ -31,15 +31,15 @@ class User extends Authenticatable
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        
+
     ];
-    public $timestamps = true; 
+    public $timestamps = true;
     public function vaiTro()
-{
-    return $this->belongsTo(VaiTro::class, 'vai_tro_id');
-}
-public function getTenVaiTroAttribute()
-{
-    return $this->vaiTro->ten_vai_tro ?? null;
-}
+    {
+        return $this->belongsTo(VaiTro::class, 'vai_tro_id');
+    }
+    public function getTenVaiTroAttribute()
+    {
+        return $this->vaiTro->ten_vai_tro ?? null;
+    }
 }
