@@ -59,4 +59,12 @@ class DangNhapController extends Controller
             ]
         ]);
     }
+
+    public function dangXuat(Request $request)
+{
+    return response()->json([
+        'status' => true,
+        'message' => 'Đăng xuất thành công!'
+    ]);
+}
 }

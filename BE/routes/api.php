@@ -109,3 +109,5 @@ Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
 
 Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 
+Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
+
