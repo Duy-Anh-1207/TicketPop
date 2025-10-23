@@ -26,10 +26,12 @@ return new class extends Migration
             $table->text('state');
             $table->string('stt')->nullable();
             $table->boolean('trang_thai')->default(true);
+            $table->timestamps();
         });
 
 
         Schema::create('quyen_truy_cap', function (Blueprint $table) {
+            
             $table->foreignId('vai_tro_id')->constrained('vai_tro')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('menu_id')->constrained('menu')->onUpdate('cascade')->onDelete('cascade');
             $table->string('function')->nullable();
