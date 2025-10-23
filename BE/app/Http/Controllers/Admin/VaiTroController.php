@@ -21,8 +21,9 @@ class VaiTroController extends Controller
 
     public function store(StoreVaiTroRequest $request): JsonResponse
     {
-        $validated = $request->validated();
 
+        $validated = $request->validated();
+        
         try {
             DB::beginTransaction();
 
@@ -31,14 +32,23 @@ class VaiTroController extends Controller
                 'ten_vai_tro' => $validated['ten_vai_tro'],
                 'mo_ta' => $validated['mo_ta'] ?? null,
             ]);
+            // Thêm quyền
+            if (!empty($validated['permissions'])) {
+                foreach ($validated['permissions'] as $perm) {
+                    $vaiTro->quyenTruyCaps()->create([
+                        'menu_id'  => $perm['menu_id'],
+                        'function' => $perm['function'], // tự encode JSON
+                    ]);
+                }
+            }
+
 
             DB::commit();
 
             return response()->json([
                 'message' => 'Tạo vai trò thành công!',
-                'data' => $vaiTro
+                'data' => $vaiTro->load('quyenTruyCaps')
             ], 201);
-
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(['message' => 'Đã có lỗi xảy ra: ' . $e->getMessage()], 500);
