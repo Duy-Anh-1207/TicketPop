@@ -24,7 +24,7 @@ class LichChieuController extends Controller
         $phienBanIds = json_decode($phim->phien_ban_id, true) ?? [];
 
         if (!empty($phienBanIds)) {
-            $phienBans = \App\Models\PhienBan::whereIn('id', $phienBanIds)
+            $phienBans = PhienBan::whereIn('id', $phienBanIds)
                 ->pluck('the_loai')
                 ->toArray();
             $item->phien_ban = implode(', ', $phienBans);
