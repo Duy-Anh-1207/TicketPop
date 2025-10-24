@@ -15,13 +15,15 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
 use App\Http\Controllers\Admin\MaGiamGiaController;
 use App\Http\Controllers\Admin\TinTucController;
+use App\Http\Controllers\Admin\DangKyController;
+use App\Http\Controllers\Admin\DangNhapController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);
 Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
-Route::apiResource('vai_tro', PhimController::class);
+// Route::apiResource('vai_tro', PhimController::class);
 
 //  API Room
 Route::get('/room', [RoomController::class, 'index']);
@@ -98,9 +100,17 @@ Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);
-Route::post('/tin-tucs', [VaiTroController::class, 'store']);
-Route::get('/tin-tucs/{id}', [VaiTroController::class, 'show']);
-Route::put('/tin-tucs/{id}', [VaiTroController::class, 'update']);
-Route::delete('/tin-tucs/{id}', [VaiTroController::class, 'destroy']);
+Route::post('/tin-tucs', [TinTucController::class, 'store']);
+Route::get('/tin-tucs/{id}', [TinTucController::class, 'show']);
+Route::put('/tin-tucs/{id}', [TinTucController::class, 'update']);
+Route::delete('/tin-tucs/{id}', [TinTucController::class, 'destroy']);
 
 Route::get('/phien-ban', [PhienBanController::class, 'index']);
+
+Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
+
+Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
+
+Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
+Route::get('/phim/{phim_id}/phien-ban', [LichChieuController::class, 'getPhienBanByPhim']);
+

@@ -11,8 +11,13 @@ class Menu extends Model
     protected $table = 'menu';
 
     protected $fillable = [
-        'ma_chuc_nang','ma_cha','ten_chuc_nang','state','stt','trang_thai',
-        
+        'ma_chuc_nang',
+        'ma_cha',
+        'ten_chuc_nang',
+        'state',
+        'stt',
+        'trang_thai',
+
     ];
 
     // Quan hệ cha–con dựa trên mã
@@ -24,6 +29,10 @@ class Menu extends Model
     public function children(): HasMany
     {
         return $this->hasMany(Menu::class, 'ma_cha', 'ma_chuc_nang');
+    }
+    public function quyenTruyCaps(): HasMany
+    {
+        return $this->hasMany(QuyenTruyCap::class, 'menu_id');
     }
 
     // scope tiện lọc menu đang hoạt động

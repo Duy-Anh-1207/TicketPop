@@ -25,14 +25,19 @@ class PhimController extends Controller
             // các field khác...
         ]);
 
-        // ✅ Chuyển từ "1,2" -> [1, 2]
+        $anhPosterPath = null;
+        if ($request->hasFile('anh_poster')) {
+            $anhPosterPath = $request->file('anh_poster')->store('posters', 'public');
+        }
+
+        // Chuyển "1,2" -> [1, 2]
         $phienBanIds = array_filter(explode(',', $request->input('phien_ban')));
         $theLoaiIds = array_filter(explode(',', $request->input('the_loai')));
 
         $phim = Phim::create([
             'ten_phim' => $request->ten_phim,
-            'phien_ban_id' => json_encode($phienBanIds),
-            'the_loai_id' => json_encode($theLoaiIds),
+            'phien_ban_id' => $phienBanIds,
+            'the_loai_id' => $theLoaiIds,
             'thoi_luong' => $request->thoi_luong,
             'do_tuoi_gioi_han' => $request->do_tuoi_gioi_han,
             'loai_suat_chieu' => $request->loai_suat_chieu,
@@ -41,6 +46,8 @@ class PhimController extends Controller
             'trailer' => $request->trailer,
             'quoc_gia' => $request->quoc_gia,
             'ngon_ngu' => $request->ngon_ngu,
+            'mo_ta' => $request->mo_ta,
+            'anh_poster' => $anhPosterPath,
         ]);
 
         return response()->json([
@@ -50,53 +57,51 @@ class PhimController extends Controller
     }
 
 
-    public function update(StorePhimRequest $request, $id)
+
+    public function update(Request $request, $id)
     {
+        // Chuyển mảng -> chuỗi để tránh lỗi validate
+        if (is_array($request->phien_ban)) {
+            $request->merge(['phien_ban' => implode(',', $request->phien_ban)]);
+        }
+        if (is_array($request->the_loai)) {
+            $request->merge(['the_loai' => implode(',', $request->the_loai)]);
+        }
+
+        $validated = $request->validate([
+            'ten_phim' => 'required|string|max:255',
+            'phien_ban' => 'nullable|string',
+            'the_loai' => 'nullable|string',
+            // các field khác...
+        ]);
+
         $phim = Phim::findOrFail($id);
-        $data = $request->validated();
 
-        // Xử lý PHIÊN BẢN
-        $phienBanInput = $request->input('phien_ban_id');
-        if (is_string($phienBanInput)) {
-            $phienBanInput = explode(',', $phienBanInput);
-        }
-
-        $data['phien_ban_id'] = collect($phienBanInput)
-            ->map(function ($id) {
-                $phienBan = PhienBan::find($id);
-                return $phienBan ? [
-                    'id' => $phienBan->id,
-                    'ten_phien_ban' => $phienBan->ten_phien_ban,
-                ] : null;
-            })
-            ->filter()
-            ->values()
-            ->toJson();
-
-        // Xử lý THỂ LOẠI
-        $theLoaiInput = $request->input('the_loai_id');
-        if (is_string($theLoaiInput)) {
-            $theLoaiInput = explode(',', $theLoaiInput);
-        }
-
-        $data['the_loai_id'] = collect($theLoaiInput)
-            ->map(function ($id) {
-                $theLoai = TheLoai::find($id);
-                return $theLoai ? [
-                    'id' => $theLoai->id,
-                    'ten_the_loai' => $theLoai->ten_the_loai,
-                ] : null;
-            })
-            ->filter()
-            ->values()
-            ->toJson();
-
-        // Xử lý ảnh poster (nếu có upload mới)
+        // Xử lý ảnh
+        $anhPosterPath = $phim->anh_poster;
         if ($request->hasFile('anh_poster')) {
-            $data['anh_poster'] = $request->file('anh_poster')->store('posters', 'public');
+            $anhPosterPath = $request->file('anh_poster')->store('posters', 'public');
         }
 
-        $phim->update($data);
+        // Xử lý phiên bản & thể loại
+        $phienBanIds = array_filter(explode(',', $request->input('phien_ban')));
+        $theLoaiIds = array_filter(explode(',', $request->input('the_loai')));
+
+        $phim->update([
+            'ten_phim' => $request->ten_phim,
+            'phien_ban_id' => $phienBanIds,
+            'the_loai_id' => $theLoaiIds,
+            'thoi_luong' => $request->thoi_luong,
+            'do_tuoi_gioi_han' => $request->do_tuoi_gioi_han,
+            'loai_suat_chieu' => $request->loai_suat_chieu,
+            'ngay_cong_chieu' => $request->ngay_cong_chieu,
+            'ngay_ket_thuc' => $request->ngay_ket_thuc,
+            'trailer' => $request->trailer,
+            'quoc_gia' => $request->quoc_gia,
+            'ngon_ngu' => $request->ngon_ngu,
+            'mo_ta' => $request->mo_ta,
+            'anh_poster' => $anhPosterPath,
+        ]);
 
         return response()->json([
             'message' => 'Cập nhật phim thành công',
@@ -106,10 +111,22 @@ class PhimController extends Controller
 
 
 
+
     public function destroy($id)
     {
         $phim = Phim::findOrFail($id);
         $phim->delete();
         return response()->json(null, 204);
+    }
+
+    public function show($id)
+    {
+        $phim = Phim::find($id);
+
+        if (!$phim) {
+            return response()->json(['message' => 'Phim không tồn tại'], 404);
+        }
+
+        return response()->json($phim);
     }
 }

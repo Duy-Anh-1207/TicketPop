@@ -26,4 +26,8 @@ class VaiTro extends Model
     {
         return $this->hasMany(NguoiDung::class, 'vai_tro_id');
     }
+    public function quyenTruyCaps()
+    {
+        return $this->hasMany(QuyenTruyCap::class, 'vai_tro_id');
+    }
 }

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getCreatePhim, getDeletePhim, getListPhienBan, getListPhim, getListTheLoai, getUpdatePhim } from "../provider/PhimProvider";
+import { getCreatePhim, getDeletePhim, getListPhienBan, getListPhim, getListTheLoai, getPhimById, getUpdatePhim } from "../provider/PhimProvider";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -26,8 +26,16 @@ export const useListPhienBan = () => {
     queryKey: ['phien-ban'],
     queryFn: async () => {
       const res = await getListPhienBan({ resource: 'phien-ban' });
-      return res.data; 
+      return res.data;
     },
+  });
+};
+
+export const useGetPhimById = (id?: number) => {
+  return useQuery({
+    queryKey: ["phim", id],
+    queryFn: () => getPhimById(id!),
+    enabled: !!id, // chỉ gọi khi có id
   });
 };
 
@@ -68,12 +76,17 @@ export const useCreatePhim = ({ resource = "phim" }: any) => {
         formData = new FormData();
         Object.entries(values).forEach(([key, val]) => {
           if (Array.isArray(val)) {
-            // Mảng (thể loại, phiên bản) => "1,2,3"
             formData.append(key, val.join(","));
-          } else {
+          } else if (val !== null && val !== undefined) {
             formData.append(key, val as any);
           }
         });
+      } else {
+        // Không phải file, xóa key ảnh nếu là chuỗi (file cũ)
+        if (typeof values.anh_poster === "string") {
+          delete values.anh_poster;
+        }
+        formData = values;
       }
 
       return await getCreatePhim({ resource, values: formData });
@@ -116,10 +129,16 @@ export const useUpdatePhim = ({ resource = "phim" }) => {
         Object.entries(values).forEach(([key, val]) => {
           if (Array.isArray(val)) {
             formData.append(key, val.join(","));
-          } else {
+          } else if (val !== null && val !== undefined) {
             formData.append(key, val as any);
           }
         });
+      } else {
+        // Không phải file, xóa key ảnh nếu là chuỗi (file cũ)
+        if (typeof values.anh_poster === "string") {
+          delete values.anh_poster;
+        }
+        formData = values;
       }
 
       return await getUpdatePhim({ resource, id, values: formData });
@@ -132,7 +151,7 @@ export const useUpdatePhim = ({ resource = "phim" }) => {
         showConfirmButton: false,
       });
       queryClient.invalidateQueries({ queryKey: [resource] });
-      navigate("/admin/phim");
+      navigate("/phim");
     },
     onError: (error: any) => {
       const messages = error.response?.data?.errors

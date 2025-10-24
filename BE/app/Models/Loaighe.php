@@ -16,4 +16,9 @@ class LoaiGhe extends Model
     {
         return $this->hasMany(Ghe::class, 'loai_ghe_id');
     }
+    public function giaVe()
+{
+    return $this->hasMany(GiaVe::class, 'lich_chieu_id');
+}
+
 }
