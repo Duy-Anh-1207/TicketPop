@@ -41,4 +41,9 @@ class LichChieu extends Model
     {
         return $this->belongsTo(PhienBan::class, 'phien_ban_id'); // nếu có bảng riêng
     }
+    public function giaVe()
+{
+    return $this->hasMany(GiaVe::class, 'lich_chieu_id');
+}
+
 }

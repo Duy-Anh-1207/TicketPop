@@ -110,4 +110,5 @@ Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
 Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 
 Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
+Route::get('/phim/{phim_id}/phien-ban', [LichChieuController::class, 'getPhienBanByPhim']);
 
