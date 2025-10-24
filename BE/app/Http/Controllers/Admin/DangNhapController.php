@@ -23,6 +23,7 @@ class DangNhapController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        // ❌ Sai tài khoản hoặc mật khẩu
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => false,
@@ -30,41 +31,36 @@ class DangNhapController extends Controller
             ], 401);
         }
 
-        if (!$user->is_active) {
+        // 🚫 Kiểm tra tài khoản bị khóa
+        if ($user->trang_thai == 0) {
             return response()->json([
                 'status' => false,
                 'message' => 'Tài khoản của bạn đã bị khóa!'
             ], 403);
         }
 
-        // 5️⃣ Phân quyền
-        $role = $user->role ?? 'user';
-        $redirectUrl = '';
-
-        if ($role === 'admin') {
-            $redirectUrl = '/admin/phim'; 
-        } else {
-            $redirectUrl = '/'; 
-        }
+        // ✅ Phân quyền và chuyển hướng
+        $vaiTro = $user->vaiTro->ten_vai_tro ?? 'Khách hàng';
+        $redirectUrl = ($vaiTro === 'Admin') ? '/admin/phim' : '/';
 
         return response()->json([
             'status' => true,
             'message' => 'Đăng nhập thành công!',
             'data' => [
                 'id' => $user->id,
-                'name' => $user->name,
+                'ten' => $user->ten,
                 'email' => $user->email,
-                'role' => $role,
+                'vai_tro' => $vaiTro,
                 'redirect_url' => $redirectUrl,
             ]
         ]);
     }
 
     public function dangXuat(Request $request)
-{
-    return response()->json([
-        'status' => true,
-        'message' => 'Đăng xuất thành công!'
-    ]);
-}
+    {
+        return response()->json([
+            'status' => true,
+            'message' => 'Đăng xuất thành công!'
+        ]);
+    }
 }
