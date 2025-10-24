@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { createLichChieu } from "../../../provider/LichChieuProviders";
-import { getListPhim } from "../../../provider/PhimProvider"; 
+import { getListPhim } from "../../../provider/PhimProvider";
 import { getListPhongChieu } from "../../../provider/PhongChieuProvider";
-// import { getLis }; 
+import { getListPhienBan } from "../../../provider/PhienBanProvider";
+import type { Phim } from "../../../types/phim";
+import type { PhongChieu } from "../../../types/phongchieu";
+import type { PhienBan } from "../../../types/phienban";
 
 export default function CreateLichChieu() {
   const navigate = useNavigate();
@@ -17,16 +20,12 @@ export default function CreateLichChieu() {
     gio_ket_thuc: "",
   });
 
-  type Phim = { id: number; ten_phim: string };
-  type Phong = { id: number; ten_phong: string };
-  type PhienBan = { id: number; ten_phien_ban: string };
-
   const [phimList, setPhimList] = useState<Phim[]>([]);
-  const [phongList, setPhongList] = useState<Phong[]>([]);
+  const [phongList, setPhongList] = useState<PhongChieu[]>([]);
   const [phienBanList, setPhienBanList] = useState<PhienBan[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 🔹 Lấy danh sách phim, phòng, và phiên bản khi load trang
+  // Lấy danh sách phim, phòng, và phiên bản khi load trang
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,10 +45,13 @@ export default function CreateLichChieu() {
           setFormData((prev) => ({ ...prev, phong_id: String(phongData[0].id) }));
         }
 
-        // // Lấy danh sách phiên bản
-        // const phienBanRes = await getListPhienBan({});
-        // const phienBanData = Array.isArray(phienBanRes.data) ? phienBanRes.data : phienBanRes;
-        // setPhienBanList(phienBanData);
+        // Lấy danh sách phiên bản
+        const phienBanRes = await getListPhienBan();
+        const phienBanData = Array.isArray(phienBanRes) ? phienBanRes : phienBanRes.data;
+        setPhienBanList(phienBanData);
+        if (phienBanData.length > 0 && !formData.phien_ban_id) {
+          setFormData((prev) => ({ ...prev, phien_ban_id: String(phienBanData[0].id) }));
+        }
       } catch (error) {
         console.error("❌ Lỗi khi tải dữ liệu:", error);
         Swal.fire("Lỗi", "Không thể tải danh sách phim, phòng hoặc phiên bản", "error");
@@ -58,7 +60,7 @@ export default function CreateLichChieu() {
     fetchData();
   }, []);
 
-  // 🔹 Xử lý thay đổi input
+  // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -67,7 +69,7 @@ export default function CreateLichChieu() {
     }));
   };
 
-  // 🔹 Submit form
+  // Submit form
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -93,7 +95,7 @@ export default function CreateLichChieu() {
       Swal.fire({
         icon: "success",
         title: "🎉 Thành công!",
-        text: res.message || "Tạo lịch chiếu thành công!",
+        text: res.message || "Thêm lịch chiếu thành công",
       });
 
       navigate("/admin/lich-chieu");
@@ -177,7 +179,7 @@ export default function CreateLichChieu() {
                 {phienBanList.length > 0 ? (
                   phienBanList.map((phienBan) => (
                     <option key={phienBan.id} value={phienBan.id}>
-                      {phienBan.ten_phien_ban}
+                      {phienBan.the_loai}
                     </option>
                   ))
                 ) : (

@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\GheController;
 use App\Http\Controllers\Admin\LichChieuController;
+use App\Http\Controllers\Admin\PhienBanController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PhimController;
 use App\Http\Controllers\Admin\RoomController;
@@ -13,7 +14,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
 use App\Http\Controllers\Admin\MaGiamGiaController;
-use App\Http\Controllers\Admin\PhienBanController;
 use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
@@ -83,6 +83,8 @@ Route::get('/foods/{id}', [FoodController::class, 'show']);
 Route::put('/foods/{id}', [FoodController::class, 'update']);
 Route::delete('/foods/{id}', [FoodController::class, 'destroy']);
 
+Route::get('/phien-ban', [PhienBanController::class, 'index']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
@@ -98,10 +100,10 @@ Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);
-Route::post('/tin-tucs', [VaiTroController::class, 'store']);
-Route::get('/tin-tucs/{id}', [VaiTroController::class, 'show']);
-Route::put('/tin-tucs/{id}', [VaiTroController::class, 'update']);
-Route::delete('/tin-tucs/{id}', [VaiTroController::class, 'destroy']);
+Route::post('/tin-tucs', [TinTucController::class, 'store']);
+Route::get('/tin-tucs/{id}', [TinTucController::class, 'show']);
+Route::put('/tin-tucs/{id}', [TinTucController::class, 'update']);
+Route::delete('/tin-tucs/{id}', [TinTucController::class, 'destroy']);
 
 Route::get('/phien-ban', [PhienBanController::class, 'index']);
 
