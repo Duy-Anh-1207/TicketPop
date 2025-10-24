@@ -26,7 +26,8 @@ const DanhSachPhimTable = () => {
     });
   };
 
-  if (isLoading || loadingTheLoai || loadingPhienBan) return <p>Đang tải dữ liệu...</p>;
+  if (isLoading || loadingTheLoai || loadingPhienBan)
+    return <p>Đang tải dữ liệu...</p>;
 
   return (
     <div className="container my-4">
@@ -50,39 +51,59 @@ const DanhSachPhimTable = () => {
                 <th>Thời lượng</th>
                 <th>Ngày công chiếu</th>
                 <th>Ngày kết thúc</th>
+                <th>Mô tả</th>
                 <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
               {phims.map((phim: any, index: number) => {
-                const theLoaiIds: number[] = JSON.parse(phim.the_loai_id || "[]").map(Number);
-                const phienBanIds: number[] = JSON.parse(phim.phien_ban_id || "[]").map(Number);
+                const theLoaiIds: number[] = Array.isArray(phim.the_loai_id)
+                  ? phim.the_loai_id.map(Number)
+                  : JSON.parse(phim.the_loai_id || "[]").map(Number);
+
+                const phienBanIds: number[] = Array.isArray(phim.phien_ban_id)
+                  ? phim.phien_ban_id.map(Number)
+                  : JSON.parse(phim.phien_ban_id || "[]").map(Number);
 
                 const theLoaiNames = theLoaiIds
-                  .map((id) => theloais?.find((tl: any) => tl.id === id)?.ten_the_loai)
+                  .map(
+                    (id) =>
+                      theloais?.find((tl: any) => tl.id === id)?.ten_the_loai
+                  )
                   .filter(Boolean)
                   .join(", ");
 
                 const phienBanNames = phienBanIds
-                  .map((id) => phienbans?.find((pb: any) => pb.id === id)?.the_loai)
+                  .map(
+                    (id) =>
+                      phienbans?.find((pb: any) => pb.id === id)?.the_loai
+                  )
                   .filter(Boolean)
                   .join(", ");
+
+                const imageUrl = phim.anh_poster
+                  ? phim.anh_poster.startsWith("http")
+                    ? phim.anh_poster
+                    : `${import.meta.env.VITE_API_BASE_URL}/storage/${phim.anh_poster.replace("posters/", "posters/")}`
+                  : null;
+
 
                 return (
                   <tr key={phim.id}>
                     <td>{index + 1}</td>
                     <td className="fw-semibold">{phim.ten_phim}</td>
                     <td>
-                      {phim.anh_poster ? (
+                      {imageUrl ? (
                         <img
-                          src={
-                            phim.anh_poster.startsWith("http")
-                              ? phim.anh_poster
-                              : `http://localhost:8000/storage/${phim.anh_poster}`
-                          }
+                          src={imageUrl}
                           alt="poster"
                           className="img-thumbnail"
-                          style={{ width: 80, height: 110, objectFit: "cover" }}
+                          style={{
+                            width: 80,
+                            height: 110,
+                            objectFit: "cover",
+                            borderRadius: "6px",
+                          }}
                         />
                       ) : (
                         "—"
@@ -90,14 +111,45 @@ const DanhSachPhimTable = () => {
                     </td>
                     <td>{theLoaiNames || "Không xác định"}</td>
                     <td>{phienBanNames || "Không xác định"}</td>
-                    <td>{phim.thoi_luong ? `${phim.thoi_luong} phút` : "—"}</td>
-                    <td>{phim.ngay_cong_chieu ? new Date(phim.ngay_cong_chieu).toLocaleDateString("vi-VN") : "—"}</td>
-                    <td>{phim.ngay_ket_thuc ? new Date(phim.ngay_ket_thuc).toLocaleDateString("vi-VN") : "—"}</td>
+                    <td>
+                      {phim.thoi_luong ? `${phim.thoi_luong} phút` : "—"}
+                    </td>
+                    <td>
+                      {phim.ngay_cong_chieu
+                        ? new Date(phim.ngay_cong_chieu).toLocaleDateString(
+                          "vi-VN"
+                        )
+                        : "—"}
+                    </td>
+                    <td>
+                      {phim.ngay_ket_thuc
+                        ? new Date(phim.ngay_ket_thuc).toLocaleDateString(
+                          "vi-VN"
+                        )
+                        : "—"}
+                    </td>
+                    <td
+                      style={{
+                        maxWidth: 250,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                      }}
+                      title={phim.mo_ta}
+                    >
+                      {phim.mo_ta || "—"}
+                    </td>
                     <td className="d-flex justify-content-center gap-2">
-                      <button className="btn btn-sm btn-info" onClick={() => handleEdit(phim.id)}>
+                      <button
+                        className="btn btn-sm btn-info"
+                        onClick={() => handleEdit(phim.id)}
+                      >
                         Sửa
                       </button>
-                      <button className="btn btn-sm btn-danger" onClick={() => handleDelete(phim.id)}>
+                      <button
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(phim.id)}
+                      >
                         Xóa
                       </button>
                     </td>
