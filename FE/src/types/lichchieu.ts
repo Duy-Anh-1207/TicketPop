@@ -18,6 +18,6 @@ export interface LichChieu {
   };
   phienBan?: {
     id: number;
-    ten_phien_ban: string;
+    the_loai: string;
   };
 }
