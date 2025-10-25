@@ -94,9 +94,6 @@ class VaiTroController extends Controller
         return response()->json(null, 204);
     }
 
-    /**
-     * 🟡 Hàm cập nhật quyền truy cập (tách riêng)
-     */
     public function update_quyen_truy_cap(Request $request, $vai_tro_id): JsonResponse
     {
         $validated = $request->validate([
@@ -114,7 +111,6 @@ class VaiTroController extends Controller
             $newPermissions = collect($validated['permissions']);
             $newMenuIds = $newPermissions->pluck('menu_id')->toArray();
 
-            // 🧩 Nếu vai trò chưa có quyền nào → thêm mới toàn bộ
             if ($currentPermissions->isEmpty()) {
                 foreach ($newPermissions as $perm) {
                     $vaiTro->quyenTruyCaps()->create([
@@ -123,12 +119,10 @@ class VaiTroController extends Controller
                     ]);
                 }
             } else {
-                // 🧩 Xóa quyền cũ không còn trong danh sách mới
                 $vaiTro->quyenTruyCaps()
                     ->whereNotIn('menu_id', $newMenuIds)
                     ->delete();
 
-                // 🧩 Cập nhật hoặc thêm mới
                 foreach ($newPermissions as $perm) {
                     if (isset($currentPermissions[$perm['menu_id']])) {
                         $currentPermissions[$perm['menu_id']]->update([
