@@ -12,8 +12,10 @@ class BannerController extends Controller
     // Lấy tất cả banner
     public function index()
     {
-        return Banner::all();
+        return Banner::all(); 
     }
+
+    
 
     // Thêm mới banner (có upload ảnh)
     public function store(Request $request)

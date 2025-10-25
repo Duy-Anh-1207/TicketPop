@@ -1,0 +1,82 @@
+.banner-container {
+  position: relative;
+  width: 100%;
+  max-width: 1214px;
+  margin: 1rem auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.banner-slide {
+  display: flex;
+  transition: transform 0.7s ease-in-out;
+}
+
+.banner-slide-item {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.banner-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.banner-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0,0,0,0.4);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.3s;
+}
+
+.banner-btn:hover {
+  background-color: rgba(0,0,0,0.8);
+}
+
+.banner-btn-left {
+  left: 1rem;
+}
+
+.banner-btn-right {
+  right: 1rem;
+}
+
+.banner-dots {
+  position: absolute;
+  bottom: 1rem;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  z-index: 10;
+}
+
+.banner-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background-color: rgba(128,128,128,0.7);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.banner-dot.active {
+  background-color: white;
+  transform: scale(1.2);
+}
+
+.banner-loading {
+  text-align: center;
+  padding: 2rem;
+}

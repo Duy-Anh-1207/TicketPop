@@ -2,20 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Models\Food;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-
+use App\Http\Controllers\Controller;
 class FoodController extends Controller
 {
-    // 🧾 Lấy tất cả món ăn
+    // 🔹 Lấy tất cả món ăn
     public function index()
     {
-        return Food::all();
+        return response()->json(Food::all(), 200);
     }
 
-    // ➕ Thêm mới món ăn (có upload ảnh)
+    // 🔹 Thêm món ăn mới
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -24,7 +23,7 @@ class FoodController extends Controller
             'gia_nhap' => 'required|numeric|min:0',
             'gia_ban' => 'required|numeric|min:0',
             'so_luong_ton' => 'required|integer|min:0',
-            'image' => 'nullable|string|max:2048',
+            'image' => 'nullable|image|max:2048',
         ]);
 
         if ($request->hasFile('image')) {
@@ -33,56 +32,61 @@ class FoodController extends Controller
         }
 
         $food = Food::create($validated);
-        return response()->json($food, 201);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Thêm món ăn thành công!',
+            'data' => $food
+        ], 201);
     }
 
-    // 🔍 Xem chi tiết món ăn
+    // 🔹 Lấy chi tiết 1 món ăn
     public function show($id)
     {
-        return Food::findOrFail($id);
+        $food = Food::findOrFail($id);
+        return response()->json($food, 200);
     }
 
-    // ✏️ Cập nhật món ăn (có xử lý thay ảnh)
-   public function update(Request $request, $id)
-{
-    $food = Food::findOrFail($id);
-
-    $validated = $request->validate([
-        'ten_do_an' => 'sometimes|string|max:255',
-        'mo_ta' => 'nullable|string',
-        'gia_nhap' => 'sometimes|numeric|min:0',
-        'gia_ban' => 'sometimes|numeric|min:0',
-        'so_luong_ton' => 'sometimes|integer|min:0',
-        'image' => 'nullable|string|max:2048',
-    ]);
-
-    if ($request->hasFile('image')) {
-        if ($food->image && Storage::disk('public')->exists(str_replace('/storage/', '', $food->image))) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $food->image));
-        }
-
-        $path = $request->file('image')->store('foods', 'public');
-        $validated['image'] = '/storage/' . $path;
-    }
-
-    $food->update($validated);
-    return response()->json([
-        'success' => true,
-        'data' => $food
-    ], 200);
-}
-
-    // 🗑️ Xóa hoàn toàn món ăn (có xóa ảnh)
-    public function destroy($id)
+    // 🔹 Cập nhật món ăn
+    public function update(Request $request, $id)
     {
         $food = Food::findOrFail($id);
 
-        if ($food->image && Storage::disk('public')->exists(str_replace('/storage/', '', $food->image))) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', $food->image));
+        $validated = $request->validate([
+            'ten_do_an' => 'sometimes|string|max:255',
+            'mo_ta' => 'nullable|string',
+            'gia_nhap' => 'sometimes|numeric|min:0',
+            'gia_ban' => 'sometimes|numeric|min:0',
+            'so_luong_ton' => 'sometimes|integer|min:0',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            if ($food->image && Storage::disk('public')->exists(str_replace('/storage/', '', $food->image))) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $food->image));
+            }
+            $path = $request->file('image')->store('foods', 'public');
+            $validated['image'] = '/storage/' . $path;
         }
 
-        $food->forceDelete();
+        $food->update($validated);
 
-        return response()->json(['message' => 'Món ăn đã được xóa hoàn toàn.'], 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật món ăn thành công!',
+            'data' => $food
+        ], 200);
+    }
+
+    // 🔹 Xóa món ăn
+    public function destroy($id)
+    {
+        $food = Food::findOrFail($id);
+        $food->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Xóa món ăn thành công!'
+        ], 200);
     }
 }
