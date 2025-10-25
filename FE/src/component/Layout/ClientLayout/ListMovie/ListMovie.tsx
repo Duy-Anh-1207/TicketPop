@@ -1,6 +1,7 @@
 import { useListPhim } from "../../../../hook/PhimHook";
 import type { Phim } from "../../../../types/phim";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./ListMovie.css";
 
 interface MovieCardProps {
@@ -10,6 +11,24 @@ interface MovieCardProps {
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
+
+  const toSlug = (text: string) => {
+    return text
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, "")
+      .trim()
+      .replace(/\s+/g, "-");
+  };
+
+  const handleGoDetail = (scrollToLichChieu = false) => {
+    const slug = toSlug(movie.ten_phim);
+    navigate(`/phim/${slug}-${movie.id}`, {
+      state: { scrollToLichChieu },
+    });
+  };
 
   return (
     <div
@@ -17,7 +36,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="poster-wrapper">
+      <div className="poster-wrapper" onClick={() => handleGoDetail(false)}>
         <img
           src={movie.anh_poster}
           className="card-img-top"
@@ -27,14 +46,24 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
           <div className="movie-info-overlay">
             <h3 className="movie-title-overlay">{movie.ten_phim}</h3>
             <div className="movie-details">
-              <p><i className="fa-solid fa-clock"></i> {movie.thoi_luong} phút</p>
-              <p><i className="fa-solid fa-globe"></i> {movie.quoc_gia}</p>
-              <p><i className="fa-solid fa-language"></i> {movie.ngon_ngu}</p>
+              <p>
+                <i className="fa-solid fa-clock"></i> {movie.thoi_luong} phút
+              </p>
+              <p>
+                <i className="fa-solid fa-globe"></i> {movie.quoc_gia}
+              </p>
+              <p>
+                <i className="fa-solid fa-language"></i> {movie.ngon_ngu}
+              </p>
             </div>
           </div>
         )}
       </div>
-      <p className="movie-title">{movie.ten_phim}</p>
+
+      <p className="movie-title" onClick={() => handleGoDetail(false)}>
+        {movie.ten_phim}
+      </p>
+
       <div className="movie-actions">
         <div
           className="trailer-link"
@@ -43,7 +72,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
           <i className="fa-solid fa-circle-play"></i>
           <p>Xem trailer</p>
         </div>
-        <button className="book-ticket">ĐẶT VÉ</button>
+        <button
+          className="book-ticket"
+          onClick={() => handleGoDetail(true)} 
+        >
+          ĐẶT VÉ
+        </button>
       </div>
     </div>
   );
@@ -54,30 +88,43 @@ interface MovieSliderProps {
   openTrailer: (url: string) => void;
 }
 
-const MovieSlider: React.FC<MovieSliderProps> = ({ movieList, openTrailer }) => {
+const MovieSlider: React.FC<MovieSliderProps> = ({
+  movieList,
+  openTrailer,
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const itemsPerPage = window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4;
+  const itemsPerPage =
+    window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 4;
   const canScroll = movieList.length > itemsPerPage;
   const maxIndex = canScroll ? movieList.length - itemsPerPage : 0;
 
   const scrollLeft = () => setCurrentIndex((prev) => (prev > 0 ? prev - 1 : 0));
-  const scrollRight = () => setCurrentIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
+  const scrollRight = () =>
+    setCurrentIndex((prev) => (prev < maxIndex ? prev + 1 : prev));
 
   return (
     <div className="slider-container">
       <div
         className="slider"
-        style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
+        style={{
+          transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)`,
+        }}
       >
         {movieList.map((movie) => (
           <MovieCard key={movie.id} movie={movie} openTrailer={openTrailer} />
         ))}
       </div>
       {canScroll && currentIndex > 0 && (
-        <i className="fa-solid fa-chevron-left slider-arrow left" onClick={scrollLeft}></i>
+        <i
+          className="fa-solid fa-chevron-left slider-arrow left"
+          onClick={scrollLeft}
+        ></i>
       )}
       {canScroll && currentIndex < maxIndex && (
-        <i className="fa-solid fa-chevron-right slider-arrow right" onClick={scrollRight}></i>
+        <i
+          className="fa-solid fa-chevron-right slider-arrow right"
+          onClick={scrollRight}
+        ></i>
       )}
     </div>
   );
@@ -88,8 +135,7 @@ const ListMovie: React.FC = () => {
   const [showTrailer, setShowTrailer] = useState(false);
   const [currentTrailer, setCurrentTrailer] = useState<string | null>(null);
 
-  if (isLoading)
-    return <div className="loading">Đang tải phim...</div>;
+  if (isLoading) return <div className="loading">Đang tải phim...</div>;
 
   if (!movies || movies.length === 0)
     return <div className="no-movies">Không có phim nào</div>;

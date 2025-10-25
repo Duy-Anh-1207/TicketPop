@@ -1,7 +1,13 @@
 import { useRoutes } from "react-router-dom";
+
+//Client
+//Home
 import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
+
+//Chi tiết phim
+import MovieDetail from "../Page/MovieDetail/MovieDetail";
 
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
@@ -50,7 +56,8 @@ const Routermain = () => {
       path: "/",
       element: <LayoutWeb />,
       children: [
-        { index: true, element: <HomePage /> }, // Trang chủ
+        { index: true, element: <HomePage /> }, 
+        { path: "phim/:slug", element:<MovieDetail/> }
       ],
     },
 
@@ -76,8 +83,8 @@ const Routermain = () => {
         { path: "the-loai", element: <DanhSachTheLoai /> },
 
         // Phòng chiếu
-        { path: "roomxb", element: <PhongChieuList /> },           // Phòng chiếu đã xuất bản
-        { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> }, // Phòng chiếu chưa xuất bản
+        { path: "roomxb", element: <PhongChieuList /> },         
+        { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> }, 
         { path: "room/them-moi", element: <CreatePhongChieu /> },
         { path: "room/:id", element: <CreatePhongChieu /> },
 
