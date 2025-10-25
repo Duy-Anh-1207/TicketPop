@@ -8,6 +8,8 @@ const Sidebar: React.FC = () => {
   const [isBlogOpen, setIsBlogOpen] = useState(false);
   const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   const [isLichChieuOpen, setIsLichChieuOpen] = useState(false);
+  const [isVoucherOpen, setIsVoucherOpen] = useState(false);
+  const [isTinTucOpen, setIsTinTucOpen] = useState(false);
 
   return (
     <aside className="left-sidebar with-vertical">
@@ -253,6 +255,66 @@ const Sidebar: React.FC = () => {
                   >
                     <span className="sidebar-icon"></span>
                     <span className="hide-menu">Thêm mới lịch chiếu</span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
+            <li className="sidebar-item">
+              <a
+                className="sidebar-link has-arrow danger-hover-bg"
+                href="#"
+                aria-expanded={isVoucherOpen}
+                onClick={() => setIsVoucherOpen(!isVoucherOpen)}
+              >
+                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
+                  <Icon
+                    icon="solar:calendar-mark-line-duotone"
+                    className="fs-6"
+                  />
+                </span>
+                <span className="hide-menu ps-1">Quản lý voucher</span>
+              </a>
+              <ul
+                aria-expanded={isVoucherOpen}
+                className={`collapse first-level ${
+                  isVoucherOpen ? "show" : ""
+                }`}
+              >
+                <li className="sidebar-item">
+                  <Link to="/admin/vouchers" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Danh sách voucher</span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
+            <li className="sidebar-item">
+              <a
+                className="sidebar-link has-arrow danger-hover-bg"
+                href="#"
+                aria-expanded={isTinTucOpen}
+                onClick={() => setIsTinTucOpen(!isTinTucOpen)}
+              >
+                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
+                  <Icon
+                    icon="solar:calendar-mark-line-duotone"
+                    className="fs-6"
+                  />
+                </span>
+                <span className="hide-menu ps-1">Quản lý tin tức</span>
+              </a>
+              <ul
+                aria-expanded={isTinTucOpen}
+                className={`collapse first-level ${
+                  isTinTucOpen ? "show" : ""
+                }`}
+              >
+                <li className="sidebar-item">
+                  <Link to="/admin/tin-tuc" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Danh sách tin tức</span>
                   </Link>
                 </li>
               </ul>

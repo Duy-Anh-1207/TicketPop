@@ -12,7 +12,7 @@ class PhienBan extends Model
     protected $table = 'phien_ban';
 
     protected $fillable = [
-        'ten_phien_ban',
+        'the_loai',
     ];
 
     public function phim()

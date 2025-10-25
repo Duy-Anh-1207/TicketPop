@@ -39,6 +39,11 @@ class LichChieu extends Model
 
     public function phienBan()
     {
-        return $this->belongsTo(PhienBan::class, 'phien_ban_id'); // nếu có bảng riêng
+        return $this->belongsTo(PhienBan::class, 'phien_ban_id'); 
     }
+    public function giaVe()
+{
+    return $this->hasMany(GiaVe::class, 'lich_chieu_id');
+}
+
 }

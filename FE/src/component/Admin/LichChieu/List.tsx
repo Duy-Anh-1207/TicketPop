@@ -1,6 +1,6 @@
-// import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useListLichChieu } from "../../../hook/useLichChieu";
+import Swal from "sweetalert2";
+import { useListLichChieu, useDeleteLichChieu } from "../../../hook/useLichChieu";
 import type { LichChieu } from "../../../types/lichchieu";
 import { useListPhim } from "../../../hook/PhimHook";
 import { useListPhongChieuTH0 } from "../../../hook/PhongChieuHook";
@@ -10,8 +10,31 @@ export default function LichChieuList() {
   const { data: lichChieuList, isLoading } = useListLichChieu();
   const { data: phimList } = useListPhim({});
   const { data: phongList } = useListPhongChieuTH0();
+  const deleteLichChieu = useDeleteLichChieu();
+
+  // Debug dữ liệu để kiểm tra
+  console.log("lichChieuList:", lichChieuList);
+
+  const handleDelete = (id: number | string) => {
+    Swal.fire({
+      title: "Xác nhận xóa",
+      text: "Bạn có chắc muốn xóa lịch chiếu này?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteLichChieu.mutate(id);
+      }
+    });
+  };
 
   if (isLoading) return <p className="text-center">Đang tải danh sách...</p>;
+
+  if (!lichChieuList || lichChieuList.length === 0) {
+    return <p className="text-center">Không có lịch chiếu nào</p>;
+  }
 
   return (
     <div className="container p-4">
@@ -38,15 +61,20 @@ export default function LichChieuList() {
             </tr>
           </thead>
           <tbody>
-            {lichChieuList?.map((lichChieu: LichChieu) => {
+            {lichChieuList.map((lichChieu: LichChieu) => {
               const phimName =
                 phimList?.find((p: any) => p.id === lichChieu.phim_id)?.ten_phim ||
                 "Không xác định";
               const phongName =
                 phongList?.find((p: any) => p.id === lichChieu.phong_id)?.ten_phong ||
                 "Không xác định";
-              const phienBanName =
-                lichChieu.phienBan?.ten_phien_ban || "Không có phiên bản";
+              const phienBanName = lichChieu.phien_ban?.the_loai || "Không có phiên bản";
+
+              // Debug từng lịch chiếu
+              console.log(`LichChieu ${lichChieu.id}:`, {
+                phien_ban_id: lichChieu.phien_ban_id,
+                phienBan: lichChieu.phienBan,
+              });
 
               return (
                 <tr key={lichChieu.id}>
@@ -71,13 +99,20 @@ export default function LichChieuList() {
                         <i className="fa-solid fa-ellipsis-vertical"></i>
                       </button>
                       <ul className="dropdown-menu" style={{ minWidth: "220px" }}>
-                        {/* Xem chi tiết */}
                         <li>
                           <button
                             className="dropdown-item"
-                            onClick={() => navigate(`/admin/lich-chieu/${lichChieu.id}`)}
+                            onClick={() => navigate(`/admin/lich-chieu/chi-tiet/${lichChieu.id}`)}
                           >
                             Xem chi tiết
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            className="dropdown-item text-danger"
+                            onClick={() => handleDelete(lichChieu.id)}
+                          >
+                            Xóa
                           </button>
                         </li>
                       </ul>

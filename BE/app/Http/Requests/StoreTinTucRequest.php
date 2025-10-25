@@ -15,7 +15,7 @@ class StoreTinTucRequest extends FormRequest
         return [
                 'tieu_de' => 'required|string|max:255|unique:tin_tuc,tieu_de',
                 'noi_dung' => 'required|string',
-                'hinh_anh' => 'nullable|string|max:255',
+                'hinh_anh' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
             ];
     }
 }

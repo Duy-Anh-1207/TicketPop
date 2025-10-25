@@ -16,10 +16,10 @@ class StoreVaiTroRequest extends FormRequest
         return [
             'ten_vai_tro' => 'required|string|max:50|unique:vai_tro,ten_vai_tro',
             'mo_ta' => 'nullable|string',
-            'permissions' => 'nullable|array',
-            'permissions.*.menu_id' => 'required|integer|exists:menu,id',
-            'permissions.*.function' => 'required|array|min:1',
-            'permissions.*.function.*' => 'integer|between:1,4',
+            // 'permissions' => 'nullable|array',
+            // 'permissions.*.menu_id' => 'required|integer|exists:menu,id',
+            // 'permissions.*.function' => 'required|array|min:1',
+            // 'permissions.*.function.*' => 'integer|between:1,4',
         ];
     }
 

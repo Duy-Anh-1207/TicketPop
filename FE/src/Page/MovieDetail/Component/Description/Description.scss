@@ -1,0 +1,130 @@
+.description-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px 0;
+  gap: 20px;
+  scroll-behavior: smooth;
+}
+
+.description-left {
+  width: 45%;
+  img {
+    width: 100%;
+    height: 600px;
+    border-radius: 16px;
+    object-fit: cover;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transition: transform 0.4s ease;
+    &:hover {
+      transform: scale(1.03);
+    }
+  }
+}
+
+.description-right {
+  width: 50%;
+  padding-left: 2%;
+  display: flex;
+  flex-direction: column;
+
+  .movie-title {
+    font-size: 35px;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    color: #222;
+  }
+
+  .movie-info {
+    font-size: 18px;
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 25px;
+  }
+
+  .movie-description {
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #111;
+    }
+  }
+
+  .movie-buttons {
+    margin-top: 30px;
+    .trailer-btn {
+      background: #e50914;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      &:hover {
+        background: #ff0a16;
+        transform: scale(1.05);
+      }
+    }
+  }
+}
+
+/* --- Lịch chiếu --- */
+.lichchieu-wrapper {
+  width: 100%;
+  margin-top: 60px;
+  padding: 30px 20px;
+  border-top: 2px solid #eee;
+  scroll-margin-top: 80px; /* cuộn chính xác */
+
+  .lichchieu-title {
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
+  .lichchieu-days {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+
+    .lichchieu-day-btn {
+      background: #f5f5f5;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background: #e50914;
+        color: white;
+        transform: translateY(-2px);
+      }
+    }
+  }
+
+  .lichchieu-content {
+    margin-top: 30px;
+    text-align: center;
+    font-size: 18px;
+    color: #444;
+  }
+}
+
+/* Hiệu ứng highlight */
+.highlight {
+  animation: blink 1.2s ease-in-out 2;
+}
+
+@keyframes blink {
+  0% { background-color: #fff; }
+  50% { background-color: rgba(255, 240, 200, 0.6); }
+  100% { background-color: #fff; }
+}
