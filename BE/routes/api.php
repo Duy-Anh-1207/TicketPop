@@ -17,6 +17,7 @@ use App\Http\Controllers\Admin\PhienBanController;
 use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
+use App\Http\Controllers\Client\LocPhimController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -111,3 +112,7 @@ Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 
 Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
 
+
+
+//client
+Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
