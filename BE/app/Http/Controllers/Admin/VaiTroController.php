@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admin;
-
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\VaiTro;
 use App\Http\Requests\StoreVaiTroRequest;
@@ -33,21 +33,21 @@ class VaiTroController extends Controller
                 'mo_ta' => $validated['mo_ta'] ?? null,
             ]);
             // Thêm quyền
-            if (!empty($validated['permissions'])) {
-                foreach ($validated['permissions'] as $perm) {
-                    $vaiTro->quyenTruyCaps()->create([
-                        'menu_id'  => $perm['menu_id'],
-                        'function' => $perm['function'], // tự encode JSON
-                    ]);
-                }
-            }
+            // if (!empty($validated['permissions'])) {
+            //     foreach ($validated['permissions'] as $perm) {
+            //         $vaiTro->quyenTruyCaps()->create([
+            //             'menu_id'  => $perm['menu_id'],
+            //             'function' => $perm['function'], // tự encode JSON
+            //         ]);
+            //     }
+            // }
 
 
             DB::commit();
 
             return response()->json([
                 'message' => 'Tạo vai trò thành công!',
-                'data' => $vaiTro->load('quyenTruyCaps')
+                'data' => $vaiTro
             ], 201);
         } catch (Exception $e) {
             DB::rollBack();
@@ -93,4 +93,66 @@ class VaiTroController extends Controller
 
         return response()->json(null, 204);
     }
+
+    /**
+     * 🟡 Hàm cập nhật quyền truy cập (tách riêng)
+     */
+    public function update_quyen_truy_cap(Request $request, $vai_tro_id): JsonResponse
+    {
+        $validated = $request->validate([
+            'permissions' => 'required|array',
+            'permissions.*.menu_id' => 'required|integer|exists:menu,id',
+            'permissions.*.function' => 'nullable|array'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $vaiTro = VaiTro::findOrFail($vai_tro_id);
+            $currentPermissions = $vaiTro->quyenTruyCaps()->get()->keyBy('menu_id');
+
+            $newPermissions = collect($validated['permissions']);
+            $newMenuIds = $newPermissions->pluck('menu_id')->toArray();
+
+            // 🧩 Nếu vai trò chưa có quyền nào → thêm mới toàn bộ
+            if ($currentPermissions->isEmpty()) {
+                foreach ($newPermissions as $perm) {
+                    $vaiTro->quyenTruyCaps()->create([
+                        'menu_id' => $perm['menu_id'],
+                        'function' => implode(',', $perm['function'] ?? [])
+                    ]);
+                }
+            } else {
+                // 🧩 Xóa quyền cũ không còn trong danh sách mới
+                $vaiTro->quyenTruyCaps()
+                    ->whereNotIn('menu_id', $newMenuIds)
+                    ->delete();
+
+                // 🧩 Cập nhật hoặc thêm mới
+                foreach ($newPermissions as $perm) {
+                    if (isset($currentPermissions[$perm['menu_id']])) {
+                        $currentPermissions[$perm['menu_id']]->update([
+                            'function' => implode(',', $perm['function'] ?? [])
+                        ]);
+                    } else {
+                        $vaiTro->quyenTruyCaps()->create([
+                            'menu_id' => $perm['menu_id'],
+                            'function' => implode(',', $perm['function'] ?? [])
+                        ]);
+                    }
+                }
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Cập nhật quyền truy cập thành công!',
+                'data' => $vaiTro->load('quyenTruyCaps')
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Lỗi: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

@@ -69,7 +69,7 @@ Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
 Route::get('/the-loai', [TheLoaiController::class, 'index']);
 Route::post('/the-loai', [TheLoaiController::class, 'store']);
 Route::get('/the-loai/{the_loai}', [TheLoaiController::class, 'show']);
-Route::put('/the-loai/{the_loai}', [TheLoaiController::class, 'update']);
+Route::put('/the-loai/{the_loai}', [TheLoaiController::class, 'update']);           
 Route::delete('/the-loai/{the_loai}', [TheLoaiController::class, 'destroy']);
 
 Route::get('/vai-tro', [VaiTroController::class, 'index']);
@@ -77,6 +77,8 @@ Route::post('/vai-tro', [VaiTroController::class, 'store']);
 Route::get('/vai-tro/{id}', [VaiTroController::class, 'show']);
 Route::put('/vai-tro/{id}', [VaiTroController::class, 'update']);
 Route::delete('/vai-tro/{id}', [VaiTroController::class, 'destroy']);
+
+Route::put('/vai-tro/{vai_tro_id}/update_quyen_truy_cap', [VaiTroController::class, 'update_quyen_truy_cap']);
 
 Route::get('/foods', [FoodController::class, 'index']);
 Route::post('/foods', [FoodController::class, 'store']);
