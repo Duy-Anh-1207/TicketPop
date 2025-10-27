@@ -67,4 +67,11 @@ axiosClient.interceptors.response.use(
   }
 );
 
+export const getListMenu = async () => {
+  const { data } = await axiosClient.get("/menu");
+  return data;
+};
+
+
+
 export default axiosClient;
