@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GiaVe;
+
 use App\Models\LichChieu;
 use App\Models\PhienBan;
 use App\Models\Phim;
@@ -244,7 +245,7 @@ class LichChieuController extends Controller
         }
 
         // Lấy tất cả lịch chiếu trong tương lai của phòng này
-        $lichChieu = \App\Models\LichChieu::where('phong_id', $phongId)
+        $lichChieu = LichChieu::where('phong_id', $phongId)
             ->where('gio_ket_thuc', '>', now())
             ->orderBy('gio_chieu', 'asc')
             ->get();

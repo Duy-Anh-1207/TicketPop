@@ -151,7 +151,7 @@ export default function CreateLichChieu() {
           <form onSubmit={handleSubmit(onSubmit)}>
             {/* Phim */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Phim</label>
+              <label className="form-label fw-bold">🎬 Phim</label>
               <select
                 {...register("phim_id", { required: true })}
                 className="form-select"
@@ -173,7 +173,7 @@ export default function CreateLichChieu() {
 
             {/* Phòng chiếu */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Phòng chiếu</label>
+              <label className="form-label fw-bold">🏢 Phòng chiếu</label>
               <select
                 {...register("phong_id", { required: true })}
                 className="form-select"
@@ -209,7 +209,7 @@ export default function CreateLichChieu() {
 
             {/* Giờ chiếu */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Giờ chiếu</label>
+              <label className="form-label fw-bold">🕐 Giờ chiếu</label>
               <input
                 type="datetime-local"
                 {...register("gio_chieu", { required: true })}
@@ -220,7 +220,7 @@ export default function CreateLichChieu() {
 
             {/* Giờ kết thúc */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Giờ kết thúc</label>
+              <label className="form-label fw-bold">⏰ Giờ kết thúc (tự động)</label>
               <input
                 type="datetime-local"
                 {...register("gio_ket_thuc")}
@@ -280,3 +280,4 @@ export default function CreateLichChieu() {
     </div>
   );
 }
+
