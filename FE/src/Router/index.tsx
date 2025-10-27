@@ -16,6 +16,8 @@ import FoodCreate from "../component/Admin/Food/CreateFood";
 import Create from "../component/Admin/LichChieu/Create";
 import LichChieuList from "../component/Admin/LichChieu/List";
 import CreatePhim from "../component/Admin/Phim/CreatePhim";
+import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
+
 const Routermain = () => {
   const element = useRoutes([
     {
@@ -49,6 +51,7 @@ const Routermain = () => {
         { path: "foods/them-moi", element: <FoodCreate /> },
         { path: "lich-chieu/them-moi", element: <Create /> },
         { path: "lich-chieu", element: <LichChieuList /> },
+        { path: "/admin/lich-chieu/:id", element: <LichChieuDetail /> }
       ],
     },
   ]);

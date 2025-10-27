@@ -43,3 +43,8 @@ export const updatePhienBan = async (
 export const deletePhienBan = async (id: number | string): Promise<void> => {
   await axiosClient.delete(`/phien-ban/${id}`);
 };
+// Lấy danh sách phiên bản theo phim
+export const getPhienBanByPhim = async (phim_id: number | string) => {
+  const { data } = await axiosClient.get(`/phim/${phim_id}/phien-ban`);
+  return data.data;
+};
