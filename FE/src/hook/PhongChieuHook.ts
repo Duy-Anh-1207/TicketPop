@@ -16,9 +16,7 @@ export const useListPhongChieuTH1 = (status: string = "1") =>
         queryKey: ["room", status],
         queryFn: async () => {
             const data = await getListPhongChieu();
-            console.log("Phòng chiếu API trả về:", data);
             const filtered = data.filter((pc: PhongChieu) => String(pc.trang_thai) === status);
-            console.log("Filtered rooms:", filtered);
             return filtered;
         },
     });
@@ -28,9 +26,7 @@ export const useListPhongChieuTH0 = (status: string = "0") =>
         queryKey: ["room", status],
         queryFn: async () => {
             const data = await getListPhongChieu();
-            console.log("Phòng chiếu API trả về:", data);
             const filtered = data.filter((pc: PhongChieu) => String(pc.trang_thai) === status);
-            console.log("Filtered rooms:", filtered);
             return filtered;
         },
     });

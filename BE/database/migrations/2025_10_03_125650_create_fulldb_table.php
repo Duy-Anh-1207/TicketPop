@@ -31,21 +31,11 @@ return new class extends Migration
 
 
         Schema::create('quyen_truy_cap', function (Blueprint $table) {
-            $table->foreignId('vai_tro_id')
-                ->constrained('vai_tro')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-
-            $table->foreignId('menu_id')
-                ->constrained('menu')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-
+            
+            $table->foreignId('vai_tro_id')->constrained('vai_tro')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreignId('menu_id')->constrained('menu')->onUpdate('cascade')->onDelete('cascade');
             $table->string('function')->nullable();
             $table->timestamps();
-
-            // ✅ Khai báo khóa chính là cặp (vai_tro_id, menu_id)
-            $table->primary(['vai_tro_id', 'menu_id']);
         });
 
 
@@ -61,9 +51,9 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        
 
-
-
+        
 
         Schema::create('the_loai', function (Blueprint $table) {
             $table->id();
@@ -97,7 +87,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-
+        
 
         Schema::create('danh_gia', function (Blueprint $table) {
             $table->id();
@@ -172,6 +162,7 @@ return new class extends Migration
             $table->foreignId('dat_ve_id')->constrained('dat_ve')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('ghe_id')->constrained('ghe')->onUpdate('cascade')->onDelete('cascade');
             $table->decimal('gia_ve', 10, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -282,5 +273,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('fulldb');
+        
     }
 };

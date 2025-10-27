@@ -63,7 +63,14 @@ export const useUpdateLichChieu = () => {
     }: {
       id: string | number;
       values: Partial<Omit<LichChieu, "id" | "created_at" | "updated_at" | "deleted_at">>;
-    }) => updateLichChieu(id, values),
+    }) => {
+      const cleanValues = {
+        ...values,
+        phien_ban_id:
+          values.phien_ban_id != null ? Number(values.phien_ban_id) : undefined,
+      };
+      return updateLichChieu(id, cleanValues);
+    },
 
     onSuccess: (res) => {
       Swal.fire("Thành công!", res.message, "success");

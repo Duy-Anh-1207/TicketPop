@@ -43,7 +43,7 @@ class LichChieu extends Model
     }
     public function giaVe()
 {
-    return $this->hasMany(GiaVe::class, 'lich_chieu_id');
+    return $this->hasOne(GiaVe::class, 'lich_chieu_id');
 }
 
 }

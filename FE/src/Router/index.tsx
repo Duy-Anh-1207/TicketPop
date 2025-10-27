@@ -38,7 +38,6 @@ import FoodCreate from "../component/Admin/Food/CreateFood";
 // Lịch chiếu
 import Create from "../component/Admin/LichChieu/Create";
 import LichChieuList from "../component/Admin/LichChieu/List";
-import LichChieuDetail from "../component/Admin/LichChieu/Show";
 
 // Voucher
 import ListVoucher from "../component/Admin/Voucher/ListVoucher";
@@ -50,6 +49,8 @@ import ViewVoucher from "../component/Admin/Voucher/ViewVoucher";
 import TinTucList from "../component/Admin/TinTuc/ListTinTuc";
 import CreateTinTuc from "../component/Admin/TinTuc/CreateTinTuc";
 import DetailTinTuc from "../component/Admin/TinTuc/DetailTinTuc";
+import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
+// import EditLichChieu from "../component/Admin/LichChieu/Show";
 
 
 import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
@@ -110,7 +111,8 @@ const Routermain = () => {
         // Lịch chiếu
         { path: "lich-chieu", element: <LichChieuList /> },
         { path: "lich-chieu/them-moi", element: <Create /> },
-        { path: "lich-chieu/chi-tiet/:id", element: <LichChieuDetail /> },
+        // { path: "lich-chieu/chi-tiet/:id", element: <EditLichChieu /> },
+        { path: "lich-chieu/:id", element: <LichChieuDetail /> },
 
         // Voucher
         { path: "vouchers", element: <ListVoucher /> },
