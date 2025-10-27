@@ -172,6 +172,7 @@ return new class extends Migration
             $table->foreignId('dat_ve_id')->constrained('dat_ve')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('ghe_id')->constrained('ghe')->onUpdate('cascade')->onDelete('cascade');
             $table->decimal('gia_ve', 10, 2);
+            $table->softDeletes();
             $table->timestamps();
         });
 
@@ -282,5 +283,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('fulldb');
+        
     }
 };
