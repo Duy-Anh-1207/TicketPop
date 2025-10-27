@@ -157,8 +157,7 @@ export default function DangKy() {
               hoặc quay lại{" "}
               <a href="/" className="text-primary fw-semibold">
                 Trang chủ
-              </a>
-              
+              </a>              
             </small>
           </div>
         </form>
