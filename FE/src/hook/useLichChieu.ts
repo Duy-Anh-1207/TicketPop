@@ -9,22 +9,22 @@ import {
 } from "../provider/LichChieuProviders";
 import type { LichChieu } from "../types/lichchieu";
 
-// 🔹 Lấy danh sách lịch chiếu
+// Lấy danh sách lịch chiếu
 export const useListLichChieu = () =>
   useQuery<LichChieu[]>({
     queryKey: ["lich-chieu"],
     queryFn: getListLichChieu,
   });
 
-// 🔹 Lấy chi tiết lịch chiếu
+// Lấy chi tiết lịch chiếu
 export const useLichChieuDetail = (id: number | string | null) =>
   useQuery<LichChieu>({
     queryKey: ["lich-chieu", id],
     queryFn: () => getLichChieuById(id!),
-    enabled: !!id, // Chỉ chạy khi có id
+    enabled: !!id,
   });
 
-// 🔹 Thêm lịch chiếu
+// Thêm lịch chiếu
 export const useCreateLichChieu = () => {
   const queryClient = useQueryClient();
 
@@ -38,13 +38,13 @@ export const useCreateLichChieu = () => {
     }) => createLichChieu(values),
 
     onSuccess: (res) => {
-      Swal.fire("✅ Thành công!", res.message || "Đã thêm lịch chiếu mới!", "success");
+      Swal.fire("Thành công!", res.message, "success");
       queryClient.invalidateQueries({ queryKey: ["lich-chieu"] });
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
       Swal.fire(
-        "❌ Lỗi!",
+        "Lỗi!",
         err.response?.data?.message || "Không thể thêm lịch chiếu.",
         "error"
       );
@@ -52,7 +52,7 @@ export const useCreateLichChieu = () => {
   });
 };
 
-// 🔹 Cập nhật lịch chiếu
+// Cập nhật lịch chiếu
 export const useUpdateLichChieu = () => {
   const queryClient = useQueryClient();
 
@@ -63,16 +63,23 @@ export const useUpdateLichChieu = () => {
     }: {
       id: string | number;
       values: Partial<Omit<LichChieu, "id" | "created_at" | "updated_at" | "deleted_at">>;
-    }) => updateLichChieu(id, values),
+    }) => {
+      const cleanValues = {
+        ...values,
+        phien_ban_id:
+          values.phien_ban_id != null ? Number(values.phien_ban_id) : undefined,
+      };
+      return updateLichChieu(id, cleanValues);
+    },
 
     onSuccess: (res) => {
-      Swal.fire("✅ Thành công!", res.message || "Đã cập nhật lịch chiếu.", "success");
+      Swal.fire("Thành công!", res.message, "success");
       queryClient.invalidateQueries({ queryKey: ["lich-chieu"] });
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
       Swal.fire(
-        "❌ Lỗi!",
+        "Lỗi!",
         err.response?.data?.message || "Không thể cập nhật lịch chiếu.",
         "error"
       );
@@ -80,19 +87,23 @@ export const useUpdateLichChieu = () => {
   });
 };
 
-// 🔹 Xóa lịch chiếu
+// Xóa lịch chiếu
 export const useDeleteLichChieu = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (id: number | string) => deleteLichChieu(id),
-    onSuccess: () => {
-      Swal.fire("🗑️ Đã xóa!", "Lịch chiếu đã được xóa.", "success");
+    onSuccess: (res) => {
+      Swal.fire("Đã xóa!", res.message, "success");
       queryClient.invalidateQueries({ queryKey: ["lich-chieu"] });
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể xóa lịch chiếu.", "error");
+      Swal.fire(
+        "Lỗi!",
+        err.response?.data?.message || "Không thể xóa lịch chiếu.",
+        "error"
+      );
     },
   });
 };

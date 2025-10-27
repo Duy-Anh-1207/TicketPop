@@ -2,14 +2,14 @@
   import { useNavigate } from "react-router-dom";
   import { useListLichChieu } from "../../../hook/useLichChieu";
   import type { LichChieu } from "../../../types/lichchieu";
-  import { useListPhim } from "../../../hook/PhimHook";
-  import { useListPhongChieuTH0 } from "../../../hook/PhongChieuHook";
+  // import { useListPhim } from "../../../hook/PhimHook";
+  // import { useListPhongChieuTH0 } from "../../../hook/PhongChieuHook";
 
   export default function LichChieuList() {
     const navigate = useNavigate();
     const { data: lichChieuList, isLoading } = useListLichChieu();
-    const { data: phimList } = useListPhim({});
-    const { data: phongList } = useListPhongChieuTH0();
+    // const { data: phimList } = useListPhim({});
+    // const { data: phongList } = useListPhongChieuTH0();
 
     if (isLoading) return <p className="text-center">Đang tải danh sách...</p>;
 

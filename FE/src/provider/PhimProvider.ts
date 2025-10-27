@@ -67,3 +67,8 @@ export const getPhimById = async (id: number) => {
   const response = await axiosClient.get(`/phim/${id}`);
   return response.data;
 };
+
+export const getPhimBySlug = async (slug: string) => {
+  const response = await axiosClient.get(`/phim/slug/${slug}`);
+  return response.data;
+};

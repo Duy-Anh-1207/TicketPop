@@ -6,14 +6,15 @@ import { createLichChieu } from "../../../provider/LichChieuProviders";
 import { getListPhim } from "../../../provider/PhimProvider";
 import { getListPhongChieu } from "../../../provider/PhongChieuProvider";
 
+
 type Phim = { id: number; ten_phim: string; thoi_luong: number };
-type Phong = { id: number; ten_phong: string };
+type PhongChieu = { id: number; ten_phong: string };
 type PhienBan = { id: number; the_loai: string };
 
 export default function CreateLichChieu() {
   const navigate = useNavigate();
   const [phimList, setPhimList] = useState<Phim[]>([]);
-  const [phongList, setPhongList] = useState<Phong[]>([]);
+  const [phongList, setPhongList] = useState<PhongChieu[]>([]);
   const [phienBanList, setPhienBanList] = useState<PhienBan[]>([]);
   const [thoiLuongPhim, setThoiLuongPhim] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);

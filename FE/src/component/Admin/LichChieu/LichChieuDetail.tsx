@@ -31,7 +31,7 @@ export default function LichChieuDetail() {
                         <th>Giá vé</th>
                         <td>
                             {lichChieu.gia_ve?.gia_ve
-                                ? parseFloat(lichChieu.gia_ve.gia_ve).toLocaleString("vi-VN") + " ₫"
+                                ? Number(lichChieu.gia_ve.gia_ve).toLocaleString("vi-VN") + " ₫"
                                 : "Không xác định"}
                         </td>
                     </tr>

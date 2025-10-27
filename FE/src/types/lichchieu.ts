@@ -2,7 +2,7 @@ export interface LichChieu {
   id: number;
   phim_id: number;
   phong_id: number;
-  phien_ban_id: number | string | null;
+  phien_ban_id: number | null;
   gio_chieu: string;
   gio_ket_thuc: string;
   created_at?: string;
@@ -27,6 +27,6 @@ export interface LichChieu {
 
   gia_ve?: {
     id: number;
-    gia: number;
+    gia_ve: number;
   };
 }

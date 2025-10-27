@@ -1,7 +1,7 @@
 export interface Phim {
   id: number;
   ten_phim: string;
-  the_loai: number[];   // sửa thành mảng số
+  the_loai: number[];   
   phien_ban: number[];
   thoi_luong: number;
   anh_poster: string;
@@ -12,4 +12,5 @@ export interface Phim {
   trailer: string;
   quoc_gia:string;
   ngon_ngu:string;
+  mo_ta:string
 }
