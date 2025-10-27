@@ -5,9 +5,11 @@ import { useRoutes } from "react-router-dom";
 import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
-
-//Chi tiết phim
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
+
+// Auth
+import Login from "../component/Auth/DangNhap";
+import Register from "../component/Auth/DangKy";
 
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
@@ -49,27 +51,40 @@ import TinTucList from "../component/Admin/TinTuc/ListTinTuc";
 import CreateTinTuc from "../component/Admin/TinTuc/CreateTinTuc";
 import DetailTinTuc from "../component/Admin/TinTuc/DetailTinTuc";
 
+
+import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
+
+
 const Routermain = () => {
   const element = useRoutes([
-    // Route chính website
+    // ✅ Route đăng nhập (ngoài layout)
+    { path: "/dang-nhap", element: <Login /> },
+
+    { path: "/dang-ky", element: <Register /> },
+
+    // Route chính website (client)
     {
       path: "/",
       element: <LayoutWeb />,
       children: [
-        { index: true, element: <HomePage /> }, 
-        { path: "phim/:slug", element:<MovieDetail/> }
+        { index: true, element: <HomePage /> },
+        { path: "phim/:slug", element: <MovieDetail /> },
       ],
     },
 
     // Route admin
     {
       path: "/admin",
-      element: <AdminLayout />,
+      element: (
+        <ProtectedRouteAdmin>
+          <AdminLayout />
+        </ProtectedRouteAdmin>
+      ),
       children: [
         // Phim
         { path: "phim", element: <DanhSachPhimTable /> },
-        { path: "/admin/phim/create", element: <CreatePhim /> },
-        { path: "/admin/phim/edit/:id", element: <CreatePhim /> },
+        { path: "phim/create", element: <CreatePhim /> },
+        { path: "phim/edit/:id", element: <CreatePhim /> },
 
         // Người dùng
         { path: "nguoi-dung", element: <UserList /> },
@@ -83,8 +98,8 @@ const Routermain = () => {
         { path: "the-loai", element: <DanhSachTheLoai /> },
 
         // Phòng chiếu
-        { path: "roomxb", element: <PhongChieuList /> },         
-        { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> }, 
+        { path: "roomxb", element: <PhongChieuList /> },
+        { path: "roomcxb", element: <PhongChieuChuaXuatBanList /> },
         { path: "room/them-moi", element: <CreatePhongChieu /> },
         { path: "room/:id", element: <CreatePhongChieu /> },
 
