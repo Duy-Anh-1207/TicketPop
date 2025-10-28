@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 const Sidebar: React.FC = () => {
   const [isFrontPagesOpen, setIsFrontPagesOpen] = useState(false);
   const [isEcommerceOpen, setIsEcommerceOpen] = useState(false);
+  const [isBannerOpen, setIsBannerOpen] = useState(false);
   const [isBlogOpen, setIsBlogOpen] = useState(false);
   const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   const [isLichChieuOpen, setIsLichChieuOpen] = useState(false);
@@ -78,9 +79,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isFrontPagesOpen}
-                className={`collapse first-level ${
-                  isFrontPagesOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isFrontPagesOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/phim" className="sidebar-link">
@@ -107,6 +107,47 @@ const Sidebar: React.FC = () => {
                 </li>
               </ul>
             </li>
+
+
+            <li className="sidebar-item">
+              <a
+                className="sidebar-link has-arrow indigo-hover-bg"
+                href="#"
+                aria-expanded={isBannerOpen}
+                onClick={() => setIsBannerOpen(!isBannerOpen)}
+              >
+                <span className="aside-icon p-2 bg-indigo-subtle rounded-1">
+                  <Icon
+                    icon="solar:smart-speaker-minimalistic-line-duotone"
+                    className="fs-6"
+                  />
+                </span>
+                <span className="hide-menu ps-1">Quản lý Banner</span>
+              </a>
+
+              <ul
+                aria-expanded={isBannerOpen}
+                className={`collapse first-level ${isBannerOpen ? "show" : ""}`}
+              >
+                {/* Danh sách Banner */}
+                <li className="sidebar-item">
+                  <Link to="/admin/banners" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Danh sách banner</span>
+                  </Link>
+                </li>
+
+                {/* Thêm mới Banner */}
+                <li className="sidebar-item">
+                  <Link to="/admin/banners/them-moi" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Thêm mới banner</span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
+
             <li className="sidebar-item">
               <a
                 className="sidebar-link has-arrow success-hover-bg"
@@ -124,9 +165,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isEcommerceOpen}
-                className={`collapse first-level ${
-                  isEcommerceOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isEcommerceOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/nguoi-dung" className="sidebar-link">
@@ -202,9 +242,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isUserProfileOpen}
-                className={`collapse first-level ${
-                  isUserProfileOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isUserProfileOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/foods" className="sidebar-link">
@@ -238,9 +277,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isLichChieuOpen}
-                className={`collapse first-level ${
-                  isLichChieuOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isLichChieuOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/lich-chieu" className="sidebar-link">
@@ -277,9 +315,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isVoucherOpen}
-                className={`collapse first-level ${
-                  isVoucherOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isVoucherOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/vouchers" className="sidebar-link">
@@ -307,9 +344,8 @@ const Sidebar: React.FC = () => {
               </a>
               <ul
                 aria-expanded={isTinTucOpen}
-                className={`collapse first-level ${
-                  isTinTucOpen ? "show" : ""
-                }`}
+                className={`collapse first-level ${isTinTucOpen ? "show" : ""
+                  }`}
               >
                 <li className="sidebar-item">
                   <Link to="/admin/tin-tuc" className="sidebar-link">

@@ -49,6 +49,11 @@ import TinTucList from "../component/Admin/TinTuc/ListTinTuc";
 import CreateTinTuc from "../component/Admin/TinTuc/CreateTinTuc";
 import DetailTinTuc from "../component/Admin/TinTuc/DetailTinTuc";
 
+
+// Banner
+import BannerList from "../component/Admin/Banner/ListBanner";
+import CreateBanner from "../component/Admin/Banner/CreateBanner";
+
 const Routermain = () => {
   const element = useRoutes([
     // Route chính website
@@ -107,6 +112,11 @@ const Routermain = () => {
         { path: "tin-tuc", element: <TinTucList /> },
         { path: "tin-tuc/them-moi", element: <CreateTinTuc /> },
         { path: "tin-tuc/:id", element: <DetailTinTuc /> },
+
+        // Banner
+        { path: "banners", element: <BannerList /> },
+        { path: "banners/them-moi", element: <CreateBanner /> },
+
       ],
     },
   ]);
