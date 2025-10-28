@@ -60,8 +60,11 @@ Route::post('/lich-chieu', [LichChieuController::class, 'store']);
 Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
 Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
+Route::get('/lich-chieu/find-next', [LichChieuController::class, 'findNextAvailableTime']);
+
 
 Route::get('/banners', [BannerController::class, 'index']);
+
 Route::post('/banners', [BannerController::class, 'store']);
 Route::get('/banners/{id}', [BannerController::class, 'show']);
 Route::put('/banners/{id}', [BannerController::class, 'update']);
@@ -116,7 +119,10 @@ Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
 Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 
 Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
-Route::get('/phim/{phim_id}/phien-ban', [LichChieuController::class, 'getPhienBanByPhim']);
+Route::get('/phim/{id}/phien-ban', [LichChieuController::class, 'getPhienBanTheoPhimId']);
+
+
+
 
 
 

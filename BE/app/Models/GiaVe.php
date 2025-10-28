@@ -9,9 +9,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class GiaVe extends Model
 {
     use HasFactory;
-    use SoftDeletes; // nếu bạn muốn xóa mềm
+    // use SoftDeletes; // nếu bạn muốn xóa mềm
 
     protected $table = 'gia_ve';
+    
 
     protected $fillable = [
         'lich_chieu_id',
@@ -34,4 +35,5 @@ class GiaVe extends Model
     {
         return $this->belongsTo(LoaiGhe::class, 'loai_ghe_id');
     }
+   
 }

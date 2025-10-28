@@ -4,6 +4,7 @@ import {
   createVaiTro,
   updateVaiTro,
   deleteVaiTro,
+  getListMenu,
 } from "../provider/VaiTroProvider";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -38,7 +39,11 @@ export const useCreateVaiTro = () => {
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể thêm vai trò.", "error");
+      Swal.fire(
+        "❌ Lỗi!",
+        err.response?.data?.message || "Không thể thêm vai trò.",
+        "error"
+      );
     },
   });
 };
@@ -48,15 +53,24 @@ export const useUpdateVaiTro = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, values }: { id: string | number; values: Partial<VaiTro> }) =>
-      updateVaiTro(id, values),
+    mutationFn: ({
+      id,
+      values,
+    }: {
+      id: string | number;
+      values: Partial<VaiTro>;
+    }) => updateVaiTro(id, values),
     onSuccess: () => {
       Swal.fire("✅ Thành công!", "Đã cập nhật vai trò.", "success");
       queryClient.invalidateQueries({ queryKey: ["vai-tro"] });
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể cập nhật vai trò.", "error");
+      Swal.fire(
+        "❌ Lỗi!",
+        err.response?.data?.message || "Không thể cập nhật vai trò.",
+        "error"
+      );
     },
   });
 };
@@ -73,7 +87,17 @@ export const useDeleteVaiTro = () => {
     },
     onError: (error: unknown) => {
       const err = error as { response?: { data?: { message?: string } } };
-      Swal.fire("❌ Lỗi!", err.response?.data?.message || "Không thể xóa vai trò.", "error");
+      Swal.fire(
+        "❌ Lỗi!",
+        err.response?.data?.message || "Không thể xóa vai trò.",
+        "error"
+      );
     },
   });
 };
+
+export const useListMenu = () =>
+  useQuery<any[]>({
+    queryKey: ["menu"],
+    queryFn: getListMenu,
+  });

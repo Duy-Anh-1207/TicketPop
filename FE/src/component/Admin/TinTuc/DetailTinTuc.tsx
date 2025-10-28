@@ -85,7 +85,7 @@ export default function DetailTinTuc() {
       });
 
       setIsEditing(false);
-      navigate("/admin/tin-tuc"); 
+      navigate("/admin/tin-tuc");
     } catch (err: any) {
       Swal.fire({
         icon: "error",
@@ -152,7 +152,7 @@ export default function DetailTinTuc() {
             <div className="mb-3">
               <label className="form-label fw-bold">Nội dung</label>
               <CKEditor
-                editor={ClassicEditor}
+                editor={ClassicEditor as any}
                 data={formData.noi_dung}
                 onChange={(_, editor) => {
                   const data = editor.getData();
@@ -163,7 +163,10 @@ export default function DetailTinTuc() {
                 }}
                 onReady={(editor) => {
                   editor.editing.view.change((writer) => {
-                    writer.setStyle("min-height", "200px", editor.editing.view.document.getRoot());
+                    const root = editor.editing.view.document.getRoot();
+                    if (root) {
+                      writer.setStyle("min-height", "200px", root);
+                    }
                   });
                 }}
               />

@@ -8,16 +8,25 @@ export interface LichChieu {
   created_at?: string;
   updated_at?: string;
   deleted_at?: string | null;
+
+  // 🔹 Quan hệ (theo đúng JSON API Laravel trả về)
   phim?: {
     id: number;
     ten_phim: string;
   };
+
   phong?: {
     id: number;
     ten_phong: string;
   };
-  phienBan?: {
+
+  phien_ban?: {
     id: number;
-    the_loai: string;
+    the_loai: string; // ⚠️ backend dùng “the_loai”, không phải “ten_phien_ban”
+  };
+
+  gia_ve?: {
+    id: number;
+    gia_ve: number;
   };
 }
