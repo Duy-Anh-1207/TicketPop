@@ -54,6 +54,8 @@ import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
 
 
 import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
+import MenuList from "../component/Admin/Menu/MenuList";
+import MenuCreate from "../component/Admin/Menu/MenuCreate";
 
 
 const Routermain = () => {
@@ -94,6 +96,9 @@ const Routermain = () => {
 
         // Vai trò
         { path: "vai-tro", element: <VaiTroList /> },
+
+        { path: "menu", element: <MenuList /> },
+        { path: "menu/create", element: <MenuCreate /> },
 
         // Thể loại
         { path: "the-loai", element: <DanhSachTheLoai /> },

@@ -218,6 +218,12 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Thêm mới đồ ăn</span>
                   </Link>
                 </li>
+                <li className="sidebar-item">
+                  <Link to="/admin/menu" className="sidebar-link">
+                    <span className="sidebar-icon"></span>
+                    <span className="hide-menu">Quản lý menu</span>
+                  </Link>
+                </li>
               </ul>
             </li>
 

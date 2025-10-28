@@ -2,14 +2,16 @@ import { useState } from "react";
 import { useListVaiTro, useCreateVaiTro, useDeleteVaiTro } from "../../../hook/VaiTroHook";
 import Swal from "sweetalert2";
 import type { VaiTro } from "../../../types/vaitro";
+import RolePermissionModal from "../PhanQuyen/Phanquyen";
 
 export default function VaiTroList() {
   const { data: vaitros, isLoading } = useListVaiTro();
   const createVaiTro = useCreateVaiTro();
   const deleteVaiTro = useDeleteVaiTro();
 
-  // form input cho thêm mới
   const [newTen, setNewTen] = useState("");
+  const [selectedRole, setSelectedRole] = useState<VaiTro | null>(null); // role đang mở modal
+
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách...</p>;
 
   const handleAdd = () => {
@@ -18,14 +20,7 @@ export default function VaiTroList() {
       return;
     }
 
-    createVaiTro.mutate(
-      { ten_vai_tro: newTen },
-      {
-        onSuccess: () => {
-          setNewTen("");
-        },
-      }
-    );
+    createVaiTro.mutate({ ten_vai_tro: newTen }, { onSuccess: () => setNewTen("") });
   };
 
   const handleDelete = (id: number) => {
@@ -45,7 +40,7 @@ export default function VaiTroList() {
     <div className="container p-4">
       <h4 className="mb-4 text-center">🧩 Quản lý vai trò</h4>
 
-      {/* --- Form thêm nhanh --- */}
+      {/* Form thêm mới */}
       <div className="card shadow-sm p-3 mb-4">
         <h6>➕ Thêm vai trò mới</h6>
         <div className="row g-2 align-items-center">
@@ -70,7 +65,7 @@ export default function VaiTroList() {
         </div>
       </div>
 
-      {/* --- Danh sách --- */}
+      {/* Danh sách vai trò */}
       <div className="table-responsive">
         <table className="table table-bordered table-striped mx-auto align-middle">
           <thead className="table-light text-center">
@@ -96,6 +91,15 @@ export default function VaiTroList() {
                       >
                         Cập nhật
                       </button>
+
+                      {/* Nút phân quyền */}
+                      <button
+                        className="btn btn-outline-warning btn-sm"
+                        onClick={() => setSelectedRole(vt)}
+                      >
+                        Phân quyền
+                      </button>
+
                       <button
                         className="btn btn-outline-danger btn-sm"
                         onClick={() => handleDelete(vt.id)}
@@ -116,6 +120,14 @@ export default function VaiTroList() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal phân quyền */}
+      {selectedRole && (
+        <RolePermissionModal
+          role={selectedRole}
+          onClose={() => setSelectedRole(null)}
+        />
+      )}
     </div>
   );
 }
