@@ -17,8 +17,6 @@ const Banner: React.FC = () => {
     }
   }, [banners]);
 
-
-  
   if (isLoading) return <div className="banner-loading">Đang tải banners...</div>;
   if (!banners || banners.length === 0) return <div className="banner-loading">Không có banner nào</div>;
 

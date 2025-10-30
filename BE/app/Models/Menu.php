@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Menu extends Model
 {
     protected $table = 'menu';
+     public $timestamps = false;
 
     protected $fillable = [
         'ma_chuc_nang',
@@ -40,4 +41,5 @@ class Menu extends Model
     {
         return $q->where('trang_thai', 1);
     }
+    
 }

@@ -31,6 +31,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
     fetchData();
   }, [id]);
 
+  // Gom ghế theo hàng
   const hangList = data.reduce((acc, ghe) => {
     acc[ghe.hang] = acc[ghe.hang] || [];
     acc[ghe.hang].push(ghe);
@@ -53,7 +54,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
       await axios.put(`http://127.0.0.1:8000/api/ghe/${ghe.id}`, {
         loai_ghe_id: newLoai,
       });
-      message.success(`Ghế ${ghe.so_ghe} đã đổi loại thành ${newLoai}`);
+      message.success(`Ghế ${ghe.so_ghe} đã đổi loại thành ${newLoai === 2 ? "VIP" : "Thường"}`);
     } catch (error: any) {
       console.error("Lỗi khi cập nhật ghế:", error);
       message.error(
@@ -84,6 +85,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
         <p>Đang tải...</p>
       ) : (
         <div style={{ textAlign: "center" }}>
+          {/* Sơ đồ ghế */}
           {Object.keys(hangList).map((hang) => (
             <div key={hang} style={{ marginBottom: 10 }}>
               <div
@@ -104,10 +106,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
                         width: 40,
                         height: 40,
                         lineHeight: "40px",
-                        border:
-                          ghe.loai_ghe_id === 2
-                            ? "2px solid blue"
-                            : "1px solid #555",
+                        border: ghe.loai_ghe_id === 2 ? "2px solid blue" : "1px solid #555",
                         borderRadius: 6,
                         background: "#fff",
                         color: "#000",
@@ -115,9 +114,7 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
                         cursor: updating ? "not-allowed" : "pointer",
                         opacity: updating ? 0.6 : 1,
                       }}
-                      onClick={() =>
-                        !updating ? handleToggleLoaiGhe(ghe) : null
-                      }
+                      onClick={() => !updating && handleToggleLoaiGhe(ghe)}
                     >
                       {ghe.so_ghe}
                     </div>
@@ -125,6 +122,17 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
               </div>
             </div>
           ))}
+          {/* Chú thích */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 15 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 20, height: 20, border: "1px solid #555", borderRadius: 4, background: "#fff" }}></div>
+              <span>Ghế thường</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div style={{ width: 20, height: 20, border: "2px solid blue", borderRadius: 4, background: "#fff", }}></div>
+              <span>Ghế VIP</span>
+            </div>
+          </div>
         </div>
       )}
     </Modal>

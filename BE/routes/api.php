@@ -17,7 +17,9 @@ use App\Http\Controllers\Admin\MaGiamGiaController;
 use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
+use App\Http\Controllers\Admin\DatVeController;
 use App\Http\Controllers\Client\LocPhimController;
+use App\Http\Controllers\Admin\QuyenTruyCapController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -62,7 +64,8 @@ Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::get('/lich-chieu/find-next', [LichChieuController::class, 'findNextAvailableTime']);
 
-
+// dat ve
+Route::post('/dat-ve', [DatVeController::class, 'datVe']);
 Route::get('/banners', [BannerController::class, 'index']);
 
 Route::post('/banners', [BannerController::class, 'store']);
@@ -121,9 +124,7 @@ Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
 Route::get('/phim/{id}/phien-ban', [LichChieuController::class, 'getPhienBanTheoPhimId']);
 
-
-
-
+Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);
 
 
 //client
