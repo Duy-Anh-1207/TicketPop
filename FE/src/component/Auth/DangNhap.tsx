@@ -22,12 +22,13 @@ export default function LoginPage() {
       if (response.data.status) {
         const user = response.data.data;
 
-        // ✅ Lưu user vào localStorage
+        // ✅ Lưu token và user vào localStorage
+        localStorage.setItem("token", user.token);
         localStorage.setItem("user", JSON.stringify(user));
 
-        alert(response.data.message);
+        alert("Đăng nhập thành công!");
 
-        // ✅ Phân quyền điều hướng
+        // ✅ Điều hướng theo vai trò
         if (user.vai_tro === "Admin") {
           navigate("/admin");
         } else {
@@ -61,7 +62,6 @@ export default function LoginPage() {
         </h3>
 
         <form onSubmit={handleLogin}>
-          {/* Email */}
           <div className="mb-3">
             <label className="form-label fw-semibold">Email</label>
             <input
@@ -74,7 +74,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Password */}
           <div className="mb-3">
             <label className="form-label fw-semibold">Mật khẩu</label>
             <input
@@ -87,7 +86,6 @@ export default function LoginPage() {
             />
           </div>
 
-          {/* Nút đăng nhập */}
           <div className="d-grid mt-4">
             <button
               type="submit"
@@ -98,19 +96,17 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Liên kết đăng ký */}
           <div className="text-center mt-3">
             <small className="text-muted">
               Chưa có tài khoản?{" "}
               <Link to="/dang-ky" className="text-primary fw-semibold">
                 Đăng ký ngay
               </Link>
-              hoặc quay lại{" "}
+              {" "}hoặc quay lại{" "}
               <Link to="/" className="text-primary fw-semibold">
                 Trang chủ
               </Link>
             </small>
-            
           </div>
         </form>
       </div>

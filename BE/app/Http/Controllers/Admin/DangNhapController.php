@@ -39,9 +39,12 @@ class DangNhapController extends Controller
             ], 403);
         }
 
-        // ✅ Phân quyền và chuyển hướng
+        // ✅ Tạo token với Laravel Sanctum
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // ✅ Lấy vai trò
         $vaiTro = $user->vaiTro->ten_vai_tro ?? 'Khách hàng';
-        $redirectUrl = ($vaiTro === 'Admin') ? '/admin/phim' : '/';
+        $redirectUrl = ($vaiTro === 'Admin') ? '/admin' : '/';
 
         return response()->json([
             'status' => true,
@@ -51,6 +54,7 @@ class DangNhapController extends Controller
                 'ten' => $user->ten,
                 'email' => $user->email,
                 'vai_tro' => $vaiTro,
+                'token' => $token,
                 'redirect_url' => $redirectUrl,
             ]
         ]);
@@ -58,6 +62,9 @@ class DangNhapController extends Controller
 
     public function dangXuat(Request $request)
     {
+        // Xóa token hiện tại
+        $request->user()->currentAccessToken()->delete();
+
         return response()->json([
             'status' => true,
             'message' => 'Đăng xuất thành công!'
