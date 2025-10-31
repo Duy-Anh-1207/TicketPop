@@ -10,6 +10,7 @@ import MovieDetail from "../Page/MovieDetail/MovieDetail";
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
+import VerifyCode from "../component/Auth/VerifyRegister";
 
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
@@ -69,6 +70,8 @@ const Routermain = () => {
     { path: "/dang-nhap", element: <Login /> },
 
     { path: "/dang-ky", element: <Register /> },
+
+    { path: "/verify-code", element: <VerifyCode /> },
 
     // Route chính website (client)
     {

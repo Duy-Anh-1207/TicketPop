@@ -29,21 +29,35 @@ export default function DangKy() {
 
         // Xóa form
         setTen("");
-        setEmail("");
+        // KHÔNG nên xóa email nếu bạn cần đẩy sang trang verify
+        // setEmail("");
         setSoDienThoai("");
         setPassword("");
         setPasswordConfirmation("");
 
-        // Chuyển hướng sau 2 giây
+        // 👉 CHUYỂN HƯỚNG sang trang điền mã
         setTimeout(() => {
-          window.location.href = "/dang-nhap";
-        }, 2000);
+          window.location.href =
+            "/verify-code?email=" + encodeURIComponent(email);
+        }, 1000);
       } else {
         setError(response.data.message || "Đăng ký thất bại!");
       }
     } catch (error: any) {
       console.error("Lỗi đăng ký:", error.response?.data || error.message);
-      setError("Có lỗi xảy ra khi đăng ký!");
+      // lấy lỗi validate
+      if (error.response?.status === 422) {
+        const errs = error.response.data.errors;
+        const first =
+          errs?.ten?.[0] ||
+          errs?.email?.[0] ||
+          errs?.so_dien_thoai?.[0] ||
+          errs?.password?.[0] ||
+          "Có lỗi xảy ra khi đăng ký!";
+        setError(first);
+      } else {
+        setError("Có lỗi xảy ra khi đăng ký!");
+      }
     }
   };
 
@@ -68,7 +82,6 @@ export default function DangKy() {
           🎟️ Đăng ký tài khoản
         </h3>
 
-        {/* Thông báo lỗi / thành công */}
         {error && (
           <div className="alert alert-danger text-center py-2" role="alert">
             {error}
@@ -153,11 +166,11 @@ export default function DangKy() {
               Đã có tài khoản?{" "}
               <a href="/dang-nhap" className="text-primary fw-semibold">
                 Đăng nhập
-              </a>
+              </a>{" "}
               hoặc quay lại{" "}
               <a href="/" className="text-primary fw-semibold">
                 Trang chủ
-              </a>              
+              </a>
             </small>
           </div>
         </form>

@@ -118,6 +118,9 @@ Route::delete('/tin-tucs/{id}', [TinTucController::class, 'destroy']);
 Route::get('/phien-ban', [PhienBanController::class, 'index']);
 
 Route::post('/dang-ky', [DangKyController::class, 'dangKy']);
+Route::get('/xac-thuc-email', [DangKyController::class, 'xacThucEmail']); 
+Route::post('/xac-thuc-email', [DangKyController::class, 'xacThucEmail']); 
+Route::post('/gui-lai-ma', [DangKyController::class, 'guiLaiMa']);
 
 Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 

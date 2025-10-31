@@ -11,6 +11,7 @@ class DangNhapController extends Controller
 {
     public function dangNhap(Request $request)
     {
+        // 1. Validate đầu vào
         $request->validate([
             'email' => 'required|email',
             'password' => 'required|min:6'
@@ -21,9 +22,10 @@ class DangNhapController extends Controller
             'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.'
         ]);
 
+        // 2. Tìm user theo email
         $user = User::where('email', $request->email)->first();
 
-        // ❌ Sai tài khoản hoặc mật khẩu
+        // 3. Sai email hoặc mật khẩu
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status' => false,
@@ -31,7 +33,7 @@ class DangNhapController extends Controller
             ], 401);
         }
 
-        // 🚫 Kiểm tra tài khoản bị khóa
+        // 4. Tài khoản bị khóa
         if ($user->trang_thai == 0) {
             return response()->json([
                 'status' => false,
@@ -39,22 +41,32 @@ class DangNhapController extends Controller
             ], 403);
         }
 
-        // ✅ Tạo token với Laravel Sanctum
+        // 5. CHẶN CHƯA XÁC THỰC EMAIL
+        // kiểm tra theo đúng flow bạn vừa làm: bảng nguoi_dung có cột email_verified_at
+        if (is_null($user->email_verified_at)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Email của bạn chưa được xác thực. Vui lòng kiểm tra email để xác thực hoặc yêu cầu gửi lại mã.'
+            ], 403);
+        }
+
+        // 6. Tạo token Sanctum
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        // ✅ Lấy vai trò
+        // 7. Lấy vai trò để điều hướng
         $vaiTro = $user->vaiTro->ten_vai_tro ?? 'Khách hàng';
         $redirectUrl = ($vaiTro === 'Admin') ? '/admin' : '/';
 
+        // 8. Trả về JSON
         return response()->json([
             'status' => true,
             'message' => 'Đăng nhập thành công!',
             'data' => [
-                'id' => $user->id,
-                'ten' => $user->ten,
-                'email' => $user->email,
-                'vai_tro' => $vaiTro,
-                'token' => $token,
+                'id'         => $user->id,
+                'ten'        => $user->ten,
+                'email'      => $user->email,
+                'vai_tro'    => $vaiTro,
+                'token'      => $token,
                 'redirect_url' => $redirectUrl,
             ]
         ]);
