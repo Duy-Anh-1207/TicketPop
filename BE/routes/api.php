@@ -63,6 +63,9 @@ Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
 Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::get('/lich-chieu/find-next', [LichChieuController::class, 'findNextAvailableTime']);
+Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
+Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore']);
+
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
