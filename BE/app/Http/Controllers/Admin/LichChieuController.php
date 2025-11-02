@@ -16,14 +16,25 @@ use Illuminate\Support\Facades\DB;
 
 class LichChieuController extends Controller
 {
-    // 🟢 Lấy danh sách lịch chiếu
-    public function index()
+    // Lấy danh sách lịch chiếu
+    public function index(Request $request)
     {
         try {
-            // Lấy danh sách lịch chiếu cùng thông tin liên quan
-            $lichChieu = LichChieu::with(['phim', 'phong', 'phienBan'])
-                ->orderBy('gio_chieu', 'asc')
-                ->get();
+            $phimId = $request->query('phim_id');
+            $ngayChieu = $request->query('ngay_chieu');
+
+            $query = LichChieu::with(['phim', 'phong', 'phienBan'])
+                ->orderBy('gio_chieu', 'asc');
+
+            if ($phimId) {
+                $query->where('phim_id', $phimId);
+            }
+
+            if ($ngayChieu) {
+                $query->whereDate('gio_chieu', $ngayChieu);
+            }
+
+            $lichChieu = $query->get();
 
             return response()->json([
                 'status' => true,
@@ -39,117 +50,111 @@ class LichChieuController extends Controller
         }
     }
 
-    // 🟢 Thêm lịch chiếu mới
-  
-    // 🟢 Thêm 1 hoặc nhiều lịch chiếu
-public function store(Request $request)
-{
-    $request->validate([
-        'lich_chieu' => 'required|array|min:1',
-        'lich_chieu.*.phim_id' => 'required|integer|exists:phim,id',
-        'lich_chieu.*.phong_id' => [
-            'required',
-            'integer',
-            Rule::exists('phong_chieu', 'id')->where('trang_thai', 1),
-        ],
-        'lich_chieu.*.gio_chieu' => 'required|date',
-        'lich_chieu.*.gia_ve_thuong' => 'required|numeric|min:0',
-        'lich_chieu.*.gia_ve_vip' => 'nullable|numeric|min:0',
-        'lich_chieu.*.phien_ban_id' => 'nullable' // thêm trường này
-    ]);
+    // Thêm 1 hoặc nhiều lịch chiếu
+    public function store(Request $request)
+    {
+        $request->validate([
+            'lich_chieu' => 'required|array|min:1',
+            'lich_chieu.*.phim_id' => 'required|integer|exists:phim,id',
+            'lich_chieu.*.phong_id' => [
+                'required',
+                'integer',
+                Rule::exists('phong_chieu', 'id')->where('trang_thai', 1),
+            ],
+            'lich_chieu.*.gio_chieu' => 'required|date',
+            'lich_chieu.*.gia_ve_thuong' => 'required|numeric|min:0',
+            'lich_chieu.*.gia_ve_vip' => 'nullable|numeric|min:0',
+            'lich_chieu.*.phien_ban_id' => 'nullable' // thêm trường này
+        ]);
 
-    DB::beginTransaction();
-    try {
-        $created = [];
+        DB::beginTransaction();
+        try {
+            $created = [];
 
-        foreach ($request->lich_chieu as $item) {
-            $phim = Phim::findOrFail($item['phim_id']);
+            foreach ($request->lich_chieu as $item) {
+                $phim = Phim::findOrFail($item['phim_id']);
 
-            $gioChieu = Carbon::parse($item['gio_chieu'], 'Asia/Ho_Chi_Minh');
-            $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
+                $gioChieu = Carbon::parse($item['gio_chieu'], 'Asia/Ho_Chi_Minh');
+                $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
 
-            // 🚫 Không cho phép lịch chiếu trong quá khứ
-            if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
-                throw new \Exception('Không thể tạo lịch chiếu trong quá khứ!');
-            }
-
-            // 🚫 Kiểm tra trùng lịch trong cùng phòng
-            $trungLich = LichChieu::where('phong_id', $item['phong_id'])
-                ->where(function ($query) use ($gioChieu, $gioKetThuc) {
-                    $query->where('gio_chieu', '<', $gioKetThuc)
-                          ->where('gio_ket_thuc', '>', $gioChieu);
-                })
-                ->exists();
-
-            if ($trungLich) {
-                throw new \Exception("Phòng ID {$item['phong_id']} đã có lịch chiếu trùng thời gian.");
-            }
-
-            // ✅ Lấy phien_ban_id
-            $phienBanId = $item['phien_ban_id'] ?? null;
-
-            // Nếu không truyền thì lấy từ phim
-            if (!$phienBanId) {
-                $phienBanIds = $phim->phien_ban_id;
-
-                if (is_string($phienBanIds)) {
-                    $decoded = json_decode($phienBanIds, true);
-                    $phienBanIds = is_array($decoded) ? $decoded : explode(',', $phienBanIds);
+                // 🚫 Không cho phép lịch chiếu trong quá khứ
+                if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+                    throw new \Exception('Không thể tạo lịch chiếu trong quá khứ!');
                 }
 
-                // lấy phần tử đầu tiên (nếu phim có nhiều phiên bản)
-                $phienBanId = is_array($phienBanIds) && count($phienBanIds) > 0 ? $phienBanIds[0] : null;
+                // 🚫 Kiểm tra trùng lịch trong cùng phòng
+                $trungLich = LichChieu::where('phong_id', $item['phong_id'])
+                    ->where(function ($query) use ($gioChieu, $gioKetThuc) {
+                        $query->where('gio_chieu', '<', $gioKetThuc)
+                            ->where('gio_ket_thuc', '>', $gioChieu);
+                    })
+                    ->exists();
+
+                if ($trungLich) {
+                    throw new \Exception("Phòng ID {$item['phong_id']} đã có lịch chiếu trùng thời gian.");
+                }
+
+                // ✅ Lấy phien_ban_id
+                $phienBanId = $item['phien_ban_id'] ?? null;
+
+                // Nếu không truyền thì lấy từ phim
+                if (!$phienBanId) {
+                    $phienBanIds = $phim->phien_ban_id;
+
+                    if (is_string($phienBanIds)) {
+                        $decoded = json_decode($phienBanIds, true);
+                        $phienBanIds = is_array($decoded) ? $decoded : explode(',', $phienBanIds);
+                    }
+
+                    // lấy phần tử đầu tiên (nếu phim có nhiều phiên bản)
+                    $phienBanId = is_array($phienBanIds) && count($phienBanIds) > 0 ? $phienBanIds[0] : null;
+                }
+
+                // ✅ Tạo lịch chiếu
+                $lichChieu = LichChieu::create([
+                    'phim_id' => $item['phim_id'],
+                    'phong_id' => $item['phong_id'],
+                    'phien_ban_id' => $phienBanId,
+                    'gio_chieu' => $gioChieu,
+                    'gio_ket_thuc' => $gioKetThuc,
+                ]);
+
+                // ✅ Giá vé
+                $giaVeThuong = $item['gia_ve_thuong'];
+                $giaVeVip = $item['gia_ve_vip'] ?? $giaVeThuong * 1.3;
+
+                GiaVe::create([
+                    'lich_chieu_id' => $lichChieu->id,
+                    'loai_ghe_id' => 1,
+                    'gia_ve' => $giaVeThuong,
+                ]);
+                GiaVe::create([
+                    'lich_chieu_id' => $lichChieu->id,
+                    'loai_ghe_id' => 2,
+                    'gia_ve' => $giaVeVip,
+                ]);
+
+                $created[] = $lichChieu;
             }
 
-            // ✅ Tạo lịch chiếu
-            $lichChieu = LichChieu::create([
-                'phim_id' => $item['phim_id'],
-                'phong_id' => $item['phong_id'],
-                'phien_ban_id' => $phienBanId,
-                'gio_chieu' => $gioChieu,
-                'gio_ket_thuc' => $gioKetThuc,
-            ]);
+            DB::commit();
 
-            // ✅ Giá vé
-            $giaVeThuong = $item['gia_ve_thuong'];
-            $giaVeVip = $item['gia_ve_vip'] ?? $giaVeThuong * 1.3;
-
-            GiaVe::create([
-                'lich_chieu_id' => $lichChieu->id,
-                'loai_ghe_id' => 1,
-                'gia_ve' => $giaVeThuong,
-            ]);
-            GiaVe::create([
-                'lich_chieu_id' => $lichChieu->id,
-                'loai_ghe_id' => 2,
-                'gia_ve' => $giaVeVip,
-            ]);
-
-            $created[] = $lichChieu;
+            return response()->json([
+                'message' => 'Thêm nhiều lịch chiếu thành công',
+                'data' => $created
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => $e->getMessage()
+            ], 422);
         }
-
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Thêm nhiều lịch chiếu thành công',
-            'data' => $created
-        ], 201);
-
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'error' => $e->getMessage()
-        ], 422);
     }
-}
 
-
-
-
-    // 🟢 Lấy chi tiết lịch chiếu
+    // Lấy chi tiết lịch chiếu
     public function show($id)
     {
-        $lichChieu = LichChieu::with(['phim', 'phong','giaVe','phienBan'])->findOrFail($id);
+        $lichChieu = LichChieu::with(['phim', 'phong', 'giaVe', 'phienBan'])->findOrFail($id);
         return response()->json($lichChieu);
     }
 
@@ -311,28 +316,26 @@ public function store(Request $request)
         ]);
     }
     public function destroy($id)
-{
-    $lichChieu = LichChieu::find($id);
+    {
+        $lichChieu = LichChieu::find($id);
 
-    if (!$lichChieu) {
-        return response()->json(['error' => 'Lịch chiếu không tồn tại!'], 404);
+        if (!$lichChieu) {
+            return response()->json(['error' => 'Lịch chiếu không tồn tại!'], 404);
+        }
+
+        $lichChieu->delete(); // 👈 xóa mềm
+
+        return response()->json(['message' => '🗑️ Xóa lịch chiếu thành công (đã lưu vào thùng rác)!']);
     }
+    public function restore($id)
+    {
+        $lichChieu = LichChieu::withTrashed()->find($id);
 
-    $lichChieu->delete(); // 👈 xóa mềm
+        if (!$lichChieu) {
+            return response()->json(['error' => 'Không tìm thấy lịch chiếu để khôi phục'], 404);
+        }
 
-    return response()->json(['message' => '🗑️ Xóa lịch chiếu thành công (đã lưu vào thùng rác)!']);
-}
-public function restore($id)
-{
-    $lichChieu = LichChieu::withTrashed()->find($id);
-
-    if (!$lichChieu) {
-        return response()->json(['error' => 'Không tìm thấy lịch chiếu để khôi phục'], 404);
+        $lichChieu->restore(); // 👈 khôi phục lại
+        return response()->json(['message' => '✅ Khôi phục lịch chiếu thành công!']);
     }
-
-    $lichChieu->restore(); // 👈 khôi phục lại
-    return response()->json(['message' => '✅ Khôi phục lịch chiếu thành công!']);
-}
-
-
 }

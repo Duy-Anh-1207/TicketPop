@@ -6,7 +6,7 @@ import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
-
+import Booking from "../Page/Booking/Booking";
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
@@ -80,6 +80,7 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
+        { path: "booking/:slug", element: <Booking/> }
       ],
     },
 
