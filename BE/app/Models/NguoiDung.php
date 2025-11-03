@@ -28,6 +28,7 @@ class NguoiDung extends Authenticatable
         'anh_dai_dien',
         'trang_thai',
         'vai_tro_id',
+        'verification_code'
     ];
 
     /**
