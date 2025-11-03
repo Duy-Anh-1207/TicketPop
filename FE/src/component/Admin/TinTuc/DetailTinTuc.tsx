@@ -12,15 +12,19 @@ export default function DetailTinTuc() {
   const { data: tinTuc, isLoading, isError } = useTinTucDetail(id ?? "");
 
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // Form chính có thêm trường "type"
   const [formData, setFormData] = useState({
     tieu_de: "",
     noi_dung: "",
     hinh_anh: "",
+    type: "tin_tuc" as "tin_tuc" | "uu_dai" | "su_kien",
   });
-  const [fileHinhAnh, setFileHinhAnh] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  // Đồng bộ formData khi tinTuc thay đổi
+  // ✅ Ảnh upload mới
+  const [fileHinhAnh, setFileHinhAnh] = useState<File | null>(null);
+
   useEffect(() => {
     if (tinTuc) {
       setFormData({
@@ -29,12 +33,13 @@ export default function DetailTinTuc() {
         hinh_anh: tinTuc.hinh_anh
           ? `http://localhost:8000${tinTuc.hinh_anh}`
           : "",
+        type: tinTuc.type ?? "tin_tuc", // ✅ Load type từ API
       });
       setFileHinhAnh(null);
     }
   }, [tinTuc]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -59,19 +64,27 @@ export default function DetailTinTuc() {
     e.preventDefault();
     if (!id) return;
 
+    if (!formData.tieu_de || !formData.noi_dung || !formData.type) {
+      Swal.fire({
+        icon: "warning",
+        title: "Thiếu thông tin!",
+        text: "Vui lòng nhập đầy đủ tiêu đề, nội dung và loại tin tức.",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
       const fd = new FormData();
       fd.append("tieu_de", formData.tieu_de);
       fd.append("noi_dung", formData.noi_dung);
+      fd.append("type", formData.type); // ✅ Gửi kèm type
 
-      // Chỉ gửi file nếu có
       if (fileHinhAnh) {
         fd.append("hinh_anh", fileHinhAnh);
       }
 
-      // Laravel nhận PUT qua POST + _method=PUT
       fd.append("_method", "PUT");
 
       const { data: res } = await axiosClient.post(`/tin-tucs/${id}`, fd, {
@@ -105,6 +118,7 @@ export default function DetailTinTuc() {
       hinh_anh: tinTuc.hinh_anh
         ? `http://localhost:8000${tinTuc.hinh_anh}`
         : "",
+      type: tinTuc.type ?? "tin_tuc",
     });
     setFileHinhAnh(null);
     setIsEditing(false);
@@ -137,6 +151,7 @@ export default function DetailTinTuc() {
 
         {isEditing ? (
           <form onSubmit={handleSubmit}>
+            {/* Tiêu đề */}
             <div className="mb-3">
               <label className="form-label fw-bold">Tiêu đề</label>
               <input
@@ -149,6 +164,23 @@ export default function DetailTinTuc() {
               />
             </div>
 
+            {/* ✅ Loại tin tức */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Loại tin tức</label>
+              <select
+                name="type"
+                className="form-select"
+                value={formData.type}
+                onChange={handleChange}
+                required
+              >
+                <option value="tin_tuc">Tin Tức</option>
+                <option value="uu_dai">Ưu Đãi</option>
+                <option value="su_kien">Sự Kiện</option>
+              </select>
+            </div>
+
+            {/* Nội dung */}
             <div className="mb-3">
               <label className="form-label fw-bold">Nội dung</label>
               <CKEditor
@@ -156,22 +188,12 @@ export default function DetailTinTuc() {
                 data={formData.noi_dung}
                 onChange={(_, editor) => {
                   const data = editor.getData();
-                  setFormData((prev) => ({
-                    ...prev,
-                    noi_dung: data,
-                  }));
-                }}
-                onReady={(editor) => {
-                  editor.editing.view.change((writer) => {
-                    const root = editor.editing.view.document.getRoot();
-                    if (root) {
-                      writer.setStyle("min-height", "200px", root);
-                    }
-                  });
+                  setFormData((prev) => ({ ...prev, noi_dung: data }));
                 }}
               />
             </div>
 
+            {/* Hình ảnh */}
             <div className="mb-3">
               <label className="form-label fw-bold">Hình ảnh</label>
               <input
@@ -180,8 +202,11 @@ export default function DetailTinTuc() {
                 className="form-control"
                 onChange={handleFileChange}
               />
+
+              {/* ✅ Preview ảnh mới hoặc ảnh cũ */}
               {formData.hinh_anh && (
                 <div className="mt-3">
+                  <p className="text-muted mb-1">Ảnh hiện tại:</p>
                   <img
                     src={formData.hinh_anh}
                     alt="Hình tin tức"
@@ -213,9 +238,24 @@ export default function DetailTinTuc() {
           <div className="py-3">
             <InfoRow title="Tiêu đề" value={tinTuc.tieu_de} icon="fa-heading" />
             <InfoRow
+              icon="fa-tag"
+              title="Loại tin tức"
+              value={
+                tinTuc.type === "uu_dai"
+                  ? "Ưu Đãi"
+                  : tinTuc.type === "su_kien"
+                  ? "Sự Kiện"
+                  : "Tin Tức"
+              }
+            />
+            <InfoRow
               icon="fa-file-alt"
               title="Nội dung"
-              value={<div dangerouslySetInnerHTML={{ __html: tinTuc.noi_dung ?? "" }} />}
+              value={
+                <div
+                  dangerouslySetInnerHTML={{ __html: tinTuc.noi_dung ?? "" }}
+                />
+              }
             />
             <InfoRow
               title="Hình ảnh"

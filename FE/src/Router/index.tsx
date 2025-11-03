@@ -64,6 +64,10 @@ import MenuCreate from "../component/Admin/Menu/MenuCreate";
 import BannerList from "../component/Admin/Banner/ListBanner";
 import CreateBanner from "../component/Admin/Banner/CreateBanner";
 
+// ✅ Tin tức (CLIENT)
+import NewsPage from "../Page/News/NewsPage";
+import NewsDetailPage from "../Page/News/NewsDetailPage";
+
 const Routermain = () => {
   const element = useRoutes([
     // ✅ Route đăng nhập (ngoài layout)
@@ -80,6 +84,10 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
+
+        // ✅ Thêm route tin tức cho CLIENT
+        { path: "tin-tuc", element: <NewsPage /> },
+        { path: "tin-tuc/:id", element: <NewsDetailPage /> },
       ],
     },
 

@@ -6,20 +6,26 @@ import {
   updateTinTuc,
 } from "../provider/TinTucProvide";
 
-import type { PaginationResponse } from "../provider/TinTucProvide";
+import type { NewsFilterType, PaginationResponse } from "../provider/TinTucProvide";
+
+export type { NewsFilterType } from "../provider/TinTucProvide";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
-import type { TinTuc } from "../types/tin-tuc";
 
-// 🔹 Lấy danh sách tin tức (phân trang)
-export const useListTinTuc = (page: number = 1) =>
+import type { TinTuc } from "../types/tin-tuc"; 
+
+
+export const useListTinTuc = (
+  page: number = 1,
+  type: NewsFilterType = 'all'
+) =>
   useQuery<PaginationResponse<TinTuc>>({
-    queryKey: ["tin-tuc", page],
-    queryFn: () => getListTinTuc(page),
+    queryKey: ["tin-tuc", page, type],
+    queryFn: () => getListTinTuc(page, type),
   });
 
-// 🔹 Lấy chi tiết tin tức
+
 export const useTinTucDetail = (id: number | string | null) =>
   useQuery<TinTuc>({
     queryKey: ["tin-tuc", id],
@@ -27,21 +33,23 @@ export const useTinTucDetail = (id: number | string | null) =>
     enabled: !!id, // chỉ chạy khi có id
   });
 
-// 🔹 Thêm tin tức
+
 export const useCreateTinTuc = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+   
     mutationFn: (values: {
       tieu_de: string;
       noi_dung: string;
-      hinh_anh?: string;
+      hinh_anh?: File; 
+      type: 'tin_tuc' | 'uu_dai' | 'su_kien';
     }) => createTinTuc(values),
 
     onSuccess: (res) => {
       Swal.fire(
         "Thành công!",
-        res.message || "Đã thêm tin tức mới!",
+        (res as { message: string }).message || "Đã thêm tin tức mới!", // Ép kiểu res
         "success"
       );
       queryClient.invalidateQueries({ queryKey: ["tin-tuc"] });
@@ -57,7 +65,6 @@ export const useCreateTinTuc = () => {
   });
 };
 
-// 🔹 Cập nhật tin tức
 export const useUpdateTinTuc = () => {
   const queryClient = useQueryClient();
 
@@ -67,15 +74,19 @@ export const useUpdateTinTuc = () => {
       values,
     }: {
       id: string | number;
-      values: Partial<
-        Omit<TinTuc, "id" | "created_at" | "updated_at" | "deleted_at">
-      >;
+      // Cập nhật kiểu 'values'
+      values: {
+        tieu_de?: string;
+        noi_dung?: string;
+        hinh_anh?: string | File | null;
+        type?: 'tin_tuc' | 'uu_dai' | 'su_kien'; // <-- Thêm trường 'type'
+      };
     }) => updateTinTuc(id, values),
 
     onSuccess: (res) => {
       Swal.fire(
         "Thành công!",
-        res.message || "Đã cập nhật tin tức.",
+        (res as { message: string }).message || "Đã cập nhật tin tức.", // Ép kiểu res
         "success"
       );
       queryClient.invalidateQueries({ queryKey: ["tin-tuc"] });
@@ -91,13 +102,17 @@ export const useUpdateTinTuc = () => {
   });
 };
 
-// 🔹 Xóa tin tức
+
 export const useDeleteTinTuc = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: number | string) => deleteTinTuc(id),
-    onSuccess: () => {
-      Swal.fire("Đã xóa!", "Tin tức đã được xóa.", "success");
+    onSuccess: (res) => {
+      Swal.fire(
+        "Đã xóa!",
+        (res as { message: string }).message || "Tin tức đã được xóa.", // Ép kiểu res
+        "success"
+      );
       queryClient.invalidateQueries({ queryKey: ["tin-tuc"] });
     },
     onError: (error: unknown) => {
@@ -110,3 +125,4 @@ export const useDeleteTinTuc = () => {
     },
   });
 };
+
