@@ -1,0 +1,681 @@
+// Booking.scss - Giao diện đặt vé phim hiện đại & responsive
+
+.booking-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  @media (max-width: 768px) {
+    margin: 20px auto;
+    padding: 16px;
+    border-radius: 16px;
+  }
+}
+
+// Phần thông tin phim + poster
+.booking-content {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+.booking-poster {
+  width: 180px;
+  height: 260px;
+  border-radius: 16px;
+  object-fit: cover;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+
+  @media (max-width: 640px) {
+    width: 150px;
+    height: 220px;
+  }
+}
+
+.booking-info {
+  flex: 1;
+  min-width: 280px;
+
+  .movie-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 16px;
+    line-height: 1.3;
+  }
+
+  .info-list {
+    display: grid;
+    gap: 10px;
+    font-size: 15px;
+    color: #4b5563;
+
+    p {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      span {
+        font-weight: 600;
+        color: #111827;
+        min-width: 90px;
+      }
+
+      @media (max-width: 480px) {
+        flex-direction: column;
+        align-items: flex-start;
+        span {
+          min-width: auto;
+        }
+      }
+    }
+  }
+}
+
+// Sơ đồ ghế
+.seat-container {
+  margin: 40px auto;
+  max-width: 600px;
+
+  .seat-title {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #4f46e5;
+    margin-bottom: 24px;
+  }
+
+  .seat-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .seat-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+    position: relative;
+
+    &::before {
+      content: attr(data-row);
+      position: absolute;
+      left: -30px;
+      font-weight: 600;
+      color: #6b7280;
+      font-size: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+
+      @media (max-width: 480px) {
+        left: -20px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  .seat-list {
+    display: flex;
+    gap: 20px;
+    flex-wrap: nowrap;
+    justify-content: center;
+
+    @media (max-width: 480px) {
+      gap: 6px;
+    }
+  }
+
+  .seat-item {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    user-select: none;
+    transition: all 0.2s ease;
+    position: relative;
+
+    @media (max-width: 480px) {
+      width: 32px;
+      height: 32px;
+      font-size: 12px;
+    }
+
+    &.thuong {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1.5px solid #d1d5db;
+
+      &:hover {
+        background: #e5e7eb;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    &.vip {
+      background: linear-gradient(135deg, #fff7ed, #fed7aa);
+      color: #ea580c;
+      border: 2px solid #fb923c;
+      font-weight: 700;
+
+      &:hover {
+        background: linear-gradient(135deg, #fed7aa, #fdba74);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(249, 115, 22, 0.2);
+      }
+    }
+  }
+
+  .screen {
+    width: 80%;
+    height: 16px;
+    background: linear-gradient(90deg, #1f2937, #374151, #1f2937);
+    border-radius: 8px;
+    margin: 30px auto 20px;
+    position: relative;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+
+    &::after {
+      content: "MÀN HÌNH";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+  }
+
+  .seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 32px;
+    flex-wrap: wrap;
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: #4b5563;
+
+      .legend-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 6px;
+      }
+
+      .legend-box.thuong {
+        background: #f3f4f6;
+        border: 1.5px solid #d1d5db;
+      }
+
+      .legend-box.vip {
+        background: linear-gradient(135deg, #fff7ed, #fed7aa);
+        border: 2px solid #fb923c;
+      }
+    }
+  }
+}
+
+// === PHẦN ĐỒ ĂN - CĂN GIỮA HOÀN HẢO ===
+.food-container {
+  margin: 48px auto 0;
+  max-width: 800px;
+  text-align: center;
+
+  .food-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #4f46e5;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+
+    &::after {
+      content: "";
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: linear-gradient(90deg, #a78bfa, #7c3aed);
+      border-radius: 2px;
+    }
+  }
+
+  .food-loading {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  // Grid căn giữa, responsive
+  .food-grid {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 0 16px;
+  }
+
+  // Card đồ ăn
+  .food-item {
+    width: 160px;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+
+    &:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+      border-color: #c4b5fd;
+    }
+
+    .food-image-placeholder {
+      width: 100%;
+      height: 100px;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #94a3b8;
+      font-size: 36px;
+      font-weight: 300;
+    }
+
+    .food-info {
+      padding: 14px 12px;
+
+      .food-name {
+        font-weight: 600;
+        color: #1e293b;
+        margin-bottom: 6px;
+        font-size: 14px;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .food-price {
+        font-weight: 700;
+        color: #ea580c;
+        font-size: 15px;
+        margin-bottom: 10px;
+      }
+
+      // Nút tăng/giảm
+      .food-quantity {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+
+        button {
+          width: 32px;
+          height: 32px;
+          border: 1.8px solid #cbd5e1;
+          background: #ffffff;
+          border-radius: 50%;
+          font-size: 18px;
+          font-weight: bold;
+          color: #64748b;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          user-select: none;
+
+          &:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #475569;
+            transform: scale(1.05);
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+
+          &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            color: #cbd5e1;
+          }
+        }
+
+        .quantity-number {
+          min-width: 28px;
+          text-align: center;
+          font-weight: 700;
+          color: #1e293b;
+          font-size: 16px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive: mobile
+@media (max-width: 480px) {
+  .food-container {
+    margin: 32px auto 0;
+    padding: 0 8px;
+
+    .food-title {
+      font-size: 20px;
+    }
+
+    .food-grid {
+      gap: 16px;
+      padding: 0;
+    }
+
+    .food-item {
+      width: 140px;
+
+      .food-image-placeholder {
+        height: 90px;
+        font-size: 32px;
+      }
+
+      .food-info {
+        padding: 12px 8px;
+
+        .food-name {
+          font-size: 13px;
+        }
+
+        .food-price {
+          font-size: 14px;
+        }
+
+        .food-quantity {
+          gap: 10px;
+
+          button {
+            width: 30px;
+            height: 30px;
+            font-size: 16px;
+          }
+
+          .quantity-number {
+            font-size: 15px;
+            min-width: 24px;
+          }
+        }
+      }
+    }
+  }
+}
+
+.booking-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 16px;
+}
+
+.booking-loading,
+.booking-error,
+.booking-empty {
+  font-size: 18px;
+  text-align: center;
+}
+
+.booking-loading {
+  color: #6b7280;
+  animation: pulse 1.8s infinite ease-in-out;
+}
+
+.booking-error {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.booking-empty {
+  color: #9ca3af;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .seat-container {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+
+  .seat-row::before {
+    left: -10px;
+    font-size: 11px;
+  }
+
+  .seat-list {
+    gap: 5px;
+  }
+
+  .seat-item {
+    width: 28px;
+    height: 28px;
+    font-size: 11px;
+  }
+}
+// === KHUNG TÓM TẮT ĐẶT VÉ ===
+.booking-summary {
+  margin-top: 40px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+
+  .summary-content {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  h3 {
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 20px;
+  }
+
+  .summary-section {
+    margin-bottom: 16px;
+
+    .section-title {
+      font-weight: 600;
+      color: #475569;
+      margin-bottom: 8px;
+    }
+
+    .empty-text {
+      color: #94a3b8;
+      font-style: italic;
+      font-size: 14px;
+    }
+  }
+
+  .selected-seats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    .seat-tag {
+      background: #e0e7ff;
+      color: #4f46e5;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
+
+  .food-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    .food-summary {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: #334155;
+
+      span:last-child {
+        font-weight: 600;
+        color: #ea580c;
+      }
+    }
+  }
+
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 2px dashed #cbd5e1;
+    margin-top: 16px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e293b;
+
+    .total-price {
+      color: #dc2626;
+      font-size: 20px;
+    }
+  }
+
+  .booking-btn {
+    margin-top: 16px;
+    height: 48px;
+    font-size: 16px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    border: none;
+
+    &:hover {
+      background: linear-gradient(135deg, #6d28d9, #4c1d95);
+    }
+
+    &:disabled {
+      background: #cbd5e1;
+      color: #94a3b8;
+    }
+  }
+}
+
+// Cập nhật ghế đã chọn
+.seat-item {
+  cursor: pointer;
+
+  &.selected {
+    background: #4f46e5 !important;
+    color: white !important;
+    border-color: #4f46e5 !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(79, 70, 229, 0.4);
+  }
+}
+
+// Nút tăng giảm đồ ăn
+.food-quantity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 8px;
+
+  button {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid #d1d5db;
+    background: #fff;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  span {
+    min-width: 24px;
+    text-align: center;
+    font-weight: 600;
+    color: #1f2937;
+  }
+}
+
+// Responsive
+@media (max-width: 640px) {
+  .booking-summary {
+    padding: 16px;
+    margin: 24px -16px;
+    border-radius: 0;
+  }
+
+  .summary-total {
+    font-size: 16px;
+    .total-price {
+      font-size: 18px;
+    }
+  }
+}
