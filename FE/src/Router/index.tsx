@@ -51,7 +51,10 @@ import TinTucList from "../component/Admin/TinTuc/ListTinTuc";
 import CreateTinTuc from "../component/Admin/TinTuc/CreateTinTuc";
 import DetailTinTuc from "../component/Admin/TinTuc/DetailTinTuc";
 import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
+import DeletedLichChieuList from "../component/Admin/LichChieu/DeletedLichChieuList";
+
 // import EditLichChieu from "../component/Admin/LichChieu/Show";
+
 
 
 import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
@@ -127,6 +130,7 @@ const Routermain = () => {
         { path: "lich-chieu/them-moi", element: <Create /> },
         // { path: "lich-chieu/chi-tiet/:id", element: <EditLichChieu /> },
         { path: "lich-chieu/:id", element: <LichChieuDetail /> },
+        { path: "lich-chieu/deleted", element: <DeletedLichChieuList /> },
 
         // Voucher
         { path: "vouchers", element: <ListVoucher /> },

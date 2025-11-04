@@ -323,10 +323,15 @@ class LichChieuController extends Controller
             return response()->json(['error' => 'Lịch chiếu không tồn tại!'], 404);
         }
 
-        $lichChieu->delete(); // 👈 xóa mềm
+        $lichChieu->giaVe()->delete();
+        $lichChieu->delete();
 
         return response()->json(['message' => '🗑️ Xóa lịch chiếu thành công (đã lưu vào thùng rác)!']);
     }
+
+    /**
+     * ♻️ Khôi phục lịch chiếu
+     */
     public function restore($id)
     {
         $lichChieu = LichChieu::withTrashed()->find($id);
@@ -335,7 +340,41 @@ class LichChieuController extends Controller
             return response()->json(['error' => 'Không tìm thấy lịch chiếu để khôi phục'], 404);
         }
 
-        $lichChieu->restore(); // 👈 khôi phục lại
+        $lichChieu->restore();
+
         return response()->json(['message' => '✅ Khôi phục lịch chiếu thành công!']);
     }
+    // 🗑️ Lấy danh sách lịch chiếu đã xóa mềm
+public function deleted()
+{
+    $lichChieu = LichChieu::onlyTrashed()
+        ->with(['phim', 'phong', 'phienBan'])
+        ->orderBy('deleted_at', 'desc')
+        ->get();
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Danh sách lịch chiếu đã xóa mềm',
+        'data' => $lichChieu,
+    ]);
 }
+// 🚮 Xóa vĩnh viễn lịch chiếu
+public function forceDelete($id)
+{
+    $lichChieu = LichChieu::withTrashed()->find($id);
+
+    if (!$lichChieu) {
+        return response()->json(['error' => 'Không tìm thấy lịch chiếu!'], 404);
+    }
+
+    // Xóa luôn giá vé liên quan nếu có
+    GiaVe::where('lich_chieu_id', $lichChieu->id)->delete();
+
+    $lichChieu->forceDelete();
+
+    return response()->json(['message' => '🧹 Đã xóa vĩnh viễn lịch chiếu!']);
+}
+
+}
+
+

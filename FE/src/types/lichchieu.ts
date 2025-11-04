@@ -7,7 +7,8 @@ export interface LichChieu {
   gio_ket_thuc: string;
   created_at?: string;
   updated_at?: string;
-  deleted_at?: string | null;
+  deleted_at?: string | null | undefined;
+
 
   phim?: {
     id: number;
@@ -32,4 +33,5 @@ export interface LichChieu {
     id: number;
     gia_ve: number;
   };
+  
 }
