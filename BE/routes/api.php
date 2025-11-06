@@ -65,6 +65,8 @@ Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::get('/lich-chieu/find-next', [LichChieuController::class, 'findNextAvailableTime']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore']);
+ Route::get('/deleted', [LichChieuController::class, 'deleted']);
+    Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
 
 
 // dat ve

@@ -51,7 +51,10 @@ import TinTucList from "../component/Admin/TinTuc/ListTinTuc";
 import CreateTinTuc from "../component/Admin/TinTuc/CreateTinTuc";
 import DetailTinTuc from "../component/Admin/TinTuc/DetailTinTuc";
 import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
+import DeletedLichChieuList from "../component/Admin/LichChieu/DeletedLichChieuList";
+
 // import EditLichChieu from "../component/Admin/LichChieu/Show";
+
 
 
 import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
@@ -84,11 +87,11 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
-        { path: "booking/:slug", element: <Booking/> },
 
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
+        { path: "booking/:slug", element: <Booking/> }
       ],
     },
 
@@ -135,6 +138,7 @@ const Routermain = () => {
         { path: "lich-chieu/them-moi", element: <Create /> },
         // { path: "lich-chieu/chi-tiet/:id", element: <EditLichChieu /> },
         { path: "lich-chieu/:id", element: <LichChieuDetail /> },
+        { path: "lich-chieu/deleted", element: <DeletedLichChieuList /> },
 
         // Voucher
         { path: "vouchers", element: <ListVoucher /> },
