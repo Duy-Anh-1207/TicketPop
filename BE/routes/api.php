@@ -63,6 +63,11 @@ Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
 Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::get('/lich-chieu/find-next', [LichChieuController::class, 'findNextAvailableTime']);
+Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
+Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore']);
+ Route::get('/deleted', [LichChieuController::class, 'deleted']);
+    Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
+
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
@@ -109,7 +114,7 @@ Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
 Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
 
-Route::get('/tin-tuc', [TinTucController::class, 'index']);
+Route::get('/tin-tucs', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);
 Route::get('/tin-tucs/{id}', [TinTucController::class, 'show']);
 Route::put('/tin-tucs/{id}', [TinTucController::class, 'update']);

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 import { useUserPermissions } from "../../../hook/useUserPermissions";
-import axios from "axios";
 
 const MENU_IDS = {
   PHIM: 1,
@@ -174,8 +173,7 @@ const Sidebar: React.FC = () => {
 
             {/* Dynamic Menu Items */}
             {MENU_CONFIG.map(menu => {
-              // Kiểm tra quyền xem của menu này
-              if (!canAccess(menu.id, 4)) return null; // 4 = Quyền xem
+              if (!canAccess(menu.id, 4)) return null;
 
               const isOpen = openMenus[menu.id] || false;
 
