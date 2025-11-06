@@ -301,6 +301,14 @@ const Sidebar: React.FC = () => {
                     <span className="hide-menu">Thêm mới lịch chiếu</span>
                   </Link>
                 </li>
+                 <li className="sidebar-item">
+      <Link to="/admin/lich-chieu/deleted" className="sidebar-link">
+        <span className="sidebar-icon">
+          <Icon icon="solar:trash-bin-trash-line-duotone" className="fs-6" />
+        </span>
+        <span className="hide-menu">Danh sách đã xóa mềm</span>
+      </Link>
+    </li>
               </ul>
             </li>
 
