@@ -1,6 +1,9 @@
 import { useListFood, useUpdateFood, useDeleteFood } from "../../../hook/FoodHook";
 import Swal from "sweetalert2";
 import type { Food } from "../../../types/foods";
+import { canAccess } from "../../../utils/permissions";
+
+const MENU_ID = 5; // menu_id cho Quản lý Food (cập nhật nếu DB khác)
 
 export default function FoodList() {
   const { data: foods, isLoading } = useListFood();
@@ -8,6 +11,9 @@ export default function FoodList() {
   const deleteFood = useDeleteFood();
 
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách...</p>;
+
+  const canEdit = canAccess(MENU_ID, 2); // Sửa
+  const canDeletePerm = canAccess(MENU_ID, 3); // Xóa
 
   const handleDelete = (id: number) => {
     Swal.fire({
@@ -78,18 +84,23 @@ export default function FoodList() {
                   <td className="text-center">{food.so_luong_ton}</td>
                   <td className="text-center">
                     <div className="btn-group">
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => handleEdit(food)}
-                      >
-                        Cập nhật
-                      </button>
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => handleDelete(food.id)}
-                      >
-                        Xóa
-                      </button>
+                      {canEdit && (
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() => handleEdit(food)}
+                        >
+                          Cập nhật
+                        </button>
+                      )}
+
+                      {canDeletePerm && (
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDelete(food.id)}
+                        >
+                          Xóa
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

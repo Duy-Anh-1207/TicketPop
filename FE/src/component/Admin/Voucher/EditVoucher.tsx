@@ -10,52 +10,46 @@ import {
 export default function EditVoucher() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  const {
-    data: voucher,
-    isLoading: loadingDetail,
-    error,
-  } = useVoucherDetail(id!);
+
+  const { data: voucher, isLoading: loadingDetail, error } = useVoucherDetail(id!);
   const { mutate: updateVoucher, isPending: loadingUpdate } = useUpdateVoucher();
   const { mutate: deleteVoucher, isPending: loadingDelete } = useDeleteVoucher();
 
   const [formData, setFormData] = useState({
-    ma: "",
     phan_tram_giam: "",
     ngay_bat_dau: "",
     ngay_ket_thuc: "",
+    so_lan_su_dung: "",
+    trang_thai: "1",
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [currentImage, setCurrentImage] = useState<string | null>(null);
 
-  // Load dữ liệu mã giảm giá khi component mount
+  // Load dữ liệu
   useEffect(() => {
     if (voucher) {
       setFormData({
-        ma: voucher.ma?.trim() || "",
         phan_tram_giam: voucher.phan_tram_giam?.toString() || "",
-        ngay_bat_dau: voucher.ngay_bat_dau ? voucher.ngay_bat_dau.split("T")[0] : "",
-        ngay_ket_thuc: voucher.ngay_ket_thuc ? voucher.ngay_ket_thuc.split("T")[0] : "",
+        ngay_bat_dau: voucher.ngay_bat_dau?.split("T")[0] || "",
+        ngay_ket_thuc: voucher.ngay_ket_thuc?.split("T")[0] || "",
+        so_lan_su_dung: voucher.so_lan_su_dung?.toString() || "",
+        trang_thai: voucher.trang_thai?.toString() || "1",
       });
+
       setCurrentImage(
         voucher.image ? `http://localhost:8000/storage/${voucher.image}` : null
       );
-      console.log("Dữ liệu voucher từ backend:", voucher); // Log dữ liệu voucher
     }
   }, [voucher]);
 
-  // Xử lý thay đổi input
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  // Xử lý input
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "ma" ? value.trim() : value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Xử lý chọn file ảnh
+  // Xử lý chọn ảnh
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -67,153 +61,83 @@ export default function EditVoucher() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Client-side validation
-    if (!formData.ma) {
-      Swal.fire("❗ Lỗi!", "Mã giảm giá không được bỏ trống.", "warning");
-      return;
-    }
-    if (!formData.ngay_bat_dau) {
-      Swal.fire("❗ Lỗi!", "Ngày bắt đầu là bắt buộc.", "warning");
-      return;
-    }
-    if (!formData.ngay_ket_thuc) {
-      Swal.fire("❗ Lỗi!", "Ngày kết thúc là bắt buộc.", "warning");
-      return;
-    }
-    if (new Date(formData.ngay_ket_thuc) < new Date(formData.ngay_bat_dau)) {
-      Swal.fire("❗ Lỗi!", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.", "warning");
+    // Validation
+    if (!formData.phan_tram_giam) {
+      Swal.fire("❗ Lỗi!", "Phần trăm giảm không được bỏ trống.", "warning");
       return;
     }
     if (
-      formData.phan_tram_giam &&
-      (Number(formData.phan_tram_giam) < 0 || Number(formData.phan_tram_giam) > 100)
+      Number(formData.phan_tram_giam) < 0 ||
+      Number(formData.phan_tram_giam) > 100
     ) {
       Swal.fire("❗ Lỗi!", "Phần trăm giảm phải từ 0 đến 100.", "warning");
       return;
     }
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("ma", formData.ma);
-      formDataToSend.append("ngay_bat_dau", formData.ngay_bat_dau);
-      formDataToSend.append("ngay_ket_thuc", formData.ngay_ket_thuc);
-
-      // Chỉ thêm phan_tram_giam nếu hợp lệ
-      if (formData.phan_tram_giam && !isNaN(Number(formData.phan_tram_giam))) {
-        formDataToSend.append("phan_tram_giam", Number(formData.phan_tram_giam).toString());
-      }
-      if (imageFile) {
-        formDataToSend.append("image", imageFile);
-      }
-
-      // Log FormData để kiểm tra
-      const formDataEntries = Object.fromEntries(formDataToSend.entries());
-      console.log("Dữ liệu gửi đi:", formDataEntries);
-
-      // Gửi request
-      await updateVoucher(
-        { id: id!, values: formDataToSend },
-        {
-          onError: (error: any) => {
-            const err = error as {
-              response?: {
-                data?: { message?: string; errors?: Record<string, string[]> };
-              };
-            };
-            let errorMessage =
-              err.response?.data?.message || "Không thể cập nhật mã giảm giá.";
-            if (err.response?.data?.errors) {
-              errorMessage = Object.entries(err.response.data.errors)
-                .map(([field, messages]) => `${field}: ${messages.join(", ")}`)
-                .join("; ");
-            }
-            console.error("Backend errors:", err.response?.data);
-            Swal.fire("❌ Lỗi!", errorMessage, "error");
-          },
-        }
-      );
-
-      // Điều hướng sau khi thành công
-      navigate("/admin/vouchers");
-    } catch (err: any) {
-      console.error("❌ Lỗi cập nhật mã giảm giá:", err);
+    if (!formData.ngay_bat_dau || !formData.ngay_ket_thuc) {
+      Swal.fire("❗ Lỗi!", "Ngày bắt đầu và kết thúc là bắt buộc.", "warning");
+      return;
     }
+
+    if (new Date(formData.ngay_ket_thuc) < new Date(formData.ngay_bat_dau)) {
+      Swal.fire("❗ Lỗi!", "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.", "warning");
+      return;
+    }
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("phan_tram_giam", formData.phan_tram_giam);
+    formDataToSend.append("ngay_bat_dau", formData.ngay_bat_dau);
+    formDataToSend.append("ngay_ket_thuc", formData.ngay_ket_thuc);
+    formDataToSend.append("so_lan_su_dung", formData.so_lan_su_dung);
+    formDataToSend.append("trang_thai", formData.trang_thai);
+
+    if (imageFile) {
+      formDataToSend.append("image", imageFile);
+    }
+
+    await updateVoucher(
+      { id: id!, values: formDataToSend },
+      {
+        onSuccess: () => {
+          Swal.fire("✅ Thành công!", "Cập nhật voucher thành công", "success");
+          navigate("/admin/vouchers");
+        },
+        onError: (error: any) => {
+          Swal.fire("❌ Lỗi!", error?.response?.data?.message || "Cập nhật thất bại", "error");
+        },
+      }
+    );
   };
 
-  // Xử lý xóa mã giảm giá
   const handleDelete = () => {
     Swal.fire({
       title: "Xác nhận xóa",
-      text: "Bạn có chắc muốn xóa mã giảm giá này?",
+      text: "Bạn có chắc muốn xóa voucher này?",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Xóa",
       cancelButtonText: "Hủy",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteVoucher(id!, {
-          onSuccess: () => {
-            navigate("/admin/vouchers");
-          },
-          onError: (error: any) => {
-            const err = error as { response?: { data?: { message?: string } } };
-            Swal.fire(
-              "❌ Lỗi!",
-              err.response?.data?.message || "Không thể xóa mã giảm giá.",
-              "error"
-            );
-          },
-        });
+        deleteVoucher(id!);
+        navigate("/admin/vouchers");
       }
     });
   };
 
-  // Xử lý lỗi hoặc đang tải
-  if (error) {
-    return (
-      <div className="container mt-4">
-        <div className="alert alert-danger">
-          Lỗi khi tải mã giảm giá: {error.message}
-        </div>
-      </div>
-    );
-  }
-
   if (loadingDetail) {
-    return (
-      <div className="container mt-4">
-        <div className="text-center">
-          <div className="spinner-border text-primary" role="status">
-            <span className="visually-hidden">Đang tải...</span>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="container mt-4">Đang tải dữ liệu...</div>;
   }
 
   return (
     <div className="container mt-4">
       <div className="card shadow-sm border-0">
         <div className="card-header bg-primary text-white fw-semibold fs-5">
-          Sửa Mã Giảm Giá
+          Chỉnh sửa Voucher
         </div>
 
         <div className="card-body">
           <form onSubmit={handleSubmit}>
-            {/* Mã giảm giá */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Mã giảm giá</label>
-              <input
-                type="text"
-                name="ma"
-                className="form-control"
-                placeholder="Nhập mã giảm giá..."
-                value={formData.ma}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
             {/* Phần trăm giảm */}
             <div className="mb-3">
               <label className="form-label fw-bold">Phần trăm giảm (%)</label>
@@ -221,11 +145,11 @@ export default function EditVoucher() {
                 type="number"
                 name="phan_tram_giam"
                 className="form-control"
-                placeholder="Nhập phần trăm giảm (0-100)..."
                 value={formData.phan_tram_giam}
                 onChange={handleChange}
                 min="0"
                 max="100"
+                required
               />
             </div>
 
@@ -237,8 +161,6 @@ export default function EditVoucher() {
                 name="ngay_bat_dau"
                 className="form-control"
                 value={formData.ngay_bat_dau}
-                onChange={handleChange}
-                required
                 readOnly
               />
             </div>
@@ -256,55 +178,61 @@ export default function EditVoucher() {
               />
             </div>
 
+            {/* Số lần sử dụng */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Số lần sử dụng</label>
+              <input
+                type="number"
+                name="so_lan_su_dung"
+                className="form-control"
+                value={formData.so_lan_su_dung}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            {/* Trạng thái */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Trạng thái</label>
+              <select
+                name="trang_thai"
+                className="form-control"
+                value={formData.trang_thai}
+                onChange={handleChange}
+              >
+                <option value="1">Đang hoạt động</option>
+                <option value="0">Ngừng hoạt động</option>
+              </select>
+            </div>
+
             {/* Ảnh đại diện */}
             <div className="mb-3">
               <label className="form-label fw-bold">Ảnh đại diện</label>
               <input
                 type="file"
-                name="image"
                 className="form-control"
                 accept="image/*"
                 onChange={handleFileChange}
               />
               {currentImage && (
-                <div className="mt-2">
-                  <img
-                    src={currentImage}
-                    alt="Voucher Preview"
-                    style={{
-                      width: "100px",
-                      height: "100px",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
+                <img
+                  src={currentImage}
+                  alt="Preview"
+                  className="mt-2"
+                  style={{ width: "100px", height: "100px", objectFit: "cover" }}
+                />
               )}
             </div>
 
-            {/* Nút hành động */}
             <div className="text-end mt-4">
-              <button
-                type="button"
-                className="btn btn-secondary me-2"
-                onClick={() => navigate("/admin/vouchers")}
-                disabled={loadingUpdate || loadingDelete}
-              >
+              <button type="button" className="btn btn-secondary me-2" onClick={() => navigate("/admin/vouchers")}>
                 Quay lại
               </button>
-              <button
-                type="button"
-                className="btn btn-danger me-2"
-                onClick={handleDelete}
-                disabled={loadingUpdate || loadingDelete}
-              >
-                {loadingDelete ? "Đang xóa..." : "Xóa"}
+              <button type="button" className="btn btn-danger me-2" onClick={handleDelete}>
+                Xóa
               </button>
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={loadingUpdate || loadingDelete}
-              >
-                {loadingUpdate ? "Đang lưu..." : "Lưu thay đổi"}
+              <button type="submit" className="btn btn-primary">
+                Lưu thay đổi
               </button>
             </div>
           </form>

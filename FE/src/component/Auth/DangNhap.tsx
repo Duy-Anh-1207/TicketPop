@@ -1,18 +1,69 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+
+type ApiLoginOK = {
+  status: true;
+  message: string;
+  data: {
+    id: number;
+    ten: string;
+    email: string;
+    vai_tro: string;
+    vai_tro_id?: number;
+    can_access_admin?: boolean;
+    token: string;
+    redirect_url?: string;
+    permissions: Array<{ menu_id: number; chuc_nang: string[] }>;
+  };
+};
+
+type ApiFail = { status: false; message: string };
+
+const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000";
+const LOGIN_URL = `${API_BASE}/api/dang-nhap`;
+const RESEND_URL = `${API_BASE}/api/gui-lai-ma`;
 
 export default function LoginPage() {
   const navigate = useNavigate();
-
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-  const [needVerify, setNeedVerify] = useState(false); // để hiện nút gửi lại mã
+  const [showPw, setShowPw] = useState(false);
+  const [remember, setRemember] = useState(true);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+  const [needVerify, setNeedVerify] = useState(false);
+
+  // Nếu đã có token thì tự vào trang phù hợp
+  useEffect(() => {
+    const raw = localStorage.getItem("user");
+    const u = raw ? JSON.parse(raw) : null;
+    if (u?.token) {
+      const can = !!u?.can_access_admin || [1, 2].includes(u?.vai_tro_id);
+      navigate(can ? "/admin" : "/", { replace: true });
+    }
+  }, [navigate]);
+
+  const afterLogin = (payload: ApiLoginOK["data"]) => {
+    axios.defaults.headers.common.Authorization = `Bearer ${payload.token}`;
+
+    localStorage.setItem("token", payload.token);
+    localStorage.setItem("user", JSON.stringify(payload));
+
+    if (!remember) {
+      sessionStorage.setItem("token", payload.token);
+      sessionStorage.setItem("user", JSON.stringify(payload));
+    }
+
+    const can = payload.can_access_admin ?? [1, 2].includes(payload.vai_tro_id ?? -1);
+    const fallback = can ? "/admin" : "/";
+    navigate(payload.redirect_url || fallback, { replace: true });
+  };
+
+  const handleLogin: React.FormEventHandler = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError("");
@@ -20,104 +71,55 @@ export default function LoginPage() {
     setNeedVerify(false);
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/dang-nhap", {
-        email,
-        password,
-      });
-
-      if (response.data.status) {
-        const user = response.data.data;
-
-        // Lưu token và user vào localStorage
-        localStorage.setItem("token", user.token);
-        localStorage.setItem("user", JSON.stringify(user));
-
-        setSuccess("Đăng nhập thành công!");
-
-        // Điều hướng theo vai trò
-        if (user.vai_tro === "Admin") {
-          navigate("/admin");
-        } else {
-          navigate("/");
-        }
+      const res = await axios.post<ApiLoginOK | ApiFail>(LOGIN_URL, { email, password });
+      if ((res.data as ApiLoginOK).status) {
+        const ok = res.data as ApiLoginOK;
+        setSuccess(ok.message || "Đăng nhập thành công");
+        afterLogin(ok.data);
       } else {
-        setError(response.data.message || "Đăng nhập thất bại!");
+        const fail = res.data as ApiFail;
+        setError(fail.message || "Đăng nhập thất bại");
       }
     } catch (err: any) {
-      console.error(err);
-      const res = err.response;
+      const msg: string =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Không kết nối được máy chủ";
+      setError(msg);
 
-      if (res) {
-        // backend Laravel của bạn trả message như này
-        if (res.status === 403) {
-          // có thể là: tài khoản bị khóa HOẶC chưa xác thực
-          const msg =
-            res.data?.message ||
-            "Không thể đăng nhập. Tài khoản bị khóa hoặc chưa xác thực.";
-          setError(msg);
-
-          // nếu đúng message chưa xác thực thì bật nút gửi lại
-          if (
-            msg.toLowerCase().includes("chưa được xác thực") ||
-            msg.toLowerCase().includes("xac thuc")
-          ) {
-            setNeedVerify(true);
-          }
-        } else if (res.status === 401) {
-          setError(res.data?.message || "Email hoặc mật khẩu không đúng!");
-        } else if (res.status === 422) {
-          // lỗi validate
-          const firstError =
-            res.data?.errors?.email?.[0] ||
-            res.data?.errors?.password?.[0] ||
-            "Dữ liệu không hợp lệ!";
-          setError(firstError);
-        } else {
-          setError("Có lỗi xảy ra, vui lòng thử lại!");
-        }
-      } else {
-        setError("Không kết nối được tới server!");
+      if (msg.toLowerCase().includes("chưa được xác thực")) {
+        setNeedVerify(true);
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // Gửi lại mã xác thực
   const handleResend = async () => {
     setError("");
     setSuccess("");
     try {
-      const res = await axios.post("http://127.0.0.1:8000/api/gui-lai-ma", {
-        email,
-      });
+      const res = await axios.post<{ message?: string }>(RESEND_URL, { email });
       setSuccess(res.data?.message || "Đã gửi lại mã xác thực. Kiểm tra email!");
       setNeedVerify(false);
     } catch (err: any) {
-      const msg =
-        err.response?.data?.message ||
-        "Không gửi lại được mã xác thực. Thử lại sau!";
-      setError(msg);
+      setError(err?.response?.data?.message || "Không thể gửi lại mã. Thử lại sau.");
     }
   };
+
+  const from = (location.state as any)?.from ?? "/";
 
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100"
-      style={{
-        background:
-          "linear-gradient(135deg, #ffffff 0%, #6366F1 50%, #3B82F6 100%)",
-      }}
+      style={{ background: "linear-gradient(135deg,#ffffff 0%,#6366F1 50%,#3B82F6 100%)" }}
     >
-      <div
-        className="card shadow-lg border-0 rounded-4 p-4"
-        style={{ width: "400px", backgroundColor: "#fff" }}
-      >
-        <h3 className="text-center text-primary fw-bold mb-4">
-          🎟️ Đăng nhập tài khoản
-        </h3>
+      <div className="card shadow-lg border-0 rounded-4 p-4" style={{ width: 420 }}>
+        <h3 className="text-center text-primary fw-bold mb-3">🎟️ Đăng nhập</h3>
+        <p className="text-center text-muted mb-4">
+          Truy cập tài khoản để đặt vé và quản trị hệ thống.
+        </p>
 
-        {/* Thông báo */}
         {error && (
           <div className="alert alert-danger py-2 text-center" role="alert">
             {error}
@@ -129,32 +131,60 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} noValidate>
           <div className="mb-3">
             <label className="form-label fw-semibold">Email</label>
             <input
               type="email"
               className="form-control"
-              placeholder="Nhập email..."
+              placeholder="Vui lòng nhập email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              autoFocus
             />
           </div>
 
-          <div className="mb-3">
+          <div className="mb-2">
             <label className="form-label fw-semibold">Mật khẩu</label>
-            <input
-              type="password"
-              className="form-control"
-              placeholder="Nhập mật khẩu..."
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div className="input-group">
+              <input
+                type={showPw ? "text" : "password"}
+                className="form-control"
+                placeholder="Vui lòng nhập mật khẩu"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setShowPw((s) => !s)}
+                aria-label="Toggle password"
+              >
+                {showPw ? "Ẩn" : "Hiện"}
+              </button>
+            </div>
           </div>
 
-          <div className="d-grid mt-4">
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <div className="form-check">
+              <input
+                id="remember"
+                className="form-check-input"
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              <label className="form-check-label" htmlFor="remember">
+                Nhớ đăng nhập
+              </label>
+            </div>
+            <small className="text-muted">Quên mật khẩu?</small>
+          </div>
+
+          <div className="d-grid">
             <button
               type="submit"
               className="btn btn-primary fw-semibold py-2"
@@ -164,7 +194,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* Nút gửi lại mã */}
           {needVerify && (
             <div className="text-center mt-3">
               <button
@@ -180,17 +209,23 @@ export default function LoginPage() {
           <div className="text-center mt-3">
             <small className="text-muted">
               Chưa có tài khoản?{" "}
-              <Link to="/dang-ky" className="text-primary fw-semibold">
-                Đăng ký ngay
-              </Link>{" "}
-              hoặc quay lại{" "}
-              <Link to="/" className="text-primary fw-semibold">
-                Trang chủ
-              </Link>
+              <Link to="/dang-ky" className="text-primary fw-semibold">Đăng ký</Link>{" "}
+              • quay lại{" "}
+              <Link to={from} className="text-primary fw-semibold">Trang trước</Link>
             </small>
           </div>
         </form>
       </div>
+
+      {/* CSS dành riêng cho placeholder trong LoginPage */}
+      <style>
+        {`
+          ::placeholder {
+            color: #9ca3af !important;
+            font-weight: 400 !important;
+          }
+        `}
+      </style>
     </div>
   );
 }

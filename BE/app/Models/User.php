@@ -46,4 +46,8 @@ class User extends Authenticatable
     {
         return $this->vaiTro->ten_vai_tro ?? null;
     }
+    public function quyenTruyCap()
+    {
+        return $this->hasMany(\App\Models\QuyenTruyCap::class, 'vai_tro_id', 'vai_tro_id');
+    }
 }
