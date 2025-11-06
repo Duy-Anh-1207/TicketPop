@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { useListTinTuc, useDeleteTinTuc } from '../../../hook/TinTucHook';
@@ -62,7 +62,6 @@ export default function ListTinTuc() {
                             <th className="text-center">ID</th>
                             <th className="text-center">Tiêu đề</th>
                             <th className="text-center">Nội dung</th>
-                            <th className="text-center">Loại tin</th>
                             <th className="text-center">Hình ảnh</th>
                             <th className="text-center">Ngày tạo</th>
                             <th className="text-center">Hành động</th>
