@@ -16,21 +16,21 @@ class DatVeController extends Controller
 {
     public function datVe(Request $request)
     {
-        // ✅ Bước 1: Validate dữ liệu đầu vào
+        // Validate dữ liệu đầu vào
         $request->validate([
             'lich_chieu_id' => 'required|exists:lich_chieu,id',
             'ghe' => 'required|array|min:1',
             'ghe.*' => 'exists:ghe,id',
         ]);
 
-        // ✅ Bước 2: Lấy thông tin user hiện tại (hoặc user đầu tiên nếu chưa có auth)
+        // Lấy thông tin user hiện tại (hoặc user đầu tiên nếu chưa có auth)
         $user = Auth::user() ?? \App\Models\NguoiDung::first();
 
         try {
-            // ✅ Bước 3: Mở transaction để đảm bảo toàn vẹn dữ liệu
+            //  Mở transaction để đảm bảo toàn vẹn dữ liệu
             DB::beginTransaction();
 
-            // ✅ Bước 4: Lấy danh sách ghế và khóa hàng (tránh double booking)
+            //  Lấy danh sách ghế và khóa hàng (tránh double booking)
             $gheList = Ghe::whereIn('id', $request->ghe)
                 ->lockForUpdate()
                 ->get();
@@ -41,7 +41,7 @@ class DatVeController extends Controller
                 ], 400);
             }
 
-            // ✅ Bước 5: Tính tổng tiền dựa trên bảng `gia_ve`
+            //  Tính tổng tiền dựa trên bảng `gia_ve`
             $tongTien = 0;
             $giaVeTheoGhe = [];
 
@@ -58,14 +58,14 @@ class DatVeController extends Controller
                 $tongTien += $giaVe;
             }
 
-            // ✅ Bước 6: Tạo đơn đặt vé chính
+            //  Tạo đơn đặt vé chính
             $datVe = DatVe::create([
                 'nguoi_dung_id' => $user->id,
                 'lich_chieu_id' => $request->lich_chieu_id,
                 'tong_tien' => $tongTien,
             ]);
 
-            // ✅ Bước 7: Tạo chi tiết đặt vé
+            //  Tạo chi tiết đặt vé
             foreach ($gheList as $ghe) {
                 DatVeChiTiet::create([
                     'dat_ve_id' => $datVe->id,
@@ -77,12 +77,19 @@ class DatVeController extends Controller
                 $ghe->update(['trang_thai' => false]);
             }
 
-            // ✅ Bước 8: Commit transaction
+            //  Commit transaction
             DB::commit();
 
             return response()->json([
                 'message' => 'Đặt vé thành công',
-                'dat_ve' => $datVe->load('chiTiet.ghe'),
+                'dat_ve' => $datVe->load([
+                    'nguoiDung:id,ten,so_dien_thoai,email',
+                    'lichChieu:id,gio_chieu,phim_id,phong_id',
+                    'lichChieu.phim:id,ten_phim,thoi_luong',
+                    'lichChieu.phong:id,ten_phong',
+                    // 'lichChieu.phongChieu.rap:id,ten_rap',
+                    'chiTiet.ghe:id,so_ghe,loai_ghe_id',
+                ]),
             ], 201);
         } catch (Exception $e) {
             // ✅ Rollback nếu có lỗi
@@ -92,5 +99,23 @@ class DatVeController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+    public function danhSachDatVe()
+    {
+        $user = Auth::user() ?? \App\Models\NguoiDung::first();
+
+        $datVe = DatVe::with([
+            'nguoiDung:email',
+            'lichChieu:id,gio_chieu,phim_id,phong_id',
+            'lichChieu.phim:ten_phim',
+            'lichChieu.phong:id,ten_phong',
+        ])
+            ->where('nguoi_dung_id', $user->id)
+            ->get();
+
+        return response()->json([
+            'message' => 'Danh sách vé đã đặt',
+            'data' => $datVe
+        ]);
     }
 }
