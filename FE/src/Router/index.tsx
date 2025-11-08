@@ -6,10 +6,11 @@ import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
-
+import Booking from "../Page/Booking/Booking";
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
+import VerifyCode from "../component/Auth/VerifyRegister";
 
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
@@ -50,16 +51,25 @@ import TinTucList from "../component/Admin/TinTuc/ListTinTuc";
 import CreateTinTuc from "../component/Admin/TinTuc/CreateTinTuc";
 import DetailTinTuc from "../component/Admin/TinTuc/DetailTinTuc";
 import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
+import DeletedLichChieuList from "../component/Admin/LichChieu/DeletedLichChieuList";
+
 // import EditLichChieu from "../component/Admin/LichChieu/Show";
 
 
+
 import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
+import MenuList from "../component/Admin/Menu/MenuList";
+import MenuCreate from "../component/Admin/Menu/MenuCreate";
 
 
 
 // Banner
 import BannerList from "../component/Admin/Banner/ListBanner";
 import CreateBanner from "../component/Admin/Banner/CreateBanner";
+
+// ✅ Tin tức (CLIENT)
+import NewsPage from "../Page/News/NewsPage";
+import NewsDetailPage from "../Page/News/NewsDetailPage";
 
 const Routermain = () => {
   const element = useRoutes([
@@ -68,6 +78,8 @@ const Routermain = () => {
 
     { path: "/dang-ky", element: <Register /> },
 
+    { path: "/verify-code", element: <VerifyCode /> },
+
     // Route chính website (client)
     {
       path: "/",
@@ -75,6 +87,11 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
+
+        // ✅ Thêm route tin tức cho CLIENT
+        { path: "tin-tuc", element: <NewsPage /> },
+        { path: "tin-tuc/:id", element: <NewsDetailPage /> },
+        { path: "booking/:slug", element: <Booking/> }
       ],
     },
 
@@ -100,6 +117,9 @@ const Routermain = () => {
         // Vai trò
         { path: "vai-tro", element: <VaiTroList /> },
 
+        { path: "menu", element: <MenuList /> },
+        { path: "menu/create", element: <MenuCreate /> },
+
         // Thể loại
         { path: "the-loai", element: <DanhSachTheLoai /> },
 
@@ -118,6 +138,7 @@ const Routermain = () => {
         { path: "lich-chieu/them-moi", element: <Create /> },
         // { path: "lich-chieu/chi-tiet/:id", element: <EditLichChieu /> },
         { path: "lich-chieu/:id", element: <LichChieuDetail /> },
+        { path: "lich-chieu/deleted", element: <DeletedLichChieuList /> },
 
         // Voucher
         { path: "vouchers", element: <ListVoucher /> },

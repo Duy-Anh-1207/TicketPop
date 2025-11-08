@@ -2,15 +2,24 @@ import { useState } from "react";
 import { useListVaiTro, useCreateVaiTro, useDeleteVaiTro } from "../../../hook/VaiTroHook";
 import Swal from "sweetalert2";
 import type { VaiTro } from "../../../types/vaitro";
+import RolePermissionModal from "../PhanQuyen/Phanquyen";
+import { canAccess } from "../../../utils/permissions";
+
+const MENU_ID = 9; // menu_id cho quản lý vai trò (cập nhật nếu DB khác)
 
 export default function VaiTroList() {
   const { data: vaitros, isLoading } = useListVaiTro();
   const createVaiTro = useCreateVaiTro();
   const deleteVaiTro = useDeleteVaiTro();
 
-  // form input cho thêm mới
   const [newTen, setNewTen] = useState("");
+  const [selectedRole, setSelectedRole] = useState<VaiTro | null>(null); // role đang mở modal
+
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách...</p>;
+
+  const canCreate = canAccess(MENU_ID, 1);
+  const canUpdate = canAccess(MENU_ID, 2);
+  const canDeletePerm = canAccess(MENU_ID, 3);
 
   const handleAdd = () => {
     if (!newTen.trim()) {
@@ -18,14 +27,7 @@ export default function VaiTroList() {
       return;
     }
 
-    createVaiTro.mutate(
-      { ten_vai_tro: newTen },
-      {
-        onSuccess: () => {
-          setNewTen("");
-        },
-      }
-    );
+    createVaiTro.mutate({ ten_vai_tro: newTen }, { onSuccess: () => setNewTen("") });
   };
 
   const handleDelete = (id: number) => {
@@ -45,8 +47,8 @@ export default function VaiTroList() {
     <div className="container p-4">
       <h4 className="mb-4 text-center">🧩 Quản lý vai trò</h4>
 
-      {/* --- Form thêm nhanh --- */}
-      <div className="card shadow-sm p-3 mb-4">
+      {/* Form thêm mới */}
+        <div className="card shadow-sm p-3 mb-4">
         <h6>➕ Thêm vai trò mới</h6>
         <div className="row g-2 align-items-center">
           <div className="col-md-4">
@@ -59,18 +61,20 @@ export default function VaiTroList() {
             />
           </div>
           <div className="col-md-3 d-grid">
-            <button
-              className="btn btn-success"
-              onClick={handleAdd}
-              disabled={createVaiTro.isPending}
-            >
-              {createVaiTro.isPending ? "Đang thêm..." : "Thêm mới"}
-            </button>
+            {canCreate && (
+              <button
+                className="btn btn-success"
+                onClick={handleAdd}
+                disabled={createVaiTro.isPending}
+              >
+                {createVaiTro.isPending ? "Đang thêm..." : "Thêm mới"}
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {/* --- Danh sách --- */}
+      {/* Danh sách vai trò */}
       <div className="table-responsive">
         <table className="table table-bordered table-striped mx-auto align-middle">
           <thead className="table-light text-center">
@@ -88,20 +92,35 @@ export default function VaiTroList() {
                   <td>{vt.ten_vai_tro}</td>
                   <td className="text-center">
                     <div className="btn-group">
-                      <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() =>
-                          Swal.fire("✏️ Chưa làm!", "Phần sửa sẽ thêm sau.", "info")
-                        }
-                      >
-                        Cập nhật
-                      </button>
-                      <button
-                        className="btn btn-outline-danger btn-sm"
-                        onClick={() => handleDelete(vt.id)}
-                      >
-                        Xóa
-                      </button>
+                      {canUpdate && (
+                        <button
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() =>
+                            Swal.fire("✏️ Chưa làm!", "Phần sửa sẽ thêm sau.", "info")
+                          }
+                        >
+                          Cập nhật
+                        </button>
+                      )}
+
+                      {/* Nút phân quyền (yêu cầu quyền cập nhật/phan quyen) */}
+                      {canUpdate && (
+                        <button
+                          className="btn btn-outline-warning btn-sm"
+                          onClick={() => setSelectedRole(vt)}
+                        >
+                          Phân quyền
+                        </button>
+                      )}
+
+                      {canDeletePerm && (
+                        <button
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={() => handleDelete(vt.id)}
+                        >
+                          Xóa
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -116,6 +135,14 @@ export default function VaiTroList() {
           </tbody>
         </table>
       </div>
+
+      {/* Modal phân quyền */}
+      {selectedRole && (
+        <RolePermissionModal
+          role={selectedRole}
+          onClose={() => setSelectedRole(null)}
+        />
+      )}
     </div>
   );
 }

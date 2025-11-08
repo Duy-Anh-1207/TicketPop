@@ -6,7 +6,6 @@ import {
   useUpdateTinTuc,
   useTinTucDetail,
 } from "../../../hook/TinTucHook";
-import { createTinTucWithFile } from "../../../provider/TinTucProvide";
 import type { TinTuc } from "../../../types/tin-tuc";
 
 import { CKEditor } from "@ckeditor/ckeditor5-react";
@@ -16,6 +15,7 @@ interface TinTucForm {
   tieu_de: string;
   noi_dung: string;
   hinh_anh: string | File | null;
+  type: 'tin_tuc' | 'uu_dai' | 'su_kien';
 }
 
 export default function CreateTinTuc() {
@@ -30,6 +30,7 @@ export default function CreateTinTuc() {
     tieu_de: "",
     noi_dung: "",
     hinh_anh: null,
+    type: "tin_tuc",
   });
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
@@ -39,13 +40,14 @@ export default function CreateTinTuc() {
         tieu_de: tinTucDetail.tieu_de,
         noi_dung: tinTucDetail.noi_dung,
         hinh_anh: tinTucDetail.hinh_anh || null,
+        type: tinTucDetail.type || "tin_tuc",
       });
       setPreviewImage(tinTucDetail.hinh_anh || null);
     }
   }, [tinTucDetail, id]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+ const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -53,6 +55,7 @@ export default function CreateTinTuc() {
       [name]: value,
     }));
   };
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,10 +82,18 @@ export default function CreateTinTuc() {
 
     try {
       if (id) {
-        const payload: Partial<Omit<TinTuc, "id" | "created_at" | "updated_at" | "deleted_at">> = {
+        const payload: {
+            tieu_de: string;
+            noi_dung: string;
+            type: 'tin_tuc' | 'uu_dai' | 'su_kien';
+            hinh_anh?: File;
+        } = {
           tieu_de: formData.tieu_de,
           noi_dung: formData.noi_dung,
-          hinh_anh: typeof formData.hinh_anh === "string" ? formData.hinh_anh : null,
+          type: formData.type,
+          hinh_anh: formData.hinh_anh instanceof File
+            ? formData.hinh_anh
+            : undefined,
         };
 
         const res = await updateTinTuc.mutateAsync({ id, values: payload });
@@ -92,10 +103,11 @@ export default function CreateTinTuc() {
           text: res.message || "Cập nhật tin tức thành công!",
         });
       } else {
-        const res = await createTinTucWithFile({
+        const res = await createTinTuc.mutateAsync({
           tieu_de: formData.tieu_de,
           noi_dung: formData.noi_dung,
           hinh_anh: formData.hinh_anh instanceof File ? formData.hinh_anh : undefined,
+          type: formData.type,
         });
         Swal.fire({
           icon: "success",
@@ -145,9 +157,20 @@ export default function CreateTinTuc() {
             </div>
 
             <div className="mb-3">
-              <label className="form-label fw-bold">Nội dung</label>
+              <label className="form-label fw-bold">Loại tin tức</label>
+              <select
+                name="type"
+                className="form-select"
+                value={formData.type}
+                onChange={handleChange} 
+                required
+              >
+                <option value="tin_tuc">Tin Tức</option>
+                <option value="uu_dai">Ưu Đãi</option>
+                <option value="su_kien">Sự Kiện</option>
+              </select>
               <CKEditor
-                editor={ClassicEditor}
+                editor={ClassicEditor as any}
                 data={formData.noi_dung}
                 onChange={(_, editor) => {
                   const data = editor.getData();
@@ -157,10 +180,12 @@ export default function CreateTinTuc() {
                   }));
                 }}
                 onReady={(editor) => {
-                  editor.editing.view.change((writer) => {
-                    writer.setStyle("min-height", "200px", editor.editing.view.document.getRoot());
+                  const root = editor.editing.view.document.getRoot();
+                  editor.editing.view.change((writer: any) => {
+                    writer.setStyle("min-height", "200px", root);
                   });
                 }}
+
               />
             </div>
 
@@ -208,8 +233,8 @@ export default function CreateTinTuc() {
                 {loading
                   ? "Đang lưu..."
                   : id
-                  ? "Cập nhật tin tức"
-                  : "Lưu tin tức"}
+                    ? "Cập nhật tin tức"
+                    : "Lưu tin tức"}
               </button>
             </div>
           </form>

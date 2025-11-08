@@ -25,6 +25,7 @@ class LichChieu extends Model
         'gio_chieu',
         'gio_ket_thuc'
     ];
+     protected $dates = ['deleted_at'];
 
     // Quan hệ với các model khác
     public function phim()

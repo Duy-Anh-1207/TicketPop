@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
-    protected $table = 'nguoi_dung'; 
+    protected $table = 'nguoi_dung';
 
     protected $fillable = [
         'ten',
@@ -20,16 +21,20 @@ class User extends Authenticatable
         'anh_dai_dien',
         'trang_thai',
         'vai_tro_id',
+        'verification_code',
+        'email_verified_at',
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        'verification_code', // ẩn luôn để API không trả ra
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'email_verified_at' => 'datetime',
     ];
 
     public function vaiTro()
@@ -40,5 +45,9 @@ class User extends Authenticatable
     public function getTenVaiTroAttribute()
     {
         return $this->vaiTro->ten_vai_tro ?? null;
+    }
+    public function quyenTruyCap()
+    {
+        return $this->hasMany(\App\Models\QuyenTruyCap::class, 'vai_tro_id', 'vai_tro_id');
     }
 }

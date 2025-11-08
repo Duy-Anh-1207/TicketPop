@@ -3,6 +3,9 @@ import Swal from "sweetalert2";
 import { useListPhim, useDeletePhim } from "../../../hook/PhimHook";
 import { useListTheLoai } from "../../../hook/TheLoaiHook";
 import { useListPhienBan } from "../../../hook/PhienBanHook";
+import { canAccess } from "../../../utils/permissions";
+
+const MENU_ID = 1; // menu_id cho Quản lý Phim trong DB
 
 const DanhSachPhimTable = () => {
   const navigate = useNavigate();
@@ -29,13 +32,20 @@ const DanhSachPhimTable = () => {
   if (isLoading || loadingTheLoai || loadingPhienBan)
     return <p>Đang tải dữ liệu...</p>;
 
+  // Quyền thao tác
+  const canCreate = canAccess(MENU_ID, 1);
+  const canEdit = canAccess(MENU_ID, 2);
+  const canDeletePerm = canAccess(MENU_ID, 3);
+
   return (
     <div className="container my-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>🎬 Danh sách phim</h2>
-        <button className="btn btn-primary" onClick={handleAdd}>
-          ➕ Thêm phim
-        </button>
+        {canCreate && (
+          <button className="btn btn-primary" onClick={handleAdd}>
+            ➕ Thêm phim
+          </button>
+        )}
       </div>
 
       {phims && phims.length > 0 ? (
@@ -140,18 +150,22 @@ const DanhSachPhimTable = () => {
                       {phim.mo_ta || "—"}
                     </td>
                     <td className="d-flex justify-content-center gap-2">
-                      <button
-                        className="btn btn-sm btn-info"
-                        onClick={() => handleEdit(phim.id)}
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        className="btn btn-sm btn-danger"
-                        onClick={() => handleDelete(phim.id)}
-                      >
-                        Xóa
-                      </button>
+                      {canEdit && (
+                        <button
+                          className="btn btn-sm btn-info"
+                          onClick={() => handleEdit(phim.id)}
+                        >
+                          Sửa
+                        </button>
+                      )}
+                      {canDeletePerm && (
+                        <button
+                          className="btn btn-sm btn-danger"
+                          onClick={() => handleDelete(phim.id)}
+                        >
+                          Xóa
+                        </button>
+                      )}
                     </td>
                   </tr>
                 );

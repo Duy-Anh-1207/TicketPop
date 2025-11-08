@@ -31,7 +31,7 @@ return new class extends Migration
 
 
         Schema::create('quyen_truy_cap', function (Blueprint $table) {
-            
+
             $table->foreignId('vai_tro_id')->constrained('vai_tro')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('menu_id')->constrained('menu')->onUpdate('cascade')->onDelete('cascade');
             $table->string('function')->nullable();
@@ -47,13 +47,16 @@ return new class extends Migration
             $table->string('password', 255);
             $table->string('anh_dai_dien', 255)->nullable();
             $table->boolean('trang_thai')->default(true);
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('email_verify_token', 64)->nullable();
+            $table->string('verification_code', 10)->nullable();
             $table->foreignId('vai_tro_id')->constrained('vai_tro')->onUpdate('cascade')->onDelete('cascade');
             $table->timestamps();
         });
 
-        
 
-        
+
+
 
         Schema::create('the_loai', function (Blueprint $table) {
             $table->id();
@@ -87,7 +90,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        
+
 
         Schema::create('danh_gia', function (Blueprint $table) {
             $table->id();
@@ -273,6 +276,5 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('fulldb');
-        
     }
 };

@@ -1,16 +1,125 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
+import { useUserPermissions } from "../../../hook/useUserPermissions";
+
+const MENU_IDS = {
+  PHIM: 1,
+  BANNER: 2,
+  TAI_KHOAN: 3,
+  PHONG_CHIEU: 4,
+  DICH_VU: 5,
+  LICH_CHIEU: 6,
+  VOUCHER: 7,
+  TIN_TUC: 8
+};
+
+interface MenuItem {
+  id: number;
+  title: string;
+  icon: string;
+  path: string;
+  color: string;
+  children?: {
+    title: string;
+    path: string;
+  }[];
+}
+
+const MENU_CONFIG: MenuItem[] = [
+  {
+    id: MENU_IDS.PHIM,
+    title: 'Quản lý phim',
+    icon: 'solar:smart-speaker-minimalistic-line-duotone',
+    path: '/admin/phim',
+    color: 'indigo',
+    children: [
+      { title: 'Danh sách phim', path: '/admin/phim' },
+      { title: 'Quản lý thể loại', path: '/admin/the-loai' }
+    ]
+  },
+  {
+    id: MENU_IDS.BANNER,
+    title: 'Quản lý Banner',
+    icon: 'solar:smart-speaker-minimalistic-line-duotone',
+    path: '/admin/banners',
+    color: 'indigo',
+    children: [
+      { title: 'Danh sách banner', path: '/admin/banners' },
+      { title: 'Thêm mới banner', path: '/admin/banners/them-moi' }
+    ]
+  },
+  {
+    id: MENU_IDS.TAI_KHOAN,
+    title: 'Quản lý tài khoản',
+    icon: 'solar:smart-speaker-minimalistic-line-duotone',
+    path: '/admin/nguoi-dung',
+    color: 'success',
+    children: [
+      { title: 'Người dùng', path: '/admin/nguoi-dung' },
+      { title: 'Vai trò', path: '/admin/vai-tro' }
+    ]
+  },
+  {
+    id: MENU_IDS.PHONG_CHIEU,
+    title: 'Quản lý phòng chiếu',
+    icon: 'solar:pie-chart-3-line-duotone',
+    path: '/admin/roomxb',
+    color: 'warning',
+    children: [
+      { title: 'Phòng chiếu đã xuất bản', path: '/admin/roomxb' },
+      { title: 'Phòng chiếu chưa xuất bản', path: '/admin/roomcxb' },
+      { title: 'Thêm mới phòng chiếu', path: '/admin/room/them-moi' }
+    ]
+  },
+  {
+    id: MENU_IDS.DICH_VU,
+    title: 'Quản lý dịch vụ',
+    icon: 'solar:user-circle-line-duotone',
+    path: '/admin/foods',
+    color: 'danger',
+    children: [
+      { title: 'Quản lý đồ ăn', path: '/admin/foods' },
+      { title: 'Thêm mới đồ ăn', path: '/admin/foods/them-moi' },
+      { title: 'Quản lý menu', path: '/admin/menu' }
+    ]
+  },
+  {
+    id: MENU_IDS.LICH_CHIEU,
+    title: 'Quản lý lịch chiếu',
+    icon: 'solar:calendar-mark-line-duotone',
+    path: '/admin/lich-chieu',
+    color: 'danger',
+    children: [
+      { title: 'Danh sách lịch chiếu', path: '/admin/lich-chieu' },
+      { title: 'Thêm mới lịch chiếu', path: '/admin/lich-chieu/them-moi' }
+    ]
+  },
+  {
+    id: MENU_IDS.VOUCHER,
+    title: 'Quản lý voucher',
+    icon: 'solar:calendar-mark-line-duotone',
+    path: '/admin/vouchers',
+    color: 'danger',
+    children: [
+      { title: 'Danh sách voucher', path: '/admin/vouchers' }
+    ]
+  },
+  {
+    id: MENU_IDS.TIN_TUC,
+    title: 'Quản lý tin tức',
+    icon: 'solar:calendar-mark-line-duotone',
+    path: '/admin/tin-tuc',
+    color: 'danger',
+    children: [
+      { title: 'Danh sách tin tức', path: '/admin/tin-tuc' }
+    ]
+  }
+];
 
 const Sidebar: React.FC = () => {
-  const [isFrontPagesOpen, setIsFrontPagesOpen] = useState(false);
-  const [isEcommerceOpen, setIsEcommerceOpen] = useState(false);
-  const [isBannerOpen, setIsBannerOpen] = useState(false);
-  const [isBlogOpen, setIsBlogOpen] = useState(false);
-  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
-  const [isLichChieuOpen, setIsLichChieuOpen] = useState(false);
-  const [isVoucherOpen, setIsVoucherOpen] = useState(false);
-  const [isTinTucOpen, setIsTinTucOpen] = useState(false);
+  const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
+  const { canAccess } = useUserPermissions();
 
   return (
     <aside className="left-sidebar with-vertical">
@@ -62,299 +171,51 @@ const Sidebar: React.FC = () => {
               </a>
             </li>
 
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow indigo-hover-bg"
-                href="#"
-                aria-expanded={isFrontPagesOpen}
-                onClick={() => setIsFrontPagesOpen(!isFrontPagesOpen)}
-              >
-                <span className="aside-icon p-2 bg-indigo-subtle rounded-1">
-                  <Icon
-                    icon="solar:smart-speaker-minimalistic-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý phim</span>
-              </a>
-              <ul
-                aria-expanded={isFrontPagesOpen}
-                className={`collapse first-level ${isFrontPagesOpen ? "show" : ""
-                  }`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/phim" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Quản lý phim</span>
-                  </Link>
-                </li>
+            {/* Dynamic Menu Items */}
+            {MENU_CONFIG.map(menu => {
+              if (!canAccess(menu.id, 4)) return null;
 
-                <li className="sidebar-item">
-                  <Link to="/admin/the-loai" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Quản lý thể loại</span>
-                  </Link>
-                </li>
+              const isOpen = openMenus[menu.id] || false;
 
-                <li className="sidebar-item">
+              return (
+                <li key={menu.id} className="sidebar-item">
                   <a
-                    href="https://bootstrapdemos.wrappixel.com/spike/dist/main/frontend-aboutpage.html"
-                    className="sidebar-link"
+                    className={`sidebar-link has-arrow ${menu.color}-hover-bg`}
+                    href="#"
+                    aria-expanded={isOpen}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOpenMenus(prev => ({
+                        ...prev,
+                        [menu.id]: !prev[menu.id]
+                      }));
+                    }}
                   >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">About Us</span>
+                    <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
+                      <Icon
+                        icon={menu.icon}
+                        className="fs-6"
+                      />
+                    </span>
+                    <span className="hide-menu ps-1">{menu.title}</span>
                   </a>
-                </li>
-              </ul>
-            </li>
 
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow indigo-hover-bg"
-                href="#"
-                aria-expanded={isBannerOpen}
-                onClick={() => setIsBannerOpen(!isBannerOpen)}
-              >
-                <span className="aside-icon p-2 bg-indigo-subtle rounded-1">
-                  <Icon
-                    icon="solar:smart-speaker-minimalistic-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý Banner</span>
-              </a>
-
-              <ul
-                aria-expanded={isBannerOpen}
-                className={`collapse first-level ${isBannerOpen ? "show" : ""}`}
-              >
-                {/* Danh sách Banner */}
-                <li className="sidebar-item">
-                  <Link to="/admin/banners" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Danh sách banner</span>
-                  </Link>
-                </li>
-
-                {/* Thêm mới Banner */}
-                <li className="sidebar-item">
-                  <Link to="/admin/banners/them-moi" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Thêm mới banner</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow success-hover-bg"
-                href="#"
-                aria-expanded={isEcommerceOpen}
-                onClick={() => setIsEcommerceOpen(!isEcommerceOpen)}
-              >
-                <span className="aside-icon p-2 bg-success-subtle rounded-1">
-                  <Icon
-                    icon="solar:smart-speaker-minimalistic-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý tài khoản</span>
-              </a>
-              <ul
-                aria-expanded={isEcommerceOpen}
-                className={`collapse first-level ${isEcommerceOpen ? "show" : ""
-                  }`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/nguoi-dung" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Người dùng</span>
-                  </Link>
-                </li>
-                <li className="sidebar-item">
-                  <Link to="/admin/vai-tro" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Vai trò</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow warning-hover-bg"
-                href="#"
-                aria-expanded={isBlogOpen}
-                onClick={() => setIsBlogOpen(!isBlogOpen)}
-              >
-                <span className="aside-icon p-2 bg-warning-subtle rounded-1">
-                  <Icon
-                    icon="solar:pie-chart-3-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý phòng chiếu</span>
-              </a>
-              <ul
-                aria-expanded={isBlogOpen}
-                className={`collapse first-level ${isBlogOpen ? "show" : ""}`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/roomxb" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Phòng chiếu đã xuất bản</span>
-                  </Link>
-                </li>
-
-                <li className="sidebar-item">
-                  <Link to="/admin/roomcxb" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Phòng chiếu chưa xuất bản</span>
-                  </Link>
-                </li>
-
-                <li className="sidebar-item">
-                  <Link to="/admin/room/them-moi" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Thêm mới phòng chiếu</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow danger-hover-bg"
-                href="#"
-                aria-expanded={isUserProfileOpen}
-                onClick={() => setIsUserProfileOpen(!isUserProfileOpen)}
-              >
-                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
-                  <Icon
-                    icon="solar:user-circle-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý dịch vụ</span>
-              </a>
-              <ul
-                aria-expanded={isUserProfileOpen}
-                className={`collapse first-level ${isUserProfileOpen ? "show" : ""
-                  }`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/foods" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Quản lý đồ ăn</span>
-                  </Link>
-                </li>
-                <li className="sidebar-item">
-                  <Link to="/admin/foods/them-moi" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Thêm mới đồ ăn</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow danger-hover-bg"
-                href="#"
-                aria-expanded={isLichChieuOpen}
-                onClick={() => setIsLichChieuOpen(!isLichChieuOpen)}
-              >
-                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
-                  <Icon
-                    icon="solar:calendar-mark-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý lịch chiếu</span>
-              </a>
-              <ul
-                aria-expanded={isLichChieuOpen}
-                className={`collapse first-level ${isLichChieuOpen ? "show" : ""
-                  }`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/lich-chieu" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Danh sách lịch chiếu</span>
-                  </Link>
-                </li>
-                <li className="sidebar-item">
-                  <Link
-                    to="/admin/lich-chieu/them-moi"
-                    className="sidebar-link"
+                  <ul
+                    aria-expanded={isOpen}
+                    className={`collapse first-level ${isOpen ? "show" : ""}`}
                   >
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Thêm mới lịch chiếu</span>
-                  </Link>
+                    {menu.children?.map((child, idx) => (
+                      <li key={`${menu.id}-${idx}`} className="sidebar-item">
+                        <Link to={child.path} className="sidebar-link">
+                          <span className="sidebar-icon"></span>
+                          <span className="hide-menu">{child.title}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 </li>
-              </ul>
-            </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow danger-hover-bg"
-                href="#"
-                aria-expanded={isVoucherOpen}
-                onClick={() => setIsVoucherOpen(!isVoucherOpen)}
-              >
-                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
-                  <Icon
-                    icon="solar:calendar-mark-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý voucher</span>
-              </a>
-              <ul
-                aria-expanded={isVoucherOpen}
-                className={`collapse first-level ${isVoucherOpen ? "show" : ""
-                  }`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/vouchers" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Danh sách voucher</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
-
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link has-arrow danger-hover-bg"
-                href="#"
-                aria-expanded={isTinTucOpen}
-                onClick={() => setIsTinTucOpen(!isTinTucOpen)}
-              >
-                <span className="aside-icon p-2 bg-danger-subtle rounded-1">
-                  <Icon
-                    icon="solar:calendar-mark-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Quản lý tin tức</span>
-              </a>
-              <ul
-                aria-expanded={isTinTucOpen}
-                className={`collapse first-level ${isTinTucOpen ? "show" : ""
-                  }`}
-              >
-                <li className="sidebar-item">
-                  <Link to="/admin/tin-tuc" className="sidebar-link">
-                    <span className="sidebar-icon"></span>
-                    <span className="hide-menu">Danh sách tin tức</span>
-                  </Link>
-                </li>
-              </ul>
-            </li>
+              );
+            })}
           </ul>
         </nav>
       </div>

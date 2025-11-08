@@ -19,111 +19,149 @@ export default function CreateVoucher() {
     trang_thai: "CHƯA KÍCH HOẠT",
   });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [imageFile, setImageFile] = useState<File | null>(null);
 
-  // Xử lý thay đổi input
+  // ✅ Validate toàn bộ form
+  const validateAll = () => {
+    const newErrors: Record<string, string> = {};
+
+    Object.entries(formData).forEach(([key, value]) => {
+      let message = "";
+
+      switch (key) {
+        case "ma":
+          if (!value.trim()) message = "Mã giảm giá là bắt buộc.";
+          break;
+
+        case "phan_tram_giam":
+          if (!value.trim()) message = "Phần trăm giảm là bắt buộc.";
+          else if (Number(value) < 0 || Number(value) > 100)
+            message = "Phần trăm giảm phải từ 0 đến 100.";
+          break;
+
+        case "giam_toi_da":
+          if (!value.trim()) message = "Giảm tối đa là bắt buộc.";
+          else if (Number(value) < 0)
+            message = "Số tiền giảm tối đa không được âm.";
+          break;
+
+        case "gia_tri_don_hang_toi_thieu":
+          if (!value.trim())
+            message = "Giá trị đơn hàng tối thiểu là bắt buộc.";
+          else if (Number(value) < 0)
+            message = "Giá trị đơn hàng tối thiểu không được âm.";
+          break;
+
+        case "so_lan_su_dung":
+          if (!value.trim()) message = "Số lần sử dụng là bắt buộc.";
+          else if (Number(value) < 0)
+            message = "Số lần sử dụng không được âm.";
+          break;
+
+        case "ngay_bat_dau":
+          if (!value.trim()) message = "Ngày bắt đầu là bắt buộc.";
+          break;
+
+        case "ngay_ket_thuc":
+          if (!value.trim()) message = "Ngày kết thúc là bắt buộc.";
+          else if (
+            formData.ngay_bat_dau &&
+            new Date(value) < new Date(formData.ngay_bat_dau)
+          )
+            message = "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.";
+          break;
+
+        default:
+          break;
+      }
+
+      newErrors[key] = message;
+    });
+
+    setErrors(newErrors);
+    return Object.values(newErrors).every((msg) => msg === "");
+  };
+
+  // ✅ Validate từng trường khi thay đổi
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // validate riêng từng trường khi nhập
+    let message = "";
+    switch (name) {
+      case "ma":
+        if (!value.trim()) message = "Mã giảm giá là bắt buộc.";
+        break;
+      case "phan_tram_giam":
+        if (!value.trim()) message = "Phần trăm giảm là bắt buộc.";
+        else if (Number(value) < 0 || Number(value) > 100)
+          message = "Phần trăm giảm phải từ 0 đến 100.";
+        break;
+      case "giam_toi_da":
+        if (!value.trim()) message = "Giảm tối đa là bắt buộc.";
+        else if (Number(value) < 0)
+          message = "Số tiền giảm tối đa không được âm.";
+        break;
+      case "gia_tri_don_hang_toi_thieu":
+        if (!value.trim()) message = "Giá trị đơn hàng tối thiểu là bắt buộc.";
+        else if (Number(value) < 0)
+          message = "Giá trị đơn hàng tối thiểu không được âm.";
+        break;
+      case "so_lan_su_dung":
+        if (!value.trim()) message = "Số lần sử dụng là bắt buộc.";
+        else if (Number(value) < 0)
+          message = "Số lần sử dụng không được âm.";
+        break;
+      case "ngay_bat_dau":
+        if (!value.trim()) message = "Ngày bắt đầu là bắt buộc.";
+        break;
+      case "ngay_ket_thuc":
+        if (!value.trim()) message = "Ngày kết thúc là bắt buộc.";
+        else if (
+          formData.ngay_bat_dau &&
+          new Date(value) < new Date(formData.ngay_bat_dau)
+        )
+          message = "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.";
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: message }));
   };
 
-  // Xử lý chọn file ảnh
+  // ✅ Xử lý chọn ảnh
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-    }
+    if (file) setImageFile(file);
   };
 
-  // Submit form
+  // ✅ Submit form
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    // Client-side validation
-    if (!formData.ma) {
-      Swal.fire("❗ Lỗi!", "Mã giảm giá là bắt buộc.", "warning");
-      return;
-    }
-    if (!formData.ngay_bat_dau || !formData.ngay_ket_thuc) {
-      Swal.fire(
-        "❗ Lỗi!",
-        "Ngày bắt đầu và ngày kết thúc là bắt buộc.",
-        "warning"
-      );
-      return;
-    }
-    if (new Date(formData.ngay_ket_thuc) < new Date(formData.ngay_bat_dau)) {
-      Swal.fire(
-        "❗ Lỗi!",
-        "Ngày kết thúc phải lớn hơn hoặc bằng ngày bắt đầu.",
-        "warning"
-      );
-      return;
-    }
-    if (
-      formData.phan_tram_giam &&
-      (Number(formData.phan_tram_giam) < 0 ||
-        Number(formData.phan_tram_giam) > 100)
-    ) {
-      Swal.fire("❗ Lỗi!", "Phần trăm giảm phải từ 0 đến 100.", "warning");
-      return;
-    }
-    if (formData.giam_toi_da && Number(formData.giam_toi_da) < 0) {
-      Swal.fire("❗ Lỗi!", "Số tiền giảm tối đa không được âm.", "warning");
-      return;
-    }
-    if (
-      formData.gia_tri_don_hang_toi_thieu &&
-      Number(formData.gia_tri_don_hang_toi_thieu) < 0
-    ) {
-      Swal.fire(
-        "❗ Lỗi!",
-        "Giá trị đơn hàng tối thiểu không được âm.",
-        "warning"
-      );
-      return;
-    }
-    if (formData.so_lan_su_dung && Number(formData.so_lan_su_dung) < 0) {
-      Swal.fire("❗ Lỗi!", "Số lần sử dụng không được âm.", "warning");
+    if (!validateAll()) {
+      Swal.fire("❗ Lỗi!", "Vui lòng kiểm tra lại các trường nhập.", "warning");
       return;
     }
 
     try {
       const formDataToSend = new FormData();
-      formDataToSend.append("ma", formData.ma);
-      if (formData.phan_tram_giam) {
-        formDataToSend.append("phan_tram_giam", formData.phan_tram_giam);
-      }
-      if (formData.giam_toi_da) {
-        formDataToSend.append("giam_toi_da", formData.giam_toi_da);
-      }
-      if (formData.gia_tri_don_hang_toi_thieu) {
-        formDataToSend.append(
-          "gia_tri_don_hang_toi_thieu",
-          formData.gia_tri_don_hang_toi_thieu
-        );
-      }
-      formDataToSend.append("ngay_bat_dau", formData.ngay_bat_dau);
-      formDataToSend.append("ngay_ket_thuc", formData.ngay_ket_thuc);
-      if (formData.so_lan_su_dung) {
-        formDataToSend.append("so_lan_su_dung", formData.so_lan_su_dung);
-      }
-      formDataToSend.append("so_lan_da_su_dung", formData.so_lan_da_su_dung);
-      formDataToSend.append("trang_thai", formData.trang_thai.toString());
-      if (imageFile) {
-        formDataToSend.append("image", imageFile);
-      }
+      Object.entries(formData).forEach(([key, value]) =>
+        formDataToSend.append(key, value)
+      );
+      if (imageFile) formDataToSend.append("image", imageFile);
 
       await createVoucher(formDataToSend);
-
+      Swal.fire("✅ Thành công!", "Đã tạo mã giảm giá mới.", "success");
       navigate("/admin/vouchers");
-    } catch (err: any) {
+    } catch (err) {
       console.error("❌ Lỗi tạo mã giảm giá:", err);
+      Swal.fire("❌ Lỗi!", "Không thể tạo mã giảm giá.", "error");
     }
   };
 
@@ -135,19 +173,19 @@ export default function CreateVoucher() {
         </div>
 
         <div className="card-body">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} noValidate>
             {/* Mã giảm giá */}
             <div className="mb-3">
               <label className="form-label fw-bold">Mã giảm giá</label>
               <input
                 type="text"
                 name="ma"
-                className="form-control"
+                className={`form-control ${errors.ma ? "is-invalid" : ""}`}
                 placeholder="Nhập mã giảm giá..."
                 value={formData.ma}
                 onChange={handleChange}
-                required
               />
+              {errors.ma && <div className="invalid-feedback">{errors.ma}</div>}
             </div>
 
             {/* Phần trăm giảm */}
@@ -156,13 +194,16 @@ export default function CreateVoucher() {
               <input
                 type="number"
                 name="phan_tram_giam"
-                className="form-control"
+                className={`form-control ${
+                  errors.phan_tram_giam ? "is-invalid" : ""
+                }`}
                 placeholder="Nhập phần trăm giảm (0-100)..."
                 value={formData.phan_tram_giam}
                 onChange={handleChange}
-                min="0"
-                max="100"
               />
+              {errors.phan_tram_giam && (
+                <div className="invalid-feedback">{errors.phan_tram_giam}</div>
+              )}
             </div>
 
             {/* Giảm tối đa */}
@@ -171,12 +212,16 @@ export default function CreateVoucher() {
               <input
                 type="number"
                 name="giam_toi_da"
-                className="form-control"
+                className={`form-control ${
+                  errors.giam_toi_da ? "is-invalid" : ""
+                }`}
                 placeholder="Nhập số tiền giảm tối đa..."
                 value={formData.giam_toi_da}
                 onChange={handleChange}
-                min="0"
               />
+              {errors.giam_toi_da && (
+                <div className="invalid-feedback">{errors.giam_toi_da}</div>
+              )}
             </div>
 
             {/* Giá trị đơn hàng tối thiểu */}
@@ -187,12 +232,18 @@ export default function CreateVoucher() {
               <input
                 type="number"
                 name="gia_tri_don_hang_toi_thieu"
-                className="form-control"
+                className={`form-control ${
+                  errors.gia_tri_don_hang_toi_thieu ? "is-invalid" : ""
+                }`}
                 placeholder="Nhập giá trị đơn hàng tối thiểu..."
                 value={formData.gia_tri_don_hang_toi_thieu}
                 onChange={handleChange}
-                min="0"
               />
+              {errors.gia_tri_don_hang_toi_thieu && (
+                <div className="invalid-feedback">
+                  {errors.gia_tri_don_hang_toi_thieu}
+                </div>
+              )}
             </div>
 
             {/* Ngày bắt đầu */}
@@ -201,11 +252,15 @@ export default function CreateVoucher() {
               <input
                 type="date"
                 name="ngay_bat_dau"
-                className="form-control"
+                className={`form-control ${
+                  errors.ngay_bat_dau ? "is-invalid" : ""
+                }`}
                 value={formData.ngay_bat_dau}
                 onChange={handleChange}
-                required
               />
+              {errors.ngay_bat_dau && (
+                <div className="invalid-feedback">{errors.ngay_bat_dau}</div>
+              )}
             </div>
 
             {/* Ngày kết thúc */}
@@ -214,11 +269,15 @@ export default function CreateVoucher() {
               <input
                 type="date"
                 name="ngay_ket_thuc"
-                className="form-control"
+                className={`form-control ${
+                  errors.ngay_ket_thuc ? "is-invalid" : ""
+                }`}
                 value={formData.ngay_ket_thuc}
                 onChange={handleChange}
-                required
               />
+              {errors.ngay_ket_thuc && (
+                <div className="invalid-feedback">{errors.ngay_ket_thuc}</div>
+              )}
             </div>
 
             {/* Số lần sử dụng */}
@@ -227,24 +286,16 @@ export default function CreateVoucher() {
               <input
                 type="number"
                 name="so_lan_su_dung"
-                className="form-control"
+                className={`form-control ${
+                  errors.so_lan_su_dung ? "is-invalid" : ""
+                }`}
                 placeholder="Nhập số lần sử dụng..."
                 value={formData.so_lan_su_dung}
                 onChange={handleChange}
-                min="0"
               />
-            </div>
-
-            {/* Số lần đã sử dụng */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Số lần đã sử dụng</label>
-              <input
-                type="number"
-                name="so_lan_da_su_dung"
-                className="form-control"
-                value={formData.so_lan_da_su_dung}
-                readOnly
-              />
+              {errors.so_lan_su_dung && (
+                <div className="invalid-feedback">{errors.so_lan_su_dung}</div>
+              )}
             </div>
 
             {/* Trạng thái */}

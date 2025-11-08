@@ -14,12 +14,12 @@ export default function ProtectedRouteAdmin({ children }: ProtectedRouteAdminPro
     return <Navigate to="/dang-nhap" replace />;
   }
 
-  // ❌ Nếu không phải Admin
-  if (user.vai_tro !== "Admin") {
+  // ❌ Nếu không có quyền truy cập admin
+  if (!user.can_access_admin) {
     alert("Bạn không có quyền truy cập vào khu vực quản trị!");
     return <Navigate to="/" replace />;
   }
 
-  // ✅ Nếu là Admin
+  // ✅ Nếu có quyền
   return <>{children}</>;
 }

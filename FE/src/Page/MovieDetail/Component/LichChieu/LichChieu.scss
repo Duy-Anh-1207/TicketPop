@@ -1,6 +1,6 @@
 .lichchieu-wrapper {
-  max-width: 1200px; 
-  margin: 40px auto 0; 
+  max-width: 1200px;
+  margin: 40px auto 0;
   padding: 30px;
   border-radius: 12px;
   background-color: #f1f4b3;
@@ -65,7 +65,7 @@
 
     .schedule-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 15px;
 
       .showtime {
