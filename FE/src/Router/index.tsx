@@ -12,6 +12,8 @@ import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
 import VerifyCode from "../component/Auth/VerifyRegister";
 
+
+
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
 import CreatePhim from "../component/Admin/Phim/CreatePhim";
@@ -87,11 +89,12 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
+        { path: "booking/:slug", element: <Booking/> },
 
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
-        { path: "booking/:slug", element: <Booking/> }
+        
       ],
     },
 

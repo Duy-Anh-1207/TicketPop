@@ -94,6 +94,8 @@ class ThongKeController extends Controller
             ], 500);
         }
     }
+    
+
     // Số lượng đồ ăn bán ra
     public function doAnBanRa()
     {
@@ -110,7 +112,5 @@ class ThongKeController extends Controller
     }
 
 
-
-
-
+    
 }

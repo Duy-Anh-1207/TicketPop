@@ -25,7 +25,7 @@ class LichChieu extends Model
         'gio_chieu',
         'gio_ket_thuc'
     ];
-     protected $dates = ['deleted_at'];
+    protected $dates = ['deleted_at'];
 
     // Quan hệ với các model khác
     public function phim()
@@ -40,11 +40,11 @@ class LichChieu extends Model
 
     public function phienBan()
     {
-        return $this->belongsTo(PhienBan::class, 'phien_ban_id'); 
+        return $this->belongsTo(PhienBan::class, 'phien_ban_id');
     }
     public function giaVe()
-{
-    return $this->hasOne(GiaVe::class, 'lich_chieu_id');
-}
-
+    {
+        return $this->hasOne(GiaVe::class, 'lich_chieu_id');
+    }
+    
 }

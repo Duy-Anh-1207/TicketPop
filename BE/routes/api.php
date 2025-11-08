@@ -73,6 +73,7 @@ Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete'])
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
+Route::get('dat-ve',[DatVeController::class, 'danhSachDatVe']);
 Route::get('/banners', [BannerController::class, 'index']);
 
 Route::post('/banners', [BannerController::class, 'store']);
