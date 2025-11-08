@@ -48,4 +48,26 @@ class ThongKeController extends Controller
         }
     }
     
+
+    // số lượng vé bán ra
+    public function veBan()
+    {
+        try {
+            $tongVeBan = DB::table('dat_ve')->count();
+
+            return response()->json([
+                'status' => true,
+                'tong_ve_ban' => $tongVeBan,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+    
+
 }
