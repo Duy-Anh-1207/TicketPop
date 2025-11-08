@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ThongKeController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\FoodController;
 use App\Http\Controllers\Admin\GheController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\Admin\PhimController;
 use App\Http\Controllers\Admin\RoomController;
 use App\Http\Controllers\Admin\TheLoaiController;
 use App\Http\Controllers\Admin\UserController;
+
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Admin\VaiTroController;
@@ -105,6 +107,8 @@ Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
 Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
 Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
+
+Route::get('/thong-ke/doanh-thu', [ThongKeController::class, 'doanhThu']);
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);
