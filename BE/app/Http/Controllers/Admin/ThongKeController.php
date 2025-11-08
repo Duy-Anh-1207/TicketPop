@@ -94,6 +94,21 @@ class ThongKeController extends Controller
             ], 500);
         }
     }
+    // Số lượng đồ ăn bán ra
+    public function doAnBanRa()
+    {
+        try {
+            $tong = DB::table('don_do_an')->sum('so_luong');
+
+            return response()->json([
+                'status' => true,
+                'tong_do_an_ban_ra' => (int) $tong
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
 
 
 
