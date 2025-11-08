@@ -110,7 +110,26 @@ class ThongKeController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
-
-
+    // Khách hàng mới trong tháng
     
+    public function khachHangMoi()
+    {
+        try {
+            $soLuong = DB::table('nguoi_dung')
+                ->whereMonth('created_at', now()->month)
+                ->whereYear('created_at', now()->year)
+                ->count();
+
+            return response()->json([
+                'status' => true,
+                'khach_hang_moi' => $soLuong
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+
+
+
 }

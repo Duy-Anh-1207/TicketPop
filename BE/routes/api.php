@@ -121,7 +121,7 @@ Route::get('/thong-ke/doanh-thu', [ThongKeController::class, 'doanhThu']);
 Route::get('/thong-ke/tong-ve-ban', [ThongKeController::class, 'veBan']);
 Route::get('/thong-ke/top-phim', [ThongKeController::class, 'topPhim']);
 Route::get('/thong-ke/do-an-ban-ra', [ThongKeController::class, 'doAnBanRa']);
-
+Route::get('/thong-ke/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);
