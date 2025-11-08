@@ -118,6 +118,8 @@ Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
 Route::get('/thong-ke/doanh-thu', [ThongKeController::class, 'doanhThu']);
 Route::get('/thong-ke/tong-ve-ban', [ThongKeController::class, 'veBan']);
+Route::get('/thong-ke/top-phim', [ThongKeController::class, 'topPhim']);
+
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);

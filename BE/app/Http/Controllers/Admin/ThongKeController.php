@@ -67,7 +67,35 @@ class ThongKeController extends Controller
         }
     }
 
+    // Top 5 phim có doanh thu cao nhất
+    public function topPhim()
+    {
+        try {
+            $data = DB::table('dat_ve')
+                ->join('phim', 'dat_ve.phim_id', '=', 'phim.id')
+                ->select(
+                    'phim.ten_phim',
+                    DB::raw('SUM(dat_ve.tong_tien) as tong_doanh_thu'),
+                    DB::raw('COUNT(dat_ve.id) as so_luot_dat')
+                )
+                ->groupBy('phim.ten_phim')
+                ->orderByDesc('tong_doanh_thu')
+                ->limit(5)
+                ->get();
 
-    
+            return response()->json([
+                'status' => true,
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+
+
 
 }
