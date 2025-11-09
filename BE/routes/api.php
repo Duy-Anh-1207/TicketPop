@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
 use App\Http\Controllers\Admin\DatVeController;
+use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
 
@@ -67,6 +68,15 @@ Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore']);
 Route::get('/deleted', [LichChieuController::class, 'deleted']);
 Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
+
+// don do an
+Route::prefix('don-do-an')->group(function () {
+    Route::get('/', [DonDoAnController::class, 'index']);
+    Route::post('/', [DonDoAnController::class, 'store']);
+    Route::get('/{id}', [DonDoAnController::class, 'show']);
+    Route::put('/{id}', [DonDoAnController::class, 'update']);
+    Route::delete('/{id}', [DonDoAnController::class, 'destroy']);
+});
 
 
 // dat ve
