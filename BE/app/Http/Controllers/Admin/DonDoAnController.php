@@ -40,4 +40,16 @@ class DonDoAnController extends Controller
             'data' => $donDoAn->load('doAn','datVe')
         ],201);
     }
+    public function show($id){
+        $donDoAn = DonDoAn::with(['datVe','doAn'])->find($id);
+        if(!$donDoAn){
+            return response()->json([
+                'messege' => 'Không tìm thấy đơn đồ ăn',
+            ],404);
+        }
+        return response()->json([
+            'message' => 'Chi tiết đơn đồ ăn',
+            'data' => $donDoAn
+        ]);
+    }
 }
