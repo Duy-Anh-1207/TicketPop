@@ -68,4 +68,16 @@ class DonDoAnController extends Controller
             'data' => $donDoAn->load('doAn','datVe'),
         ]);
     }
+    public function destroy($id){
+        $donDoAn = DonDoAn::find($id);
+        if(!$donDoAn){
+            return response()->json([
+                'message' => 'không tìm thấy đơn đồ ăn'
+            ],404);
+        }
+        $donDoAn->delete();
+        return response()->json([
+            'message' => 'Đã xóa thành công'
+        ]);
+    }
 }
