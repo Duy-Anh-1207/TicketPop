@@ -12,7 +12,7 @@ class DoAn extends Model
 
     use SoftDeletes;
     
-    protected $table='don_do_an';
+    protected $table='do_an';
     protected $fillable =[
         'ten_do_an',
         'image',
