@@ -72,7 +72,10 @@ Route::get('/deleted', [LichChieuController::class, 'deleted']);
 Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
 
 // don do an
-
+Route::prefix('don-do-an')->group(function(){
+    Route::get('/', [DonDoAnController::class, 'index']);
+    Route::post('/', [DonDoAnController::class, 'store']);
+});
 
 
 // dat ve
