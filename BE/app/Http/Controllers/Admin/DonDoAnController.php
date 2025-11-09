@@ -52,4 +52,20 @@ class DonDoAnController extends Controller
             'data' => $donDoAn
         ]);
     }
+    public function update(Request $request, $id){
+        $donDoAn = DonDoAn::find($id);
+        if(!$donDoAn){
+            return response()->json([
+                'message' => 'Không tìm thấy đơn đồ ăn nào',
+            ],404);
+        }
+        $request->validate([
+            'so_luong'=> 'sometimes|integer|min:1',
+        ]);
+        $donDoAn->update($request->only('so_luong'));
+        return response()->json([
+            'message' => 'Cập nhật đơn đồ ăn thành công',
+            'data' => $donDoAn->load('doAn','datVe'),
+        ]);
+    }
 }
