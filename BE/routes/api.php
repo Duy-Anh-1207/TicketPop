@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\DatVeController;
 use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
+use App\Http\Controllers\Admin\GiaVeController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -85,6 +86,7 @@ Route::prefix('don-do-an')->group(function(){
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
 Route::get('dat-ve',[DatVeController::class, 'danhSachDatVe']);
 Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
+Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
 
@@ -158,3 +160,8 @@ Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);
 
 //client
 Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
+
+//gia ve
+Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
+
+

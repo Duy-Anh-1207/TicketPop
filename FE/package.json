@@ -24,6 +24,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.65.0",
     "react-quill": "^2.0.0",
+    "react-quill-new": "^3.6.0",
     "react-router-dom": "^7.9.4",
     "react-select": "^5.10.2",
     "sweetalert2": "^11.24.0",
