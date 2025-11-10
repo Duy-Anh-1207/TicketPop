@@ -1,6 +1,8 @@
 import { useRoutes } from "react-router-dom";
 
 //Client
+//Payment
+import Payment from "../Page/Payment/Payment";
 //Home
 import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
@@ -56,14 +58,9 @@ import LichChieuDetail from "../component/Admin/LichChieu/LichChieuDetail";
 import DeletedLichChieuList from "../component/Admin/LichChieu/DeletedLichChieuList";
 
 // import EditLichChieu from "../component/Admin/LichChieu/Show";
-
-
-
 import ProtectedRouteAdmin from "../component/Auth/ProtectedRouteAdmin";
 import MenuList from "../component/Admin/Menu/MenuList";
 import MenuCreate from "../component/Admin/Menu/MenuCreate";
-
-
 
 // Banner
 import BannerList from "../component/Admin/Banner/ListBanner";
@@ -99,6 +96,8 @@ const Routermain = () => {
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
         
+        { path: "booking/:slug", element: <Booking/> },
+        { path: "booking/payment", element: <Payment/> },
       ],
     },
 

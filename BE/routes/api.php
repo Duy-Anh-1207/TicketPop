@@ -20,8 +20,10 @@ use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
 use App\Http\Controllers\Admin\DatVeController;
+use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
+use App\Http\Controllers\Admin\GiaVeController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -70,10 +72,22 @@ Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore'])
 Route::get('/deleted', [LichChieuController::class, 'deleted']);
 Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
 
+// don do an
+Route::prefix('don-do-an')->group(function(){
+    Route::get('/', [DonDoAnController::class, 'index']);
+    Route::post('/', [DonDoAnController::class, 'store']);
+    Route::put('/{id}', [DonDoAnController::class, 'update']);
+    Route::get('/{id}', [DonDoAnController::class, 'show']);
+    Route::delete('/{id}', [DonDoAnController::class, 'destroy']);
+});
+
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
 Route::get('dat-ve',[DatVeController::class, 'danhSachDatVe']);
+Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
+Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+
 Route::get('/banners', [BannerController::class, 'index']);
 
 Route::post('/banners', [BannerController::class, 'store']);
@@ -148,3 +162,8 @@ Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);
 
 //client
 Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
+
+//gia ve
+Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
+
+

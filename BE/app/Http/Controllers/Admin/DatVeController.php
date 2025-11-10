@@ -103,7 +103,7 @@ class DatVeController extends Controller
     public function danhSachDatVe()
     {
         $user = Auth::user() ?? \App\Models\NguoiDung::first();
-
+    
         $datVe = DatVe::with([
             'nguoiDung:email',
             'lichChieu:id,gio_chieu,phim_id,phong_id',
@@ -118,4 +118,80 @@ class DatVeController extends Controller
             'data' => $datVe
         ]);
     }
+    public function inVe($id)
+    {
+        try {
+            $datVe = DatVe::with([
+                'nguoiDung:id,ten,so_dien_thoai,email',
+                'lichChieu:id,gio_chieu,gio_ket_thuc,phim_id,phong_id',
+                'lichChieu.phim:id,ten_phim,thoi_luong,anh_poster',
+                'lichChieu.phong:id,ten_phong',
+                'chiTiet.ghe:id,so_ghe,loai_ghe_id',
+            ])->find($id);
+
+            if (!$datVe) {
+                return response()->json([
+                    'message' => 'Không tìm thấy vé.'
+                ], 404);
+            }
+            return response()->json([
+                'message' => 'Thông tin vé chi tiết',
+                'data' => [
+                    'ma_ve' => 'V' . str_pad($datVe->id, 6, '0', STR_PAD_LEFT),
+                    'ten_khach_hang' => $datVe->nguoiDung->ten ?? 'Không rõ',
+                    'so_dien_thoai' => $datVe->nguoiDung->so_dien_thoai ?? '',
+                    'phim' => $datVe->lichChieu->phim->ten_phim ?? '',
+                    'thoi_luong' => $datVe->lichChieu->phim->thoi_luong ?? '',
+                    'rap' => $datVe->lichChieu->phong->rap->ten_rap ?? '',
+                    'phong' => $datVe->lichChieu->phong->ten_phong ?? '',
+                    'gio_chieu' => $datVe->lichChieu->gio_chieu->format('H:i d/m/Y'),
+                    'gio_ket_thuc' => $datVe->lichChieu->gio_ket_thuc->format('H:i d/m/Y'),
+                    'tong_tien' => number_format($datVe->tong_tien, 0, ',', '.') . 'đ',
+                    'danh_sach_ghe' => $datVe->chiTiet->map(function ($ct) {
+                        return [
+                            'so_ghe' => $ct->ghe->so_ghe,
+                            'loai_ghe' => $ct->ghe->loai_ghe_id,
+                            'gia_ve' => number_format($ct->gia_ve, 0, ',', '.') . 'đ',
+                        ];
+                    }),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi lấy vé',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function chiTietVe($id)
+{
+    try {
+        $datVe = DatVe::with([
+            'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
+            'lichChieu:id,phim_id,phong_id,gio_chieu,gio_ket_thuc',
+            'lichChieu.phim:id,ten_phim,anh_poster,thoi_luong',
+            'lichChieu.phong:id,ten_phong',
+            'nguoiDung:id,ten,email'
+        ])->find($id);
+
+        if (!$datVe) {
+            return response()->json([
+                'message' => 'Không tìm thấy vé này!',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Lấy chi tiết vé thành công!',
+            'data' => $datVe,
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Lỗi khi lấy chi tiết vé!',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
 }

@@ -6,6 +6,9 @@ import { useLichChieuDetail } from "../../hook/useLichChieu";
 import "./Booking.scss";
 import { useListFood } from "../../hook/FoodHook";
 import type { Food } from "../../types/foods";
+import type { GiaVe } from "../../types/giave";
+import { datVe } from "../../provider/Client/datVeProvider";
+import { useNavigate } from "react-router-dom";
 
 interface SelectedSeat {
   id: number;
@@ -22,22 +25,47 @@ interface FoodQuantity {
 const Booking = () => {
   const location = useLocation();
   const lichChieuId = location.state?.lichChieuId;
+  const navigate = useNavigate();
 
+  // --- State dữ liệu ---
+  const [giaVeList, setGiaVeList] = useState<GiaVe[]>([]);
+  const [loadingGiaVe, setLoadingGiaVe] = useState(false);
   const { data: lichChieu, isLoading, error } = useLichChieuDetail(lichChieuId);
   const { data: foods, isLoading: loadingFood } = useListFood();
 
   const [gheList, setGheList] = useState<any[]>([]);
   const [loadingGhe, setLoadingGhe] = useState(false);
 
-  // Trạng thái chọn
   const [selectedSeats, setSelectedSeats] = useState<SelectedSeat[]>([]);
   const [foodQuantities, setFoodQuantities] = useState<FoodQuantity[]>([]);
 
-  // Giá ghế (có thể lấy từ API, tạm hardcode)
-  const GIA_GHE_THUONG = 75000;
-  const GIA_GHE_VIP = 120000;
+  // --- Lấy danh sách giá vé theo lịch chiếu ---
+  useEffect(() => {
+    if (!lichChieuId) return;
 
-  // Lấy danh sách ghế
+    const fetchGiaVe = async () => {
+      setLoadingGiaVe(true);
+      try {
+        const res = await axios.get(
+          `http://127.0.0.1:8000/api/gia-ve/${lichChieuId}`
+        );
+        const data = (res.data.data || []).map((item: any) => ({
+          ...item,
+          gia_ve: Number(item.gia_ve),
+        }));
+        setGiaVeList(data);
+      } catch (error) {
+        console.error("Lỗi khi lấy giá vé:", error);
+        message.error("Không thể tải giá vé!");
+      } finally {
+        setLoadingGiaVe(false);
+      }
+    };
+
+    fetchGiaVe();
+  }, [lichChieuId]);
+
+  // --- Lấy danh sách ghế ---
   useEffect(() => {
     if (!lichChieu?.phong?.id) return;
 
@@ -59,18 +87,26 @@ const Booking = () => {
     fetchGhe();
   }, [lichChieu?.phong?.id]);
 
-  // Xử lý chọn ghế
+  // --- Xử lý chọn ghế ---
   const toggleSeat = (ghe: any) => {
     const isSelected = selectedSeats.some((s) => s.id === ghe.id);
+
     if (isSelected) {
       setSelectedSeats(selectedSeats.filter((s) => s.id !== ghe.id));
     } else {
-      const gia = ghe.loai_ghe_id === 2 ? GIA_GHE_VIP : GIA_GHE_THUONG;
+      // Tìm giá vé theo loại ghế của lịch chiếu
+      const giaVe = giaVeList.find((gv) => gv.loai_ghe_id === ghe.loai_ghe_id);
+      const gia = giaVe ? giaVe.gia_ve : 0;
+
+      if (gia === 0) {
+        message.warning("Không tìm thấy giá vé cho loại ghế này!");
+      }
+
       setSelectedSeats([...selectedSeats, { ...ghe, gia }]);
     }
   };
 
-  // Xử lý chọn đồ ăn
+  // --- Xử lý chọn đồ ăn ---
   const updateFoodQuantity = (food: Food, delta: number) => {
     setFoodQuantities((prev) => {
       const existing = prev.find((item) => item.food.id === food.id);
@@ -89,7 +125,7 @@ const Booking = () => {
     });
   };
 
-  // Tính tổng tiền
+  // --- Tính tổng tiền ---
   const totalSeatPrice = selectedSeats.reduce((sum, seat) => sum + seat.gia, 0);
   const totalFoodPrice = foodQuantities.reduce(
     (sum, item) => sum + item.food.gia_ban * item.quantity,
@@ -97,18 +133,18 @@ const Booking = () => {
   );
   const totalPrice = totalSeatPrice + totalFoodPrice;
 
-  // Gom ghế theo hàng
+  // --- Gom ghế theo hàng ---
   const hangList = gheList.reduce((acc, ghe) => {
     acc[ghe.hang] = acc[ghe.hang] || [];
     acc[ghe.hang].push(ghe);
     return acc;
   }, {} as Record<string, any[]>);
 
-  // Loading states
-  if (isLoading)
+  // --- Loading states ---
+  if (isLoading || loadingGiaVe)
     return (
       <div className="booking-center">
-        <p className="booking-loading">Đang tải thông tin phòng chiếu...</p>
+        <Spin tip="Đang tải dữ liệu..." />
       </div>
     );
 
@@ -206,18 +242,19 @@ const Booking = () => {
 
         {/* Chú thích ghế */}
         <div className="seat-legend">
+          {" "}
           <div className="legend-item">
-            <div className="legend-box thuong"></div>
-            <span>Ghế thường</span>
-          </div>
+            {" "}
+            <div className="legend-box thuong"></div> <span>Ghế thường</span>{" "}
+          </div>{" "}
           <div className="legend-item">
-            <div className="legend-box vip"></div>
-            <span>Ghế VIP</span>
-          </div>
+            {" "}
+            <div className="legend-box vip"></div> <span>Ghế VIP</span>{" "}
+          </div>{" "}
           <div className="legend-item">
-            <div className="legend-box selected"></div>
-            <span>Đã chọn</span>
-          </div>
+            {" "}
+            <div className="legend-box selected"></div> <span>Đã chọn</span>{" "}
+          </div>{" "}
         </div>
       </div>
 
@@ -236,10 +273,9 @@ const Booking = () => {
                 0;
               return (
                 <div key={food.id} className="food-item">
-                  {/* Placeholder hình ảnh */}
                   <div className="food-image-placeholder">
                     <span role="img" aria-label="food">
-                      Food
+                      🍿
                     </span>
                   </div>
 
@@ -252,7 +288,6 @@ const Booking = () => {
                       }).format(food.gia_ban)}
                     </p>
 
-                    {/* Nút tăng/giảm */}
                     <div className="food-quantity">
                       <button
                         onClick={() => updateFoodQuantity(food, -1)}
@@ -277,7 +312,7 @@ const Booking = () => {
         )}
       </div>
 
-      {/* KHUNG TÓM TẮT & NÚT ĐẶT VÉ */}
+      {/* Khung tóm tắt & nút đặt vé */}
       <div className="booking-summary">
         <div className="summary-content">
           <h3>Thông tin đặt vé</h3>
@@ -333,16 +368,50 @@ const Booking = () => {
             </p>
           </div>
 
-          {/* Nút đặt vé */}
           <Button
             type="primary"
             size="large"
             block
             className="booking-btn"
             disabled={selectedSeats.length === 0}
-            onClick={() => {
-              message.success("Đặt vé thành công! (Demo)");
-              // Gọi API đặt vé ở đây
+            onClick={async () => {
+              if (selectedSeats.length === 0) {
+                message.warning("Vui lòng chọn ít nhất 1 ghế!");
+                return;
+              }
+
+              try {
+                const payload = {
+                  lich_chieu_id: lichChieuId,
+                  ghe: selectedSeats.map((seat) => seat.id),
+                };
+
+                const res = await datVe(payload);
+                console.log("datVe response:", res); 
+
+                const createdVe = res?.dat_ve ?? res?.data ?? null;
+
+                if (res?.message && createdVe?.id) {
+                  message.success(res.message);
+
+                  navigate("/booking/payment", {
+                    state: { datVeId: createdVe.id },
+                  });
+
+                  // Reset dữ liệu
+                  setSelectedSeats([]);
+                  setFoodQuantities([]);
+                  return;
+                }
+
+                console.warn("Không tìm thấy id vé trong response", res);
+                message.warning("Không nhận được ID vé từ máy chủ!");
+              } catch (error: any) {
+                console.error("Lỗi đặt vé:", error);
+                message.error(
+                  error.response?.data?.message || "Đặt vé thất bại!"
+                );
+              }
             }}
           >
             Đặt vé ({selectedSeats.length} ghế)
