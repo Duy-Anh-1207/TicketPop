@@ -24,6 +24,9 @@ use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
 use App\Http\Controllers\Admin\GiaVeController;
+use App\Http\Controllers\Client\MomoController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -166,4 +169,6 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 //gia ve
 Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 
-
+Route::post('/thanhtoan/momo', [MomoController::class,'create']);
+Route::get('/thanhtoan/momo/return', [MomoController::class,'return']);
+Route::post('/thanhtoan/momo/ipn', [MomoController::class,'ipn']);

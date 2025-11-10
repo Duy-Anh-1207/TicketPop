@@ -7,6 +7,20 @@ import "./Payment.scss";
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const handleThanhToanMoMo = async () => {
+  try {
+    const { data } = await axios.post("http://127.0.0.1:8000/api/thanhtoan/momo", {
+      dat_ve_id: datVe.id,
+      amount: Number(datVe.tong_tien),
+      return_url: window.location.origin + "/ket-qua-thanh-toan",
+    });
+    const url = data?.payment_url;
+    if (url) window.location.assign(url);
+    else message.error("Không nhận được liên kết thanh toán từ MoMo");
+  } catch (e:any) {
+    message.error(e?.response?.data?.message || "Không thể thanh toán!");
+  }
+}
   const datVeId = location.state?.datVeId;
 
   const [loading, setLoading] = useState(false);
@@ -51,23 +65,23 @@ const Payment = () => {
       </div>
     );
 
-  const handleThanhToanOnline = async () => {
-    try {
-      const res = await axios.post(`http://127.0.0.1:8000/api/thanhtoan/zalopay`, {
-        dat_ve_id: datVe.id,
-        tong_tien: datVe.tong_tien,
-      });
+  // const handleThanhToanOnline = async () => {
+  //   try {
+  //     const res = await axios.post(`http://127.0.0.1:8000/api/thanhtoan/zalopay`, {
+  //       dat_ve_id: datVe.id,
+  //       tong_tien: datVe.tong_tien,
+  //     });
 
-      if (res.data?.payment_url) {
-        window.location.href = res.data.payment_url;
-      } else {
-        message.warning("Không nhận được liên kết thanh toán!");
-      }
-    } catch (error: any) {
-      console.error("❌ Lỗi thanh toán:", error);
-      message.error(error.response?.data?.message || "Không thể thanh toán!");
-    }
-  };
+  //     if (res.data?.payment_url) {
+  //       window.location.href = res.data.payment_url;
+  //     } else {
+  //       message.warning("Không nhận được liên kết thanh toán!");
+  //     }
+  //   } catch (error: any) {
+  //     console.error("❌ Lỗi thanh toán:", error);
+  //     message.error(error.response?.data?.message || "Không thể thanh toán!");
+  //   }
+  // };
 
   return (
     <div className="payment-container">
@@ -148,9 +162,9 @@ const Payment = () => {
 
           <div className="payment-methods">
             <h4>Phương thức thanh toán</h4>
-            <Button type="primary" size="large" block onClick={handleThanhToanOnline}>
-              Thanh toán online qua ZaloPay
-            </Button>
+            <Button type="primary" size="large" block onClick={handleThanhToanMoMo}>
+  Thanh toán qua MoMo
+</Button>
           </div>
         </div>
       </div>
