@@ -33,6 +33,7 @@ const ThongKe: React.FC = () => {
   if (isLoading) return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
 
   const tongDoanhThu = data?.doanhThu?.reduce((sum, x) => sum + (x.revenue || 0), 0) ?? 0;
+  
 
   const stats = [
     {
@@ -72,7 +73,8 @@ const ThongKe: React.FC = () => {
             <div className="card-content">
               <div className="card-info">
                 <p className="card-label">{item.label}</p>
-                <h2 className="card-value">{item.value}</h2>
+               <h2 className="card-value">{item.value}</h2>
+
               </div>
               <div className="card-icon">{item.icon}</div>
             </div>
