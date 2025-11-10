@@ -13,7 +13,8 @@ use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Log;
+use Exception;
 class LichChieuController extends Controller
 {
     // Lấy danh sách lịch chiếu
@@ -389,4 +390,39 @@ class LichChieuController extends Controller
             'message' => '🧹 Đã xóa vĩnh viễn lịch chiếu!'
         ]);
     }
+
+    public function getGiaVeByLichChieu($lichChieuId)
+    {
+        try {
+
+            // Lấy danh sách giá vé
+            $giaVes = GiaVe::where('lich_chieu_id', $lichChieuId)
+                ->with('loaiGhe:id,ten_loai_ghe')
+                ->get(['id', 'lich_chieu_id', 'loai_ghe_id', 'gia_ve']);
+
+            // Nếu không có dữ liệu
+            if ($giaVes->isEmpty()) {
+                Log::warning('⚠️ Không tìm thấy giá vé cho lịch chiếu ID: ' . $lichChieuId);
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $giaVes
+            ]);
+        } catch (Exception $e) {
+            // Ghi log chi tiết lỗi
+            Log::error('❌ Lỗi khi lấy giá vé cho lịch chiếu ID: ' . $lichChieuId, [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            // Trả JSON thông báo lỗi ra frontend
+            return response()->json([
+                'success' => false,
+                'message' => 'Đã xảy ra lỗi khi lấy giá vé!',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }   
 }

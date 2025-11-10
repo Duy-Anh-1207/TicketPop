@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\DangNhapController;
 use App\Http\Controllers\Admin\DatVeController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
+use App\Http\Controllers\Admin\GiaVeController;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -71,6 +72,8 @@ Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore'])
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
+Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+
 Route::get('/banners', [BannerController::class, 'index']);
 
 Route::post('/banners', [BannerController::class, 'store']);
@@ -137,3 +140,8 @@ Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);
 
 //client
 Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
+
+//gia ve
+Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
+
+

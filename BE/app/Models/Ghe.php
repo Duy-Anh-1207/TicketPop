@@ -22,4 +22,9 @@ class Ghe extends Model
     {
         return $this->belongsTo(Room::class, 'phong_id', 'id');
     }
+
+    public function loaiGhe()
+    {
+        return $this->belongsTo(LoaiGhe::class, 'loai_ghe_id');
+    }
 }

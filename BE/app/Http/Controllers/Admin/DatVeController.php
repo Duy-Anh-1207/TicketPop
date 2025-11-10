@@ -93,4 +93,35 @@ class DatVeController extends Controller
             ], 500);
         }
     }
+
+    public function chiTietVe($id)
+{
+    try {
+        $datVe = DatVe::with([
+            'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
+            'lichChieu:id,phim_id,phong_id,gio_chieu,gio_ket_thuc',
+            'lichChieu.phim:id,ten_phim,anh_poster,thoi_luong',
+            'lichChieu.phong:id,ten_phong',
+            'nguoiDung:id,ten,email'
+        ])->find($id);
+
+        if (!$datVe) {
+            return response()->json([
+                'message' => 'Không tìm thấy vé này!',
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => 'Lấy chi tiết vé thành công!',
+            'data' => $datVe,
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Lỗi khi lấy chi tiết vé!',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
+}
+
 }
