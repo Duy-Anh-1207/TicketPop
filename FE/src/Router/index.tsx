@@ -3,6 +3,7 @@ import { useRoutes } from "react-router-dom";
 //Client
 //Payment
 import Payment from "../Page/Payment/Payment";
+import PaymentResult from "../Page/PaymentResult";
 //Home
 import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
@@ -82,7 +83,8 @@ const Routermain = () => {
     { path: "/dang-ky", element: <Register /> },
 
     { path: "/verify-code", element: <VerifyCode /> },
-
+    // ✅ Trang hiển thị kết quả sau khi MoMo redirect
+    { path: "ket-qua-thanh-toan", element: <PaymentResult /> },
     // Route chính website (client)
     {
       path: "/",
@@ -91,6 +93,7 @@ const Routermain = () => {
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
         { path: "booking/:slug", element: <Booking/> },
+        
 
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
