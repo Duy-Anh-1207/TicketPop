@@ -5,14 +5,6 @@ import { useListTinTuc, useDeleteTinTuc } from '../../../hook/TinTucHook';
 import type { TinTuc } from '../../../types/tin-tuc';
 
 // Helper hiển thị tên type đẹp hơn
-const formatNewsType = (type: 'tin_tuc' | 'uu_dai' | 'su_kien') => {
-    switch (type) {
-        case 'tin_tuc': return 'Tin Tức';
-        case 'uu_dai': return 'Ưu Đãi';
-        case 'su_kien': return 'Sự Kiện';
-        default: return 'Không xác định';
-    }
-};
 
 export default function ListTinTuc() {
     const navigate = useNavigate();
@@ -74,14 +66,6 @@ export default function ListTinTuc() {
                                 <td className="text-center">{tinTuc.tieu_de}</td>
                                 <td className="text-center">
                                     {tinTuc.noi_dung.replace(/<[^>]+>/g, '').slice(0, 50)}...
-                                </td>
-                                <td className="text-center">
-                                    <span className={`badge ${
-                                        tinTuc.type === 'uu_dai' ? 'bg-success' :
-                                        tinTuc.type === 'su_kien' ? 'bg-warning text-dark' :
-                                        'bg-primary'}`}>
-                                        {formatNewsType(tinTuc.type)}
-                                    </span>
                                 </td>
                                 <td className="text-center">
                                     {tinTuc.hinh_anh ? (

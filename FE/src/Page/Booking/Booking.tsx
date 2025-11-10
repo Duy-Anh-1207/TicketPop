@@ -168,8 +168,12 @@ const Booking = () => {
       <div className="booking-content">
         {lichChieu.phim?.anh_poster && (
           <img
-            src={lichChieu.phim.anh_poster}
-            alt={lichChieu.phim.ten_phim}
+            src={
+              lichChieu.phim?.anh_poster?.startsWith("http")
+                ? lichChieu.phim?.anh_poster
+                : `${import.meta.env.VITE_API_BASE_URL}/storage/${lichChieu.phim?.anh_poster.replace("posters/", "posters/")}`
+            }
+            alt={lichChieu.phim?.ten_phim}
             className="booking-poster"
           />
         )}
@@ -225,9 +229,8 @@ const Booking = () => {
                         return (
                           <div
                             key={ghe.id}
-                            className={`seat-item ${
-                              ghe.loai_ghe_id === 2 ? "vip" : "thuong"
-                            } ${isSelected ? "selected" : ""}`}
+                            className={`seat-item ${ghe.loai_ghe_id === 2 ? "vip" : "thuong"
+                              } ${isSelected ? "selected" : ""}`}
                             onClick={() => toggleSeat(ghe)}
                           >
                             {ghe.so_ghe}
@@ -387,7 +390,7 @@ const Booking = () => {
                 };
 
                 const res = await datVe(payload);
-                console.log("datVe response:", res); 
+                console.log("datVe response:", res);
 
                 const createdVe = res?.dat_ve ?? res?.data ?? null;
 

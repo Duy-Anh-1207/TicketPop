@@ -164,22 +164,6 @@ export default function DetailTinTuc() {
               />
             </div>
 
-            {/* ✅ Loại tin tức */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Loại tin tức</label>
-              <select
-                name="type"
-                className="form-select"
-                value={formData.type}
-                onChange={handleChange}
-                required
-              >
-                <option value="tin_tuc">Tin Tức</option>
-                <option value="uu_dai">Ưu Đãi</option>
-                <option value="su_kien">Sự Kiện</option>
-              </select>
-            </div>
-
             {/* Nội dung */}
             <div className="mb-3">
               <label className="form-label fw-bold">Nội dung</label>
@@ -237,17 +221,6 @@ export default function DetailTinTuc() {
         ) : (
           <div className="py-3">
             <InfoRow title="Tiêu đề" value={tinTuc.tieu_de} icon="fa-heading" />
-            <InfoRow
-              icon="fa-tag"
-              title="Loại tin tức"
-              value={
-                tinTuc.type === "uu_dai"
-                  ? "Ưu Đãi"
-                  : tinTuc.type === "su_kien"
-                  ? "Sự Kiện"
-                  : "Tin Tức"
-              }
-            />
             <InfoRow
               icon="fa-file-alt"
               title="Nội dung"

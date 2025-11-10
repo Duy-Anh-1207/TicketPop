@@ -11,7 +11,7 @@
 
 .payment-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr;
+  grid-template-columns: 2fr 1.4fr;
   gap: 32px;
 
   @media (max-width: 992px) {

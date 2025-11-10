@@ -8,19 +8,19 @@ const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const handleThanhToanMoMo = async () => {
-  try {
-    const { data } = await axios.post("http://127.0.0.1:8000/api/thanhtoan/momo", {
-      dat_ve_id: datVe.id,
-      amount: Number(datVe.tong_tien),
-      return_url: window.location.origin + "/ket-qua-thanh-toan",
-    });
-    const url = data?.payment_url;
-    if (url) window.location.assign(url);
-    else message.error("Không nhận được liên kết thanh toán từ MoMo");
-  } catch (e:any) {
-    message.error(e?.response?.data?.message || "Không thể thanh toán!");
+    try {
+      const { data } = await axios.post("http://127.0.0.1:8000/api/thanhtoan/momo", {
+        dat_ve_id: datVe.id,
+        amount: Number(datVe.tong_tien),
+        return_url: window.location.origin + "/ket-qua-thanh-toan",
+      });
+      const url = data?.payment_url;
+      if (url) window.location.assign(url);
+      else message.error("Không nhận được liên kết thanh toán từ MoMo");
+    } catch (e: any) {
+      message.error(e?.response?.data?.message || "Không thể thanh toán!");
+    }
   }
-}
   const datVeId = location.state?.datVeId;
 
   const [loading, setLoading] = useState(false);
@@ -65,36 +65,18 @@ const Payment = () => {
       </div>
     );
 
-  // const handleThanhToanOnline = async () => {
-  //   try {
-  //     const res = await axios.post(`http://127.0.0.1:8000/api/thanhtoan/zalopay`, {
-  //       dat_ve_id: datVe.id,
-  //       tong_tien: datVe.tong_tien,
-  //     });
-
-  //     if (res.data?.payment_url) {
-  //       window.location.href = res.data.payment_url;
-  //     } else {
-  //       message.warning("Không nhận được liên kết thanh toán!");
-  //     }
-  //   } catch (error: any) {
-  //     console.error("❌ Lỗi thanh toán:", error);
-  //     message.error(error.response?.data?.message || "Không thể thanh toán!");
-  //   }
-  // };
-
   return (
     <div className="payment-container">
       <div className="payment-grid">
-        {/* Cột trái: Thông tin phim */}
+        {/* Cột trái: tạm trống */}
         <div className="left-column">
-          {datVe.lich_chieu?.phim?.anh_poster && (
-            <img
-              src={datVe.lich_chieu.phim.anh_poster}
-              alt={datVe.lich_chieu.phim.ten_phim}
-              className="movie-poster"
-            />
-          )}
+          <div className="placeholder">
+            <p>Thông tin khách hàng sẽ hiển thị ở đây.</p>
+          </div>
+        </div>
+
+        {/* Cột phải: Thông tin phim */}
+        <div className="right-column">
           <div className="movie-details">
             <h2>{datVe.lich_chieu?.phim?.ten_phim}</h2>
             <p>Phòng: {datVe.lich_chieu?.phong?.ten_phong}</p>
@@ -143,33 +125,36 @@ const Payment = () => {
                 ))}
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Cột phải: Thanh toán */}
-        <div className="right-column">
-          <div className="total-price">
-            <h3>
-              Tổng tiền:{" "}
-              <span>
-                {new Intl.NumberFormat("vi-VN", {
-                  style: "currency",
-                  currency: "VND",
-                }).format(Number(datVe.tong_tien))}
-              </span>
-            </h3>
-          </div>
+            <div className="total-price">
+              <h3>
+                Tổng tiền:{" "}
+                <span>
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(Number(datVe.tong_tien))}
+                </span>
+              </h3>
+            </div>
 
-          <div className="payment-methods">
-            <h4>Phương thức thanh toán</h4>
-            <Button type="primary" size="large" block onClick={handleThanhToanMoMo}>
-  Thanh toán qua MoMo
-</Button>
+            <div className="payment-methods">
+              <h4>Phương thức thanh toán</h4>
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={handleThanhToanMoMo}
+              >
+                Thanh toán qua MoMo
+              </Button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   );
+
 };
 
 export default Payment;
