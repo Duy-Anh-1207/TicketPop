@@ -139,7 +139,7 @@ Route::prefix('thong-ke')->group(function () {
     Route::get('/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
 });
 
-Route::get('/tin-tuc', [TinTucController::class, 'index']);
+Route::get('/tin-tucs', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);
 Route::get('/tin-tucs/{id}', [TinTucController::class, 'show']);
 Route::put('/tin-tucs/{id}', [TinTucController::class, 'update']);
