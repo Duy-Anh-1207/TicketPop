@@ -110,6 +110,23 @@ class ThongKeController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+     // Tổng doanh thu hiện tại
+
+    public function tongDoanhThu()
+    {
+        try {
+            $tong = DB::table('dat_ve')->sum('tong_tien');
+
+            return response()->json([
+                'status' => true,
+                'tong_doanh_thu' => (float) $tong
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // Khách hàng mới trong tháng
     
     public function khachHangMoi()

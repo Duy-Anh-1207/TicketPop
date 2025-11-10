@@ -116,12 +116,14 @@ Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
 Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
 Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
-
-Route::get('/thong-ke/doanh-thu', [ThongKeController::class, 'doanhThu']);
-Route::get('/thong-ke/tong-ve-ban', [ThongKeController::class, 'veBan']);
-Route::get('/thong-ke/top-phim', [ThongKeController::class, 'topPhim']);
-Route::get('/thong-ke/do-an-ban-ra', [ThongKeController::class, 'doAnBanRa']);
-Route::get('/thong-ke/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
+Route::prefix('thong-ke')->group(function () {
+    Route::get('/doanh-thu', [ThongKeController::class, 'doanhThu']);
+    Route::get('/ve-ban', [ThongKeController::class, 'veBan']);
+    Route::get('/top-phim', [ThongKeController::class, 'topPhim']);
+    Route::get('/do-an-ban-ra', [ThongKeController::class, 'doAnBanRa']);
+    Route::get('/tong-doanh-thu', [ThongKeController::class, 'tongDoanhThu']);
+    Route::get('/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
+});
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);

@@ -69,6 +69,10 @@ import MenuCreate from "../component/Admin/Menu/MenuCreate";
 import BannerList from "../component/Admin/Banner/ListBanner";
 import CreateBanner from "../component/Admin/Banner/CreateBanner";
 
+//Thống kê
+import ThongKe from "../component/Admin/ThongKe/ThongKe";
+
+
 // ✅ Tin tức (CLIENT)
 import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
@@ -157,6 +161,8 @@ const Routermain = () => {
         // Banner
         { path: "banners", element: <BannerList /> },
         { path: "banners/them-moi", element: <CreateBanner /> },
+        // Thống kê
+        { path: "thongke", element: <ThongKe /> },
 
       ],
     },

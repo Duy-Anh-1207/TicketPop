@@ -11,7 +11,8 @@ const MENU_IDS = {
   DICH_VU: 5,
   LICH_CHIEU: 6,
   VOUCHER: 7,
-  TIN_TUC: 8
+  TIN_TUC: 8,
+  THONG_KE: 9
 };
 
 interface MenuItem {
@@ -114,7 +115,19 @@ const MENU_CONFIG: MenuItem[] = [
     children: [
       { title: 'Danh sách tin tức', path: '/admin/tin-tuc' }
     ]
-  }
+  },
+
+  {
+  id: MENU_IDS.THONG_KE,
+  title: 'Thống kê',
+  icon: 'solar:chart-square-line-duotone',
+  path: '/admin/thongke',
+  color: 'primary',
+  children: [
+    { title: 'Tổng quan', path: '/admin/thongke' },
+  ]
+},
+
 ];
 
 const Sidebar: React.FC = () => {
