@@ -14,7 +14,7 @@ const Navbar: React.FC = () => {
             display: "flex",
           }}
         >
-          <li style={{ margin: "0 40px" }}>
+          <li>
             <a
               href="#schedule"
               style={{
@@ -28,7 +28,6 @@ const Navbar: React.FC = () => {
               <span
                 role="img"
                 aria-label="calendar"
-                style={{ marginRight: "5px" }}
               >
                 <i className="fa-solid fa-location-dot"></i>
               </span>
