@@ -149,6 +149,18 @@ const Payment = () => {
                 Thanh toán qua MoMo
               </Button>
             </div>
+
+            <div className="payment-methods">
+              <h4>Phương thức thanh toán</h4>
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={handleThanhToanMoMo}
+              >
+                Thanh toán qua MoMo
+              </Button>
+            </div>
           </div>
         </div>
       </div>
