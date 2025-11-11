@@ -10,27 +10,28 @@ use App\Models\GiaVe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Models\DonDoAn;
 use Exception;
 
 class DatVeController extends Controller
 {
     public function datVe(Request $request)
     {
-        // Validate dữ liệu đầu vào
         $request->validate([
             'lich_chieu_id' => 'required|exists:lich_chieu,id',
             'ghe' => 'required|array|min:1',
             'ghe.*' => 'exists:ghe,id',
+            'do_an' => 'nullable|array',
+            'do_an.*.do_an_id' => 'required_with:do_an|exists:do_an,id',
+            'do_an.*.so_luong' => 'required_with:do_an|integer|min:1',
         ]);
 
-        // Lấy thông tin user hiện tại (hoặc user đầu tiên nếu chưa có auth)
         $user = Auth::user() ?? \App\Models\NguoiDung::first();
 
         try {
-            //  Mở transaction để đảm bảo toàn vẹn dữ liệu
             DB::beginTransaction();
 
-            //  Lấy danh sách ghế và khóa hàng (tránh double booking)
+            // ====== Xử lý ghế ======
             $gheList = Ghe::whereIn('id', $request->ghe)
                 ->lockForUpdate()
                 ->get();
@@ -41,7 +42,6 @@ class DatVeController extends Controller
                 ], 400);
             }
 
-            //  Tính tổng tiền dựa trên bảng `gia_ve`
             $tongTien = 0;
             $giaVeTheoGhe = [];
 
@@ -58,14 +58,14 @@ class DatVeController extends Controller
                 $tongTien += $giaVe;
             }
 
-            //  Tạo đơn đặt vé chính
+            // ====== Tạo đơn đặt vé ======
             $datVe = DatVe::create([
                 'nguoi_dung_id' => $user->id,
                 'lich_chieu_id' => $request->lich_chieu_id,
                 'tong_tien' => $tongTien,
             ]);
 
-            //  Tạo chi tiết đặt vé
+            // ====== Chi tiết ghế ======
             foreach ($gheList as $ghe) {
                 DatVeChiTiet::create([
                     'dat_ve_id' => $datVe->id,
@@ -73,11 +73,30 @@ class DatVeController extends Controller
                     'gia_ve' => $giaVeTheoGhe[$ghe->id],
                 ]);
 
-                // cập nhật trạng thái ghế (false = đã đặt)
                 $ghe->update(['trang_thai' => false]);
             }
 
-            //  Commit transaction
+            // ====== Xử lý đồ ăn ======
+            if ($request->has('do_an') && count($request->do_an) > 0) {
+                foreach ($request->do_an as $item) {
+                    $doAn = \App\Models\DoAn::find($item['do_an_id']);
+                    if (!$doAn) continue;
+
+                    $giaBan = $doAn->gia_ban ?? 0;
+                    $soLuong = $item['so_luong'];
+                    $tongTien += $giaBan * $soLuong;
+
+                    DonDoAn::create([
+                        'dat_ve_id' => $datVe->id,
+                        'do_an_id' => $doAn->id,
+                        'gia_ban' => $giaBan,
+                        'so_luong' => $soLuong,
+                    ]);
+                }
+
+                $datVe->update(['tong_tien' => $tongTien]);
+            }
+
             DB::commit();
 
             return response()->json([
@@ -87,12 +106,11 @@ class DatVeController extends Controller
                     'lichChieu:id,gio_chieu,phim_id,phong_id',
                     'lichChieu.phim:id,ten_phim,thoi_luong',
                     'lichChieu.phong:id,ten_phong',
-                    // 'lichChieu.phongChieu.rap:id,ten_rap',
                     'chiTiet.ghe:id,so_ghe,loai_ghe_id',
+                    'donDoAn.doAn:id,ten_do_an,gia_ban'
                 ]),
             ], 201);
         } catch (Exception $e) {
-            // ✅ Rollback nếu có lỗi
             DB::rollBack();
             return response()->json([
                 'message' => 'Đặt vé thất bại',
@@ -100,10 +118,11 @@ class DatVeController extends Controller
             ], 500);
         }
     }
+
     public function danhSachDatVe()
     {
         $user = Auth::user() ?? \App\Models\NguoiDung::first();
-    
+
         $datVe = DatVe::with([
             'nguoiDung:email',
             'lichChieu:id,gio_chieu,phim_id,phong_id',
@@ -118,6 +137,7 @@ class DatVeController extends Controller
             'data' => $datVe
         ]);
     }
+
     public function inVe($id)
     {
         try {
@@ -165,33 +185,45 @@ class DatVeController extends Controller
     }
 
     public function chiTietVe($id)
-{
-    try {
-        $datVe = DatVe::with([
-            'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
-            'lichChieu:id,phim_id,phong_id,gio_chieu,gio_ket_thuc',
-            'lichChieu.phim:id,ten_phim,anh_poster,thoi_luong',
-            'lichChieu.phong:id,ten_phong',
-            'nguoiDung:id,ten,email'
-        ])->find($id);
+    {
+        try {
+            $datVe = DatVe::with([
+                'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
+                'lichChieu:id,phim_id,phong_id,gio_chieu,gio_ket_thuc',
+                'lichChieu.phim:id,ten_phim,anh_poster,thoi_luong',
+                'lichChieu.phong:id,ten_phong',
+                'nguoiDung:id,ten,email,so_dien_thoai',
+                'donDoAn.doAn:id,ten_do_an,image'
+            ])->find($id);
 
-        if (!$datVe) {
+            if (!$datVe) {
+                return response()->json([
+                    'message' => 'Không tìm thấy vé này!',
+                ], 404);
+            }
+
+            // Đổi tên để frontend dễ dùng hơn
+            $datVe->do_an = $datVe->donDoAn->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'ten_do_an' => $item->doAn?->ten_do_an ?? 'Đồ ăn',
+                    'anh_do_an' => $item->doAn?->image,
+                    'gia_ban' => $item->gia_ban,
+                    'quantity' => $item->so_luong,
+                ];
+            });
+
+            unset($datVe->donDoAn); 
+
             return response()->json([
-                'message' => 'Không tìm thấy vé này!',
-            ], 404);
+                'message' => 'Lấy chi tiết vé thành công!',
+                'data' => $datVe,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi lấy chi tiết vé!',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        return response()->json([
-            'message' => 'Lấy chi tiết vé thành công!',
-            'data' => $datVe,
-        ], 200);
-
-    } catch (\Exception $e) {
-        return response()->json([
-            'message' => 'Lỗi khi lấy chi tiết vé!',
-            'error' => $e->getMessage(),
-        ], 500);
     }
-}
-
 }

@@ -1,8 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
-import { datVe, getDanhSachVeNguoiDung, getChiTietVe, huyVe } from "../../provider/Client/datVeProvider";
+import {
+  datVe,
+  getDanhSachVeNguoiDung,
+  getChiTietVe,
+  huyVe,
+} from "../../provider/Client/datVeProvider";
 
-//Đặt vé mới
+// Đặt vé mới
 export const useDatVe = () => {
   const queryClient = useQueryClient();
 
@@ -10,10 +15,20 @@ export const useDatVe = () => {
     mutationFn: (payload: {
       lich_chieu_id: number;
       ghe: number[];
+      do_an?: { do_an_id: number; so_luong: number }[];
     }) => datVe(payload),
 
     onSuccess: (res) => {
-      Swal.fire("✅ Thành công!", res.message || "Đặt vé thành công!", "success");
+      Swal.fire(
+        "✅ Thành công!",
+        res.message || "Đặt vé thành công!",
+        "success"
+      );
+
+      if (res.dat_ve?.id) {
+        window.location.href = `/thanh-toan?datVeId=${res.dat_ve.id}`;
+      }
+
       queryClient.invalidateQueries({ queryKey: ["dat-ve"] });
     },
 

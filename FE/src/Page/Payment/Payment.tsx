@@ -7,22 +7,26 @@ import "./Payment.scss";
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
   const handleThanhToanMoMo = async () => {
     try {
-      const { data } = await axios.post("http://127.0.0.1:8000/api/thanhtoan/momo", {
-        dat_ve_id: datVe.id,
-        amount: Number(datVe.tong_tien),
-        return_url: window.location.origin + "/ket-qua-thanh-toan",
-      });
+      const { data } = await axios.post(
+        "http://127.0.0.1:8000/api/thanhtoan/momo",
+        {
+          dat_ve_id: datVe.id,
+          amount: Number(datVe.tong_tien),
+          return_url: window.location.origin + "/ket-qua-thanh-toan",
+        }
+      );
       const url = data?.payment_url;
       if (url) window.location.assign(url);
       else message.error("Không nhận được liên kết thanh toán từ MoMo");
     } catch (e: any) {
       message.error(e?.response?.data?.message || "Không thể thanh toán!");
     }
-  }
-  const datVeId = location.state?.datVeId;
+  };
 
+  const datVeId = location.state?.datVeId;
   const [loading, setLoading] = useState(false);
   const [datVe, setDatVe] = useState<any>(null);
 
@@ -54,7 +58,7 @@ const Payment = () => {
   if (loading)
     return (
       <div className="payment-center">
-        <Spin tip="Đang tải thông tin vé..." />
+        <Spin tip="Đang tải thông tin vé..." size="large" />
       </div>
     );
 
@@ -65,38 +69,78 @@ const Payment = () => {
       </div>
     );
 
+  const hoTen = datVe.ho_ten || datVe.nguoi_dung?.ten || "Khách lẻ";
+  const email = datVe.email || datVe.nguoi_dung?.email || "Chưa cung cấp";
+  const soDienThoai =
+    datVe.so_dien_thoai || datVe.nguoi_dung?.so_dien_thoai || "Chưa cung cấp";
+
   return (
     <div className="payment-container">
       <div className="payment-grid">
-        {/* Cột trái: tạm trống */}
         <div className="left-column">
-          <div className="placeholder">
-            <p>Thông tin khách hàng sẽ hiển thị ở đây.</p>
+          <div className="movie-poster-wrapper">
+            <img
+              src={
+                datVe.lich_chieu?.phim?.anh_poster || "/placeholder-movie.jpg"
+              }
+              alt={datVe.lich_chieu?.phim?.ten_phim}
+              className="movie-poster"
+            />
+          </div>
+
+          <div className="customer-info">
+            <h3>Thông tin khách hàng</h3>
+            <div className="info-item">
+              <span className="label">Họ tên:</span>
+              <span className="value">{hoTen}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">Email:</span>
+              <span className="value">{email}</span>
+            </div>
+            <div className="info-item">
+              <span className="label">SĐT:</span>
+              <span className="value">{soDienThoai}</span>
+            </div>
+            {datVe.nguoi_dung && (
+              <div className="info-item">
+                <span className="label">Tài khoản:</span>
+                <span className="value highlight">Thành viên</span>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Cột phải: Thông tin phim */}
         <div className="right-column">
           <div className="movie-details">
             <h2>{datVe.lich_chieu?.phim?.ten_phim}</h2>
             <p>Phòng: {datVe.lich_chieu?.phong?.ten_phong}</p>
             <p>
               Ngày chiếu:{" "}
-              {new Date(datVe.lich_chieu?.gio_chieu).toLocaleDateString("vi-VN")}
+              {new Date(datVe.lich_chieu?.gio_chieu).toLocaleDateString(
+                "vi-VN"
+              )}
             </p>
             <p>
-              Giờ chiếu:{" "}
-              {new Date(datVe.lich_chieu?.gio_chieu).toLocaleTimeString("vi-VN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}{" "}
+              Giờ:{" "}
+              {new Date(datVe.lich_chieu?.gio_chieu).toLocaleTimeString(
+                "vi-VN",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}{" "}
               -{" "}
-              {new Date(datVe.lich_chieu?.gio_ket_thuc).toLocaleTimeString("vi-VN", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {new Date(datVe.lich_chieu?.gio_ket_thuc).toLocaleTimeString(
+                "vi-VN",
+                {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                }
+              )}
             </p>
 
+            {/* Ghế đã chọn */}
             <div className="seat-info">
               <h4>Ghế đã chọn</h4>
               <div className="seat-list">
@@ -108,19 +152,31 @@ const Payment = () => {
               </div>
             </div>
 
+            {/* ĐỒ ĂN */}
             {datVe.do_an && datVe.do_an.length > 0 && (
               <div className="food-info">
-                <h4>Đồ ăn đã chọn</h4>
+                <h4>Combo đồ ăn</h4>
                 {datVe.do_an.map((item: any) => (
                   <div key={item.id} className="food-item">
-                    <span>{item.ten_do_an}</span>
-                    <span>x{item.quantity}</span>
-                    <span>
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(item.gia_ban * item.quantity)}
-                    </span>
+                    {item.anh_do_an ? (
+                      <img
+                        src="https://png.pngtree.com/png-clipart/20240608/original/pngtree-popcorn-corn-cinema-icon-vector-cinema-png-image_15274782.png"
+                        alt={item.ten_do_an}
+                        className="food-thumb"
+                      />
+                    ) : (
+                      <div className="food-thumb placeholder">Food</div>
+                    )}
+                    <div className="food-details">
+                      <span className="food-name">{item.ten_do_an}</span>
+                      <span className="food-quantity">x{item.quantity}</span>
+                      <span className="food-price">
+                        {new Intl.NumberFormat("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }).format(item.gia_ban * item.quantity)}
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -145,18 +201,7 @@ const Payment = () => {
                 size="large"
                 block
                 onClick={handleThanhToanMoMo}
-              >
-                Thanh toán qua MoMo
-              </Button>
-            </div>
-
-            <div className="payment-methods">
-              <h4>Phương thức thanh toán</h4>
-              <Button
-                type="primary"
-                size="large"
-                block
-                onClick={handleThanhToanMoMo}
+                className="momo-btn"
               >
                 Thanh toán qua MoMo
               </Button>
@@ -166,7 +211,6 @@ const Payment = () => {
       </div>
     </div>
   );
-
 };
 
 export default Payment;
