@@ -2,124 +2,107 @@ import React, { useState, useEffect } from "react";
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 import { useUserPermissions } from "../../../hook/useUserPermissions";
-
-const MENU_IDS = {
-  PHIM: 1,
-  BANNER: 2,
-  TAI_KHOAN: 3,
-  PHONG_CHIEU: 4,
-  DICH_VU: 5,
-  LICH_CHIEU: 6,
-  VOUCHER: 7,
-  TIN_TUC: 8
-};
+import axios from "axios";
 
 interface MenuItem {
   id: number;
-  title: string;
+  ma_chuc_nang: string;
+  ma_cha: string | null;
+  ten_chuc_nang: string;
   icon: string;
   path: string;
   color: string;
-  children?: {
-    title: string;
-    path: string;
-  }[];
+  trang_thai: boolean;
 }
 
-const MENU_CONFIG: MenuItem[] = [
-  {
-    id: MENU_IDS.PHIM,
-    title: 'Quản lý phim',
-    icon: 'solar:smart-speaker-minimalistic-line-duotone',
-    path: '/admin/phim',
-    color: 'indigo',
-    children: [
-      { title: 'Danh sách phim', path: '/admin/phim' },
-      { title: 'Quản lý thể loại', path: '/admin/the-loai' }
-    ]
-  },
-  {
-    id: MENU_IDS.BANNER,
-    title: 'Quản lý Banner',
-    icon: 'solar:smart-speaker-minimalistic-line-duotone',
-    path: '/admin/banners',
-    color: 'indigo',
-    children: [
-      { title: 'Danh sách banner', path: '/admin/banners' },
-      { title: 'Thêm mới banner', path: '/admin/banners/them-moi' }
-    ]
-  },
-  {
-    id: MENU_IDS.TAI_KHOAN,
-    title: 'Quản lý tài khoản',
-    icon: 'solar:smart-speaker-minimalistic-line-duotone',
-    path: '/admin/nguoi-dung',
-    color: 'success',
-    children: [
-      { title: 'Người dùng', path: '/admin/nguoi-dung' },
-      { title: 'Vai trò', path: '/admin/vai-tro' }
-    ]
-  },
-  {
-    id: MENU_IDS.PHONG_CHIEU,
-    title: 'Quản lý phòng chiếu',
-    icon: 'solar:pie-chart-3-line-duotone',
-    path: '/admin/roomxb',
-    color: 'warning',
-    children: [
-      { title: 'Phòng chiếu đã xuất bản', path: '/admin/roomxb' },
-      { title: 'Phòng chiếu chưa xuất bản', path: '/admin/roomcxb' },
-      { title: 'Thêm mới phòng chiếu', path: '/admin/room/them-moi' }
-    ]
-  },
-  {
-    id: MENU_IDS.DICH_VU,
-    title: 'Quản lý dịch vụ',
-    icon: 'solar:user-circle-line-duotone',
-    path: '/admin/foods',
-    color: 'danger',
-    children: [
-      { title: 'Quản lý đồ ăn', path: '/admin/foods' },
-      { title: 'Thêm mới đồ ăn', path: '/admin/foods/them-moi' },
-      { title: 'Quản lý menu', path: '/admin/menu' }
-    ]
-  },
-  {
-    id: MENU_IDS.LICH_CHIEU,
-    title: 'Quản lý lịch chiếu',
-    icon: 'solar:calendar-mark-line-duotone',
-    path: '/admin/lich-chieu',
-    color: 'danger',
-    children: [
-      { title: 'Danh sách lịch chiếu', path: '/admin/lich-chieu' },
-      { title: 'Thêm mới lịch chiếu', path: '/admin/lich-chieu/them-moi' }
-    ]
-  },
-  {
-    id: MENU_IDS.VOUCHER,
-    title: 'Quản lý voucher',
-    icon: 'solar:calendar-mark-line-duotone',
-    path: '/admin/vouchers',
-    color: 'danger',
-    children: [
-      { title: 'Danh sách voucher', path: '/admin/vouchers' }
-    ]
-  },
-  {
-    id: MENU_IDS.TIN_TUC,
-    title: 'Quản lý tin tức',
-    icon: 'solar:calendar-mark-line-duotone',
-    path: '/admin/tin-tuc',
-    color: 'danger',
-    children: [
-      { title: 'Danh sách tin tức', path: '/admin/tin-tuc' }
-    ]
-  }
-];
+interface MenuGroup {
+  id: number;
+  ma_chuc_nang: string;
+  ten_chuc_nang: string;
+  icon: string;
+  path: string;
+  color: string;
+  trang_thai: boolean;
+  children: MenuItem[];
+}
 
 const Sidebar: React.FC = () => {
-  const [openMenus, setOpenMenus] = useState<{ [key: number]: boolean }>({});
+  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+  const [menus, setMenus] = useState<MenuGroup[]>([]);
+  const [loading, setLoading] = useState(true);
   const { canAccess } = useUserPermissions();
+
+  // Fetch menu từ API
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        // VITE_API_URL trong .env có dạng: http://127.0.0.1:8000/api
+        const apiBase = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+        const response = await axios.get(`${apiBase}/menu`);
+        
+        let allMenus: MenuItem[] = response.data;
+        
+        // Lấy user từ localStorage
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        
+        // Nếu là Staff (vai_tro_id !== 1), lọc menu từ bảng quyen_truy_cap
+        if (user && user.vai_tro_id !== 1) {
+          try {
+            const permResponse = await axios.get(`${apiBase}/quyen-truy-cap`);
+            const allPerms = permResponse.data.data || [];
+            
+            // Lấy danh sách menu_id mà user này được phép xem
+            const allowedMenuIds = allPerms
+              .filter((perm: any) => perm.vai_tro_id === user.vai_tro_id)
+              .map((perm: any) => perm.menu_id);
+            
+            // Lọc menu: chỉ giữ lại những menu user có quyền
+            allMenus = allMenus.filter((menu) => allowedMenuIds.includes(menu.id));
+          } catch (error) {
+            console.error('Lỗi fetch quyền truy cập:', error);
+            allMenus = [];
+          }
+        }
+
+        // Lọc menu cha (ma_cha = null) và đang hoạt động
+        const parentMenus = allMenus.filter((menu) => !menu.ma_cha && menu.trang_thai);
+        
+        // Nhóm menu con theo ma_cha
+        const groupedMenus: MenuGroup[] = parentMenus.map((parent) => {
+          const childMenus = allMenus.filter(
+            (child) => child.ma_cha === parent.ma_chuc_nang && child.trang_thai
+          );
+
+          return {
+            id: parent.id,
+            ma_chuc_nang: parent.ma_chuc_nang,
+            ten_chuc_nang: parent.ten_chuc_nang,
+            icon: parent.icon || 'solar:menu-dots-bold-duotone',
+            path: parent.path || '#',
+            color: parent.color || 'primary',
+            trang_thai: parent.trang_thai,
+            children: childMenus
+          };
+        });
+
+        setMenus(groupedMenus);
+      } catch (error) {
+        console.error('Lỗi fetch menu:', error);
+        setMenus([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
+
+  const toggleMenu = (maChucNang: string) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [maChucNang]: !prev[maChucNang],
+    }));
+  };
 
   return (
     <aside className="left-sidebar with-vertical">
@@ -151,71 +134,83 @@ const Sidebar: React.FC = () => {
                 icon="solar:menu-dots-bold-duotone"
                 className="nav-small-cap-icon fs-5"
               />
-              <span className="hide-menu">Home</span>
+              <span className="hide-menu">Menu</span>
             </li>
 
-            <li className="sidebar-item">
-              <a
-                className="sidebar-link primary-hover-bg"
-                href="#"
-                id="get-url"
-                aria-expanded="false"
-              >
-                <span className="aside-icon p-2 bg-primary-subtle rounded-1">
-                  <Icon
-                    icon="solar:screencast-2-line-duotone"
-                    className="fs-6"
-                  />
-                </span>
-                <span className="hide-menu ps-1">Dashboard</span>
-              </a>
-            </li>
+            {loading ? (
+              <li className="sidebar-item">
+                <p className="p-3">Đang tải menu...</p>
+              </li>
+            ) : menus.length === 0 ? (
+              <li className="sidebar-item">
+                <p className="p-3">Không có menu nào</p>
+              </li>
+            ) : (
+              menus.map((menu) => {
+                // Kiểm tra quyền truy cập
+                const hasAccess = canAccess(menu.id, 4);
+                if (!hasAccess) return null;
 
-            {/* Dynamic Menu Items */}
-            {MENU_CONFIG.map(menu => {
-              if (!canAccess(menu.id, 4)) return null;
+                const isOpen = openMenus[menu.ma_chuc_nang] || false;
+                const hasChildren = menu.children.length > 0;
 
-              const isOpen = openMenus[menu.id] || false;
+                return (
+                  <li key={menu.ma_chuc_nang} className="sidebar-item">
+                    {hasChildren ? (
+                      <a
+                        className={`sidebar-link has-arrow ${menu.color}-hover-bg`}
+                        href="#"
+                        aria-expanded={isOpen}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          toggleMenu(menu.ma_chuc_nang);
+                        }}
+                      >
+                        <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
+                          <Icon
+                            icon={menu.icon}
+                            className="fs-6"
+                          />
+                        </span>
+                        <span className="hide-menu ps-1">{menu.ten_chuc_nang}</span>
+                      </a>
+                    ) : (
+                      <Link
+                        to={menu.path}
+                        className={`sidebar-link ${menu.color}-hover-bg`}
+                      >
+                        <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
+                          <Icon
+                            icon={menu.icon}
+                            className="fs-6"
+                          />
+                        </span>
+                        <span className="hide-menu ps-1">{menu.ten_chuc_nang}</span>
+                      </Link>
+                    )}
 
-              return (
-                <li key={menu.id} className="sidebar-item">
-                  <a
-                    className={`sidebar-link has-arrow ${menu.color}-hover-bg`}
-                    href="#"
-                    aria-expanded={isOpen}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setOpenMenus(prev => ({
-                        ...prev,
-                        [menu.id]: !prev[menu.id]
-                      }));
-                    }}
-                  >
-                    <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
-                      <Icon
-                        icon={menu.icon}
-                        className="fs-6"
-                      />
-                    </span>
-                    <span className="hide-menu ps-1">{menu.title}</span>
-                  </a>
-
-                  <ul
-                    aria-expanded={isOpen}
-                    className={`collapse first-level ${isOpen ? "show" : ""}`}
-                  >
-                    {menu.children?.map((child, idx) => (
-                      <li key={`${menu.id}-${idx}`} className="sidebar-item">
-                        <Link to={child.path} className="sidebar-link">
-                          <span className="sidebar-icon"></span>
-                          <span className="hide-menu">{child.title}</span>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              );
-            })}
+                    {hasChildren && (
+                      <ul
+                        aria-expanded={isOpen}
+                        className={`collapse first-level ${isOpen ? "show" : ""}`}
+                      >
+                        {menu.children.map((child) => {
+                          const childHasAccess = canAccess(child.id, 4);
+                          return childHasAccess ? (
+                            <li key={child.ma_chuc_nang} className="sidebar-item">
+                              <Link to={child.path} className="sidebar-link">
+                                <span className="sidebar-icon"></span>
+                                <span className="hide-menu">{child.ten_chuc_nang}</span>
+                              </Link>
+                            </li>
+                          ) : null;
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })
+            )}
           </ul>
         </nav>
       </div>

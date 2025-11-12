@@ -51,6 +51,7 @@ class UserController extends Controller
             'anh_dai_dien' => $validated['anh_dai_dien'] ?? null,
             'trang_thai' => $validated['trang_thai'] ?? 0,
             'vai_tro_id' => $validated['vai_tro_id'],
+            'email_verified_at' => now(), 
         ]);
 
         return response()->json(['message' => 'Tạo người dùng thành công!', 'data' => $user], 201);
