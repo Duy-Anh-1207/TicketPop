@@ -16,27 +16,6 @@ const Navbar: React.FC = () => {
         >
           <li>
             <a
-              href="#choose-theater"
-              style={{
-                color: "black",
-                textDecoration: "none",
-                fontSize: "16px",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <span
-                role="img"
-                aria-label="location"
-                style={{ marginRight: "5px" }}
-              >
-                <i className="fa-solid fa-location-dot"></i>
-              </span>
-              Chọn rạp
-            </a>
-          </li>
-          <li style={{ margin: "0 40px" }}>
-            <a
               href="#schedule"
               style={{
                 color: "black",
@@ -49,7 +28,6 @@ const Navbar: React.FC = () => {
               <span
                 role="img"
                 aria-label="calendar"
-                style={{ marginRight: "5px" }}
               >
                 <i className="fa-solid fa-location-dot"></i>
               </span>
@@ -92,14 +70,14 @@ const Navbar: React.FC = () => {
           </li>
           <li style={{ margin: "0 15px" }}>
             <a
-              href="#entertainment"
+              href="/tin-tuc"
               style={{
                 color: "black",
                 textDecoration: "none",
                 fontSize: "16px",
               }}
             >
-              Dịch vụ giải trí khác
+              Tin tức
             </a>
           </li>
           <li style={{ margin: "0 15px" }}>

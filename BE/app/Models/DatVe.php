@@ -11,15 +11,22 @@ class DatVe extends Model
         'nguoi_dung_id',
         'lich_chieu_id',
         'tong_tien',
-        'job_id',
     ];
-    public function nguoiDung(){
+    public function nguoiDung()
+    {
         return $this->belongsTo(NguoiDung::class, 'nguoi_dung_id');
     }
-    public function lichChieu(){
+    public function lichChieu()
+    {
         return $this->belongsTo(LichChieu::class, 'lich_chieu_id');
     }
-    public function chiTiet(){
+    public function chiTiet()
+    {
         return $this->hasMany(DatVeChiTiet::class, 'dat_ve_id');
+    }
+
+    public function donDoAn()
+    {
+        return $this->hasMany(\App\Models\DonDoAn::class, 'dat_ve_id');
     }
 }

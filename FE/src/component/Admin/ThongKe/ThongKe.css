@@ -1,0 +1,157 @@
+.thongke-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  background: #f8fafc;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.thongke-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: 0.2s ease-in-out;
+  border: 1px solid #e2e8f0;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-label {
+  font-size: 12px;
+  color: #6b7280;
+  text-transform: uppercase;
+}
+
+.card-value {
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.card-icon {
+  font-size: 28px;
+}
+
+.card-green .card-value {
+  color: #16a34a;
+}
+.card-blue .card-value {
+  color: #2563eb;
+}
+.card-purple .card-value {
+  color: #7c3aed;
+}
+.card-orange .card-value {
+  color: #f97316;
+}
+
+.compare-text {
+  text-align: right;
+  font-size: 12px;
+  color: #9ca3af;
+  font-style: italic;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.chart-title {
+  font-weight: bold;
+  margin-bottom: 16px;
+}
+
+.topphim-section {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.topphim-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.phim-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: 0.2s ease;
+}
+
+.phim-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.phim-header {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  padding: 8px 12px;
+}
+
+.phim-img {
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+.phim-body {
+  padding: 12px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.highlight {
+  font-weight: 600;
+}
+
+.highlight.green {
+  color: #16a34a;
+}
+
+.footer {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 20px;
+}

@@ -24,6 +24,9 @@ use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
 use App\Http\Controllers\Admin\GiaVeController;
+use App\Http\Controllers\Client\MomoController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -130,14 +133,16 @@ Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
 Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
 Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
+Route::prefix('thong-ke')->group(function () {
+    Route::get('/doanh-thu', [ThongKeController::class, 'doanhThu']);
+    Route::get('/ve-ban', [ThongKeController::class, 'veBan']);
+    Route::get('/top-phim', [ThongKeController::class, 'topPhim']);
+    Route::get('/do-an-ban-ra', [ThongKeController::class, 'doAnBanRa']);
+    Route::get('/tong-doanh-thu', [ThongKeController::class, 'tongDoanhThu']);
+    Route::get('/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
+});
 
-Route::get('/thong-ke/doanh-thu', [ThongKeController::class, 'doanhThu']);
-Route::get('/thong-ke/tong-ve-ban', [ThongKeController::class, 'veBan']);
-Route::get('/thong-ke/top-phim', [ThongKeController::class, 'topPhim']);
-Route::get('/thong-ke/do-an-ban-ra', [ThongKeController::class, 'doAnBanRa']);
-Route::get('/thong-ke/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
-
-Route::get('/tin-tuc', [TinTucController::class, 'index']);
+Route::get('/tin-tucs', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);
 Route::get('/tin-tucs/{id}', [TinTucController::class, 'show']);
 Route::put('/tin-tucs/{id}', [TinTucController::class, 'update']);
@@ -164,4 +169,6 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 //gia ve
 Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 
-
+Route::post('/thanhtoan/momo', [MomoController::class,'create']);
+Route::get('/thanhtoan/momo/return', [MomoController::class,'return']);
+Route::post('/thanhtoan/momo/ipn', [MomoController::class,'ipn']);

@@ -8,10 +8,11 @@ const axiosClient = axios.create({
   },
 });
 
-//Gọi API đặt vé
+// Gọi API đặt vé
 export const datVe = async (payload: {
   lich_chieu_id: number;
-  ghe: number[]; // mảng ID ghế được chọn
+  ghe: number[];
+  do_an?: { do_an_id: number; so_luong: number }[];
 }) => {
   try {
     const { data } = await axiosClient.post("/dat-ve", payload);
@@ -21,6 +22,7 @@ export const datVe = async (payload: {
     throw error;
   }
 };
+
 
 // Lấy danh sách vé của người dùng hiện tại
 export const getDanhSachVeNguoiDung = async () => {

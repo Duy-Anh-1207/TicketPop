@@ -29,24 +29,11 @@ const Footer: React.FC = () => {
         </div>
 
         <div>
-          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>CINESTAR</h4>
+          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>TICKETPOP</h4>
           <ul style={{ listStyle: 'none', padding: 0 }}>
             <li style={{ marginBottom: '5px' }}>Giới thiệu</li>
             <li style={{ marginBottom: '5px' }}>Liên hệ</li>
             <li style={{ marginBottom: '5px' }}>Tuyển dụng</li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>HỆ THỐNG RẠP</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }}>Tất cả hệ thống rạp</li>
-            <li style={{ marginBottom: '5px' }}>Cinestar Quốc Thanh (TPHCM)</li>
-            <li style={{ marginBottom: '5px' }}>Cinestar Hai Bà Trưng (TPHCM)</li>
-            <li style={{ marginBottom: '5px' }}>Cinestar Sân Vườn (TPHCM)</li>
-            <li style={{ marginBottom: '5px' }}>Cinestar Huế (TP Huế)</li>
-            <li style={{ marginBottom: '5px' }}>Đống Đa Lat (Lâm Đồng)</li>
-            <li style={{ marginBottom: '5px' }}>Cinestar Mỹ Tho (Tiền Giang)</li>
           </ul>
         </div>
       </div>

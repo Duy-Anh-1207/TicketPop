@@ -3,6 +3,7 @@ import { useRoutes } from "react-router-dom";
 //Client
 //Payment
 import Payment from "../Page/Payment/Payment";
+import PaymentResult from "../Page/PaymentResult";
 //Home
 import LayoutWeb from "../Page/Layout";
 import HomePage from "../Page/Home/HomePage";
@@ -66,6 +67,10 @@ import MenuCreate from "../component/Admin/Menu/MenuCreate";
 import BannerList from "../component/Admin/Banner/ListBanner";
 import CreateBanner from "../component/Admin/Banner/CreateBanner";
 
+//Thống kê
+import ThongKe from "../component/Admin/ThongKe/ThongKe";
+
+
 // ✅ Tin tức (CLIENT)
 import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
@@ -78,7 +83,8 @@ const Routermain = () => {
     { path: "/dang-ky", element: <Register /> },
 
     { path: "/verify-code", element: <VerifyCode /> },
-
+    // ✅ Trang hiển thị kết quả sau khi MoMo redirect
+    { path: "ket-qua-thanh-toan", element: <PaymentResult /> },
     // Route chính website (client)
     {
       path: "/",
@@ -87,6 +93,7 @@ const Routermain = () => {
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
         { path: "booking/:slug", element: <Booking/> },
+        
 
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
@@ -156,6 +163,8 @@ const Routermain = () => {
         // Banner
         { path: "banners", element: <BannerList /> },
         { path: "banners/them-moi", element: <CreateBanner /> },
+        // Thống kê
+        { path: "thongke", element: <ThongKe /> },
 
       ],
     },

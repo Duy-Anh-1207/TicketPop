@@ -68,32 +68,45 @@ class ThongKeController extends Controller
     }
 
     // Top 5 phim có doanh thu cao nhất
-    public function topPhim()
-    {
-        try {
-            $data = DB::table('dat_ve')
-                ->join('phim', 'dat_ve.phim_id', '=', 'phim.id')
-                ->select(
-                    'phim.ten_phim',
-                    DB::raw('SUM(dat_ve.tong_tien) as tong_doanh_thu'),
-                    DB::raw('COUNT(dat_ve.id) as so_luot_dat')
-                )
-                ->groupBy('phim.ten_phim')
-                ->orderByDesc('tong_doanh_thu')
-                ->limit(5)
-                ->get();
+   public function topPhim()
+{
+    try {
+        $data = DB::table('dat_ve')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
+            ->select(
+                'phim.ten_phim',
+                'phim.anh_poster',
+                DB::raw('SUM(dat_ve.tong_tien) as tong_doanh_thu'),
+                DB::raw('COUNT(dat_ve.id) as tong_ve')
+            )
+            ->groupBy('phim.id', 'phim.ten_phim', 'phim.anh_poster')
+            ->orderByDesc('tong_doanh_thu')
+            ->limit(5)
+            ->get();
 
-            return response()->json([
-                'status' => true,
-                'data' => $data
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        // Ép kiểu số để frontend format đúng
+        $data = $data->map(function ($item) {
+            return [
+                'ten_phim' => $item->ten_phim,
+                'anh_poster' => $item->anh_poster,
+                'tong_doanh_thu' => (int) $item->tong_doanh_thu,
+                'tong_ve' => (int) $item->tong_ve,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage(),
+        ], 500);
     }
+}
+
     
 
     // Số lượng đồ ăn bán ra
@@ -110,6 +123,23 @@ class ThongKeController extends Controller
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+     // Tổng doanh thu hiện tại
+
+    public function tongDoanhThu()
+    {
+        try {
+            $tong = DB::table('dat_ve')->sum('tong_tien');
+
+            return response()->json([
+                'status' => true,
+                'tong_doanh_thu' => (float) $tong
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // Khách hàng mới trong tháng
     
     public function khachHangMoi()
