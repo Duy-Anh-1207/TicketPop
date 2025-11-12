@@ -164,7 +164,7 @@ const Routermain = () => {
         { path: "banners", element: <BannerList /> },
         { path: "banners/them-moi", element: <CreateBanner /> },
         // Thống kê
-        { path: "thongke", element: <ThongKe /> },
+        { path: "dashboard", element: <ThongKe /> },
 
       ],
     },

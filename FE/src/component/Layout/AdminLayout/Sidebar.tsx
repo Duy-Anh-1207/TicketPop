@@ -129,14 +129,6 @@ const Sidebar: React.FC = () => {
       <div className="scroll-sidebar" data-simplebar>
         <nav className="sidebar-nav">
           <ul id="sidebarnav" className="mb-0">
-            <li className="nav-small-cap">
-              <Icon
-                icon="solar:menu-dots-bold-duotone"
-                className="nav-small-cap-icon fs-5"
-              />
-              <span className="hide-menu">Menu</span>
-            </li>
-
             {loading ? (
               <li className="sidebar-item">
                 <p className="p-3">Đang tải menu...</p>
