@@ -21,4 +21,8 @@ class Room extends Model
     {
         return $this->hasMany(Ghe::class, 'phong_id');
     }
+     public function lichChieu()
+    {
+        return $this->hasMany(LichChieu::class, 'phong_id');
+    }
 }
