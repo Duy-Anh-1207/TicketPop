@@ -27,4 +27,8 @@ class Ghe extends Model
     {
         return $this->belongsTo(LoaiGhe::class, 'loai_ghe_id');
     }
+     public function checkGhe()
+    {
+        return $this->hasMany(CheckGhe::class, 'ghe_id');
+    }
 }
