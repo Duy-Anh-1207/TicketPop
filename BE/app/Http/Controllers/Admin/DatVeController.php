@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CheckGhe;
 use App\Models\DatVe;
 use App\Models\DatVeChiTiet;
 use App\Models\Ghe;
@@ -11,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\DonDoAn;
+use App\Models\NguoiDung;
+use App\Models\ThanhToan;
 use Exception;
 
 class DatVeController extends Controller
@@ -73,7 +76,13 @@ class DatVeController extends Controller
                     'gia_ve' => $giaVeTheoGhe[$ghe->id],
                 ]);
 
-                $ghe->update(['trang_thai' => false]);
+                // Cập nhật trạng thái trong check_ghe
+    CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
+        ->where('ghe_id', $ghe->id)
+        ->update([
+            'trang_thai' => 'dang_dat',
+            'nguoi_dung_id' => $user->id,
+        ]);
             }
 
             // ====== Xử lý đồ ăn ======
@@ -121,22 +130,35 @@ class DatVeController extends Controller
 
     public function danhSachDatVe()
     {
-        $user = Auth::user() ?? \App\Models\NguoiDung::first();
+        $user = Auth::user() ?? NguoiDung::first();
 
-        $datVe = DatVe::with([
-            'nguoiDung:email',
-            'lichChieu:id,gio_chieu,phim_id,phong_id',
-            'lichChieu.phim:ten_phim',
-            'lichChieu.phong:id,ten_phong',
+        $thanhToan = ThanhToan::with([
+            'datVe.lichChieu:id,gio_chieu,phim_id,phong_id',
+            'datVe.lichChieu.phim:id,ten_phim',
+            'datVe.lichChieu.phong:id,ten_phong',
+            'phuongThucThanhToan:id,ten',
         ])
             ->where('nguoi_dung_id', $user->id)
-            ->get();
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'ma_don_hang' => $item->ma_giao_dich,
+                    'email' => $item->email,
+                    'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
+                    'ngay_dat' => $item->created_at->format('d/m/Y'),
+                    'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
+                    'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
+                ];
+            });
 
         return response()->json([
-            'message' => 'Danh sách vé đã đặt',
-            'data' => $datVe
+            'message' => 'Danh sách vé đã thanh toán',
+            'data' => $thanhToan
         ]);
     }
+
+
 
     public function inVe($id)
     {
@@ -162,7 +184,7 @@ class DatVeController extends Controller
                     'so_dien_thoai' => $datVe->nguoiDung->so_dien_thoai ?? '',
                     'phim' => $datVe->lichChieu->phim->ten_phim ?? '',
                     'thoi_luong' => $datVe->lichChieu->phim->thoi_luong ?? '',
-                    'rap' => $datVe->lichChieu->phong->rap->ten_rap ?? '',
+                    // 'rap' => $datVe->lichChieu->phong->rap->ten_rap ?? '',
                     'phong' => $datVe->lichChieu->phong->ten_phong ?? '',
                     'gio_chieu' => $datVe->lichChieu->gio_chieu->format('H:i d/m/Y'),
                     'gio_ket_thuc' => $datVe->lichChieu->gio_ket_thuc->format('H:i d/m/Y'),
@@ -213,7 +235,7 @@ class DatVeController extends Controller
                 ];
             });
 
-            unset($datVe->donDoAn); 
+            unset($datVe->donDoAn);
 
             return response()->json([
                 'message' => 'Lấy chi tiết vé thành công!',

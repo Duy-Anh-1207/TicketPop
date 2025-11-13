@@ -1,19 +1,50 @@
+
+
+import { useState, useMemo } from "react";
 import { useListFood, useUpdateFood, useDeleteFood } from "../../../hook/FoodHook";
 import Swal from "sweetalert2";
 import type { Food } from "../../../types/foods";
 import { canAccess } from "../../../utils/permissions";
+import { useNavigate } from "react-router-dom";
 
-const MENU_ID = 5; // menu_id cho Quản lý Food (cập nhật nếu DB khác)
+const MENU_ID = 5;
+const ITEMS_PER_PAGE = 5;
 
 export default function FoodList() {
-  const { data: foods, isLoading } = useListFood();
+  const navigate = useNavigate();
+  
+
+  const { data: allFoods, isLoading } = useListFood();
   const updateFood = useUpdateFood();
   const deleteFood = useDeleteFood();
 
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+
+  const filteredFoods = useMemo(() => {
+    if (!allFoods) return [];
+    return allFoods.filter((food: Food) =>
+      food.ten_do_an.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [allFoods, searchTerm]);
+
+
+  const paginatedFoods = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredFoods.slice(start, end);
+  }, [filteredFoods, currentPage]);
+
+  const totalPages = Math.ceil(filteredFoods.length / ITEMS_PER_PAGE);
+
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách...</p>;
 
-  const canEdit = canAccess(MENU_ID, 2); // Sửa
-  const canDeletePerm = canAccess(MENU_ID, 3); // Xóa
+  const canEdit = canAccess(MENU_ID, 2);
+  const canDeletePerm = canAccess(MENU_ID, 3); 
+  const canCreate = canAccess(MENU_ID, 1); 
+
 
   const handleDelete = (id: number) => {
     Swal.fire({
@@ -59,13 +90,38 @@ export default function FoodList() {
 
   return (
     <div className="container p-4">
-      <h4 className="mb-4 text-center">🍽️ Quản lý món ăn</h4>
-      {/* --- Danh sách --- */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0">🍽️ Quản lý món ăn</h4>
+        
+        {canCreate && (
+          <button 
+            className="btn btn-success"
+            onClick={() => navigate("/admin/foods/them-moi")}
+          >
+            ➕ Thêm món ăn
+          </button>
+        )}
+      </div>
+      
+      <div className="mb-3">
+        <input 
+          type="text"
+          className="form-control"
+          placeholder="Tìm theo tên món ăn..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+      </div>
+
+
       <div className="table-responsive">
         <table className="table table-bordered table-striped mx-auto align-middle">
           <thead className="table-light text-center">
             <tr>
-              <th>ID</th>
+              <th>STT</th>
               <th>Tên món ăn</th>
               <th>Giá nhập</th>
               <th>Giá bán</th>
@@ -74,13 +130,15 @@ export default function FoodList() {
             </tr>
           </thead>
           <tbody>
-            {foods?.length ? (
-              foods.map((food: Food) => (
+            {paginatedFoods.length > 0 ? (
+              paginatedFoods.map((food: Food, index: number) => (
                 <tr key={food.id}>
-                  <td className="text-center">{food.id}</td>
+                  <td className="text-center">
+                    {index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}
+                  </td>
                   <td>{food.ten_do_an}</td>
-                  <td className="text-end">{food.gia_nhap.toLocaleString()}</td>
-                  <td className="text-end">{food.gia_ban.toLocaleString()}</td>
+                  <td className="text-end">{food.gia_nhap.toLocaleString()} ₫</td>
+                  <td className="text-end">{food.gia_ban.toLocaleString()} ₫</td>
                   <td className="text-center">{food.so_luong_ton}</td>
                   <td className="text-center">
                     <div className="btn-group">
@@ -108,13 +166,42 @@ export default function FoodList() {
             ) : (
               <tr>
                 <td colSpan={6} className="text-center text-muted py-3">
-                  Không có món ăn nào.
+                  Không tìm thấy món ăn nào.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <nav>
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setCurrentPage(p => p - 1)}
+                disabled={currentPage === 1}
+              >
+                Trước
+              </button>
+            </li>
+            <li className="page-item active">
+              <span className="page-link">{currentPage} / {totalPages}</span>
+            </li>
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+              </button>
+            </li>
+          </ul>
+        </nav>
+      )}
+
     </div>
   );
 }

@@ -84,4 +84,8 @@ class ThanhToan extends Model
     {
         return $query->where('da_quet', true);
     }
+      public function chiTiet()
+    {
+        return $this->hasMany(DatVeChiTiet::class, 'dat_ve_id');
+    }
 }

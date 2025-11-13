@@ -68,7 +68,11 @@ import BannerList from "../component/Admin/Banner/ListBanner";
 import CreateBanner from "../component/Admin/Banner/CreateBanner";
 
 //Thống kê
-import ThongKe from "../component/Admin/ThongKe/ThongKe";
+import ThongKeVe from "../component/Admin/ThongKe/ThongKeVe";
+import ThongKeDoanhThu from "../component/Admin/ThongKe/ThongKeDoanhThu";
+//Dashbroad
+import Dashbroad from "../component/Admin/Dashboard/Dashboard";
+
 
 
 // ✅ Tin tức (CLIENT)
@@ -164,7 +168,11 @@ const Routermain = () => {
         { path: "banners", element: <BannerList /> },
         { path: "banners/them-moi", element: <CreateBanner /> },
         // Thống kê
-        { path: "dashboard", element: <ThongKe /> },
+        { path: "thong-ke/ve", element: <ThongKeVe /> },
+        { path: "thong-ke/doanh-thu", element: <ThongKeDoanhThu /> },
+        //dashbroad
+        { path: "dashbroad", element: <Dashbroad /> },
+
 
       ],
     },
