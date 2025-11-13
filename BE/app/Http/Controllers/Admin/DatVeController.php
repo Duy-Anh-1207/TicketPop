@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CheckGhe;
 use App\Models\DatVe;
 use App\Models\DatVeChiTiet;
 use App\Models\Ghe;
@@ -75,7 +76,13 @@ class DatVeController extends Controller
                     'gia_ve' => $giaVeTheoGhe[$ghe->id],
                 ]);
 
-                $ghe->update(['trang_thai' => false]);
+                // Cập nhật trạng thái trong check_ghe
+    CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
+        ->where('ghe_id', $ghe->id)
+        ->update([
+            'trang_thai' => 'dang_dat',
+            'nguoi_dung_id' => $user->id,
+        ]);
             }
 
             // ====== Xử lý đồ ăn ======
