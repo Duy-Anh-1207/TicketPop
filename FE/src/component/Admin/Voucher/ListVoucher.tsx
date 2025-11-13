@@ -1,14 +1,36 @@
+
+import { useState, useMemo } from "react"; 
 import { useNavigate } from "react-router-dom";
 import { useListVouchers, useDeleteVoucher } from "../../../hook/useVoucher";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
+import type { Voucher } from "../../../types/Voucher"; 
+
+const ITEMS_PER_PAGE = 5;
 
 export default function ListVoucher() {
   const navigate = useNavigate();
-  const { data: vouchers, isLoading, error } = useListVouchers();
+  const { data: allVouchers, isLoading, error } = useListVouchers();
   const { mutate: deleteVoucher, isPending: isDeleting } = useDeleteVoucher();
 
-  // Xử lý xóa mã giảm giá
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filteredVouchers = useMemo(() => {
+    if (!allVouchers) return [];
+    return allVouchers.filter((voucher: Voucher) =>
+      voucher.ma.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [allVouchers, searchTerm]);
+
+  const paginatedVouchers = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredVouchers.slice(start, end);
+  }, [filteredVouchers, currentPage]);
+
+  const totalPages = Math.ceil(filteredVouchers.length / ITEMS_PER_PAGE);
+
   const handleDelete = (id: number) => {
     Swal.fire({
       title: "Xác nhận xóa",
@@ -24,7 +46,6 @@ export default function ListVoucher() {
     });
   };
 
-  // Xử lý lỗi khi tải danh sách
   if (error) {
     return (
       <div className="container mt-4">
@@ -49,13 +70,26 @@ export default function ListVoucher() {
         </div>
 
         <div className="card-body">
+          <div className="mb-3">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Tìm theo mã giảm giá..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+            />
+          </div>
+
           {isLoading ? (
             <div className="text-center">
               <div className="spinner-border text-primary" role="status">
                 <span className="visually-hidden">Đang tải...</span>
               </div>
             </div>
-          ) : vouchers && vouchers.length > 0 ? (
+          ) : paginatedVouchers && paginatedVouchers.length > 0 ? (
             <div className="table-responsive">
               <table className="table table-bordered">
                 <thead className="table-light">
@@ -69,7 +103,7 @@ export default function ListVoucher() {
                   </tr>
                 </thead>
                 <tbody>
-                  {vouchers.map((voucher: Voucher) => (
+                  {paginatedVouchers.map((voucher: Voucher) => (
                     <tr key={voucher.id}>
                       <td>{voucher.ma}</td>
                       <td>
@@ -142,8 +176,37 @@ export default function ListVoucher() {
               </table>
             </div>
           ) : (
-            <div className="alert alert-info">Không có mã giảm giá nào.</div>
+            <div className="alert alert-info">Không tìm thấy mã giảm giá nào.</div>
           )}
+
+          {totalPages > 1 && (
+            <nav>
+              <ul className="pagination justify-content-center">
+                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                  <button 
+                    className="page-link" 
+                    onClick={() => setCurrentPage(p => p - 1)}
+                    disabled={currentPage === 1}
+                  >
+                    Trước
+                  </button>
+                </li>
+                <li className="page-item active">
+                  <span className="page-link">{currentPage} / {totalPages}</span>
+                </li>
+                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                  <button 
+                    className="page-link" 
+                    onClick={() => setCurrentPage(p => p + 1)}
+                    disabled={currentPage === totalPages}
+                  >
+                    Sau
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          )}
+
         </div>
       </div>
     </div>
