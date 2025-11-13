@@ -136,7 +136,7 @@ class DatVeController extends Controller
             'datVe.lichChieu:id,gio_chieu,phim_id,phong_id',
             'datVe.lichChieu.phim:id,ten_phim',
             'datVe.lichChieu.phong:id,ten_phong',
-            'phuongThucThanhToan:id,ten_phuong_thuc',
+            'phuongThucThanhToan:id,ten',
         ])
             ->where('nguoi_dung_id', $user->id)
             ->orderByDesc('created_at')
@@ -147,7 +147,7 @@ class DatVeController extends Controller
                     'email' => $item->email,
                     'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
                     'ngay_dat' => $item->created_at->format('d/m/Y'),
-                    'thanh_toan' => $item->phuongThucThanhToan->ten_phuong_thuc ?? 'Không rõ',
+                    'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
                     'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
                 ];
             });
@@ -184,7 +184,7 @@ class DatVeController extends Controller
                     'so_dien_thoai' => $datVe->nguoiDung->so_dien_thoai ?? '',
                     'phim' => $datVe->lichChieu->phim->ten_phim ?? '',
                     'thoi_luong' => $datVe->lichChieu->phim->thoi_luong ?? '',
-                    'rap' => $datVe->lichChieu->phong->rap->ten_rap ?? '',
+                    // 'rap' => $datVe->lichChieu->phong->rap->ten_rap ?? '',
                     'phong' => $datVe->lichChieu->phong->ten_phong ?? '',
                     'gio_chieu' => $datVe->lichChieu->gio_chieu->format('H:i d/m/Y'),
                     'gio_ket_thuc' => $datVe->lichChieu->gio_ket_thuc->format('H:i d/m/Y'),
