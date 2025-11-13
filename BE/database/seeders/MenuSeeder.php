@@ -298,10 +298,19 @@ class MenuSeeder extends Seeder
 
             // Thống kê
             [
-                'ma_chuc_nang' => 'TK_TONG_QUAN',
+                'ma_chuc_nang' => 'TKV_TONG_QUAN',
                 'ma_cha'       => 'THONG_KE',
-                'ten_chuc_nang'=> 'Tổng quan',
-                'path'         => '/admin/thongke',
+                'ten_chuc_nang'=> 'Thống kê vé',
+                'path'         => '/admin/thong-ke/ve',
+                'state'        => 'active',
+                'stt'          => 1,
+                'trang_thai'   => true,
+            ],
+            [
+                'ma_chuc_nang' => 'TKDT_TONG_QUAN',
+                'ma_cha'       => 'THONG_KE',
+                'ten_chuc_nang'=> 'Thống kê doanh thu',
+                'path'         => '/admin/thong-ke/doanh-thu',
                 'state'        => 'active',
                 'stt'          => 1,
                 'trang_thai'   => true,
