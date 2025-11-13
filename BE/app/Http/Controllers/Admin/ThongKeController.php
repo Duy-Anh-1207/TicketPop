@@ -70,16 +70,17 @@ class ThongKeController extends Controller
 
         $query = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
-            ->join('ghe', 'dat_ve.ghe_id', '=', 'ghe.id')
+            ->join('dat_ve_chi_tiet', 'dat_ve.id', '=', 'dat_ve_chi_tiet.dat_ve_id')
+            ->join('ghe', 'dat_ve_chi_tiet.ghe_id', '=', 'ghe.id')
             ->join('loai_ghe', 'ghe.loai_ghe_id', '=', 'loai_ghe.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
             ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
             ->select(
-                'loai_ghe.ten_loai',
+                'loai_ghe.ten_loai_ghe as ten_loai',
                 DB::raw('COUNT(loai_ghe.id) as so_luong')
             )
-            ->groupBy('loai_ghe.ten_loai')
+            ->groupBy('loai_ghe.ten_loai_ghe')
             ->get();
 
         return response()->json(['status' => true, 'data' => $query]);
@@ -111,24 +112,32 @@ class ThongKeController extends Controller
     // Tỷ lệ phương thức thanh toán
     public function tyLePhuongThucThanhToan(Request $request)
     {
-        $phimId = $request->query('phim_id');
-        $ngay = $request->query('ngay');
+        try {
+            $phimId = $request->query('phim_id');
+            $ngay = $request->query('ngay');
 
-        $query = DB::table('thanh_toan')
-            ->join('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
-            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
-            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
-            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
-            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
-            ->select(
-                'phuong_thuc_thanh_toan.ten_phuong_thuc',
-                DB::raw('COUNT(thanh_toan.id) as so_luong')
-            )
-            ->groupBy('phuong_thuc_thanh_toan.ten_phuong_thuc')
-            ->get();
+            $query = DB::table('thanh_toan')
+                ->leftJoin('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
+                ->leftJoin('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+                ->leftJoin('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+                ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+                ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+                ->select(
+                    DB::raw('COALESCE(phuong_thuc_thanh_toan.ten, "Khác") as ten'),
+                    DB::raw('COUNT(thanh_toan.id) as so_luong')
+                )
+                ->groupBy('ten')
+                ->get();
 
-        return response()->json(['status' => true, 'data' => $query]);
+            return response()->json(['status' => true, 'data' => $query]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
+
 
     // Doanh thu phim
     public function doanhThuPhim(Request $request)
@@ -157,8 +166,12 @@ class ThongKeController extends Controller
     public function doanhThuDoAn(Request $request)
     {
         try {
-            $tong = DB::table('don_do_an')->sum('tong_tien');
-            return response()->json(['status' => true, 'tong_doanh_thu_do_an' => $tong]);
+            $tong = DB::table('don_do_an')->sum('so_luong');
+
+            return response()->json([
+                'status' => true,
+                'tong_do_an_ban_ra' => (int) $tong
+            ]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }

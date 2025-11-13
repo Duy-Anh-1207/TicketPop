@@ -7,7 +7,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar
 } from "recharts";
 
-const API_URL = "http://localhost:8000/api/admin/thong-ke";
+const API_URL = "http://localhost:8000/api/thong-ke";
 
 const fetchData = async () => {
   const [tyLePT, doanhThuPhim, doanhThuDoAn, theoThang] = await Promise.all([
@@ -18,23 +18,20 @@ const fetchData = async () => {
   ]);
 
   return {
-    tyLePhuongThuc: tyLePT.data.data,
-    doanhThuPhim: doanhThuPhim.data.data,
-    doanhThuDoAn: doanhThuDoAn.data.tong_doanh_thu_do_an,
-    doanhThuTheoThang: theoThang.data.data,
+    tyLePhuongThuc: tyLePT.data.data || [],
+    doanhThuPhim: doanhThuPhim.data.data || [],
+    doanhThuDoAn: doanhThuDoAn.data.tong_doanh_thu_do_an || 0,
+    doanhThuTheoThang: theoThang.data.data || [],
   };
 };
 
 const COLORS = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"];
 
 const ThongKeDoanhThu: React.FC = () => {
-  const { data, isLoading } = useQuery({
+  const { data } = useQuery({
     queryKey: ["ThongKeDoanhThu"],
     queryFn: fetchData,
   });
-
-  if (isLoading) return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
-  if (!data) return <div className="text-center mt-4">Không có dữ liệu</div>;
 
   return (
     <div className="thongke-container">
@@ -43,7 +40,7 @@ const ThongKeDoanhThu: React.FC = () => {
       <div className="thongke-grid">
         <div className="thongke-card">
           <p>Doanh thu đồ ăn</p>
-          <h2>{data.doanhThuDoAn.toLocaleString()} đ</h2>
+          <h2>{data?.doanhThuDoAn.toLocaleString()} đ</h2>
         </div>
       </div>
 
@@ -51,7 +48,7 @@ const ThongKeDoanhThu: React.FC = () => {
         <div className="thongke-chart">
           <h3>Doanh thu theo phim</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data.doanhThuPhim}>
+            <BarChart data={data?.doanhThuPhim || []}>
               <XAxis dataKey="ten_phim" />
               <YAxis />
               <Tooltip />
@@ -65,12 +62,12 @@ const ThongKeDoanhThu: React.FC = () => {
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-                data={data.tyLePhuongThuc}
+                data={data?.tyLePhuongThuc || []}
                 dataKey="so_luong"
                 nameKey="ten_phuong_thuc"
                 label
               >
-                {data.tyLePhuongThuc.map((_, i) => (
+                {data?.tyLePhuongThuc?.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
@@ -83,7 +80,7 @@ const ThongKeDoanhThu: React.FC = () => {
       <div className="thongke-chart">
         <h3>Doanh thu theo tháng</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data.doanhThuTheoThang}>
+          <LineChart data={data?.doanhThuTheoThang || []}>
             <XAxis dataKey="thang" />
             <YAxis />
             <Tooltip />

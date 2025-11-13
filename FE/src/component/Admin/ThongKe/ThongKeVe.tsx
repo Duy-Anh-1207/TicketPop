@@ -18,26 +18,20 @@ const fetchThongKeVe = async () => {
   ]);
 
   return {
-    gioMuaNhieuNhat: gio.data.data,
-    topPhimBanChay: topPhim.data.data,
-    phanBoLoaiVe: loaiVe.data.data,
-    veTheoGioHomNay: homNay.data.data,
+    gioMuaNhieuNhat: gio.data.data || [],
+    topPhimBanChay: topPhim.data.data || [],
+    phanBoLoaiVe: loaiVe.data.data || [],
+    veTheoGioHomNay: homNay.data.data || [],
   };
 };
 
 const COLORS = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"];
 
 const ThongKeVe: React.FC = () => {
-  const { data, isLoading} = useQuery({
+  const { data } = useQuery({
     queryKey: ["thongKeVe"],
     queryFn: fetchThongKeVe,
   });
-
-  
-  
-  if (isLoading)
-    return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
-    if (!data) return <div className="text-center mt-4">Không có dữ liệu</div>;
 
   return (
     <div className="thongke-container">
@@ -47,7 +41,7 @@ const ThongKeVe: React.FC = () => {
         <div className="thongke-chart">
           <h3>Giờ mua nhiều nhất</h3>
           <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data.gioMuaNhieuNhat}>
+            <BarChart data={data?.gioMuaNhieuNhat || []}>
               <XAxis dataKey="gio" />
               <YAxis />
               <Tooltip />
@@ -61,12 +55,12 @@ const ThongKeVe: React.FC = () => {
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-                data={data.phanBoLoaiVe}
+                data={data?.phanBoLoaiVe || []}
                 dataKey="so_luong"
                 nameKey="ten_loai"
                 label
               >
-                {data.phanBoLoaiVe.map((_, i) => (
+                {data?.phanBoLoaiVe?.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
                 ))}
               </Pie>
@@ -79,7 +73,7 @@ const ThongKeVe: React.FC = () => {
       <div className="thongke-chart">
         <h3>Top phim bán chạy</h3>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={data.topPhimBanChay}>
+          <BarChart data={data?.topPhimBanChay || []}>
             <XAxis dataKey="ten_phim" />
             <YAxis />
             <Tooltip />
@@ -91,7 +85,7 @@ const ThongKeVe: React.FC = () => {
       <div className="thongke-chart">
         <h3>Vé bán theo giờ hôm nay</h3>
         <ResponsiveContainer width="100%" height={250}>
-          <BarChart data={data.veTheoGioHomNay}>
+          <BarChart data={data?.veTheoGioHomNay || []}>
             <XAxis dataKey="gio" />
             <YAxis />
             <Tooltip />
