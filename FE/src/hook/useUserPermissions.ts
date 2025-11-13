@@ -18,7 +18,7 @@ export function useUserPermissions() {
     }
 
     // Nếu là admin, có tất cả quyền
-    if (user.vai_tro === 'Admin') {
+    if (user.vai_tro_id === 1) {
       axios.get('http://127.0.0.1:8000/api/menu')
         .then(res => {
           const adminPerms = res.data.map((menu: any) => ({
@@ -64,7 +64,7 @@ export function useUserPermissions() {
     if (!user) return false;
     
     // Admin có tất cả quyền
-    if (user.vai_tro === 'Admin') return true;
+    if (user.vai_tro_id === 1) return true;
 
     const menuPerms = permissions.find(p => p.menuId === menuId);
     return menuPerms?.permissions.includes(permission) || false;
