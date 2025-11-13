@@ -1,14 +1,47 @@
+// src/component/Admin/Banner/ListBanner.tsx
+// --- CÓ THÊM LOGIC LỌC & PHÂN TRANG (CLIENT-SIDE) ---
+
+import { useState, useMemo } from "react"; // 1. THÊM useState, useMemo
 import { useListBanners, useUpdateBanner, useDeleteBanner } from "../../../hook/BannerHook";
 import Swal from "sweetalert2";
 import type { Banner } from "../../../types/banner";
+import { useNavigate } from "react-router-dom"; // 2. THÊM useNavigate
+
+const ITEMS_PER_PAGE = 5; // <-- 3. ĐỊNH NGHĨA SỐ ITEM MỖI TRANG
 
 export default function BannerList() {
-  const { data: banners, isLoading } = useListBanners();
+  const navigate = useNavigate(); // 4. Khởi tạo navigate
+
+  // 5. GIỮ NGUYÊN HOOK LẤY TẤT CẢ DATA
+  const { data: allBanners, isLoading } = useListBanners(); 
   const updateBanner = useUpdateBanner();
   const deleteBanner = useDeleteBanner();
 
+  // 6. THÊM STATE CHO LỌC VÀ TRANG
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // 7. LOGIC LỌC (THEO TIÊU ĐỀ) BẰNG useMemo
+  const filteredBanners = useMemo(() => {
+    if (!allBanners) return [];
+    return allBanners.filter((banner: Banner) =>
+      banner.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [allBanners, searchTerm]);
+
+  // 8. LOGIC PHÂN TRANG BẰNG useMemo
+  const paginatedBanners = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    const end = start + ITEMS_PER_PAGE;
+    return filteredBanners.slice(start, end);
+  }, [filteredBanners, currentPage]);
+
+  const totalPages = Math.ceil(filteredBanners.length / ITEMS_PER_PAGE);
+
+
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách banner...</p>;
 
+  // ... (các hàm handleDelete, handleEdit giữ nguyên) ...
   const handleDelete = (id: number) => {
     Swal.fire({
       title: "Xác nhận xóa?",
@@ -39,15 +72,15 @@ export default function BannerList() {
 
         <label class="form-label">Ngày bắt đầu</label>
         <input id="start_date" type="date" class="form-control mb-2"
-               value="${banner.start_date ? banner.start_date.split('T')[0] : ''}" />
+               value="${banner.start_date ? new Date(banner.start_date).toISOString().split('T')[0] : ''}" />
 
         <label class="form-label">Ngày kết thúc</label>
         <input id="end_date" type="date" class="form-control mb-2"
-               value="${banner.end_date ? banner.end_date.split('T')[0] : ''}" />
+               value="${banner.end_date ? new Date(banner.end_date).toISOString().split('T')[0] : ''}" />
 
         <label class="form-label">Ảnh</label>
         <input id="image" type="file" class="form-control mb-2" />
-        <img src="${banner.image_url}" alt="preview" style="max-width:100%;border-radius:8px;margin-top:8px"/>
+        <img src="${banner.image_url.startsWith('http') ? banner.image_url : `http://127.0.0.1:8000${banner.image_url}`}" alt="preview" style="max-width:100%;border-radius:8px;margin-top:8px"/>
       </div>
     `,
     focusConfirm: false,
@@ -91,13 +124,35 @@ export default function BannerList() {
 
   return (
     <div className="container p-4">
-      <h4 className="mb-4 text-center">🖼️ Quản lý Banner</h4>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0">🖼️ Quản lý Banner</h4>
+        <button 
+          className="btn btn-success"
+          onClick={() => navigate("/admin/banners/them-moi")}
+        >
+          ➕ Thêm mới banner
+        </button>
+      </div>
+
+      {/* 9. THÊM UI BỘ LỌC */}
+      <div className="mb-3">
+        <input 
+          type="text"
+          className="form-control"
+          placeholder="Tìm theo tiêu đề banner..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset về trang 1 khi tìm
+          }}
+        />
+      </div>
 
       <div className="table-responsive">
         <table className="table table-bordered table-striped mx-auto align-middle">
           <thead className="table-light text-center">
             <tr>
-              <th>ID</th>
+              <th>STT</th>
               <th>Tiêu đề</th>
               <th>Ảnh</th>
               <th>Link</th>
@@ -107,14 +162,17 @@ export default function BannerList() {
             </tr>
           </thead>
           <tbody>
-            {banners?.length ? (
-              banners.map((banner: Banner) => (
+            {/* 10. SỬA `banners` THÀNH `paginatedBanners` */}
+            {paginatedBanners.length > 0 ? (
+              paginatedBanners.map((banner: Banner, index: number) => (
                 <tr key={banner.id}>
-                  <td className="text-center">{banner.id}</td>
+                  <td className="text-center">
+                    {index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}
+                  </td>
                   <td>{banner.title}</td>
                   <td className="text-center">
                     <img
-                      src={`http://127.0.0.1:8000${banner.image_url}`}
+                      src={banner.image_url.startsWith('http') ? banner.image_url : `http://127.0.0.1:8000${banner.image_url}`}
                       alt={banner.title}
                       className="rounded"
                       style={{ width: "120px", height: "60px", objectFit: "cover" }}
@@ -126,10 +184,10 @@ export default function BannerList() {
                     </a>
                   </td>
                   <td className="text-center">
-                    {new Date(banner.start_date).toLocaleDateString("vi-VN")}
+                    {banner.start_date ? new Date(banner.start_date).toLocaleDateString("vi-VN") : 'N/A'}
                   </td>
                   <td className="text-center">
-                    {new Date(banner.end_date).toLocaleDateString("vi-VN")}
+                    {banner.end_date ? new Date(banner.end_date).toLocaleDateString("vi-VN") : 'N/A'}
                   </td>
                   <td className="text-center">
                     <div className="btn-group">
@@ -152,13 +210,43 @@ export default function BannerList() {
             ) : (
               <tr>
                 <td colSpan={7} className="text-center text-muted py-3">
-                  Không có banner nào.
+                  Không tìm thấy banner nào.
                 </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {/* 11. THÊM UI PHÂN TRANG */}
+      {totalPages > 1 && (
+        <nav>
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setCurrentPage(p => p - 1)}
+                disabled={currentPage === 1}
+              >
+                Trước
+              </button>
+            </li>
+            <li className="page-item active">
+              <span className="page-link">{currentPage} / {totalPages}</span>
+            </li>
+            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+              <button 
+                className="page-link" 
+                onClick={() => setCurrentPage(p => p + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+              </button>
+            </li>
+          </ul>
+        </nav>
+      )}
+
     </div>
   );
 }

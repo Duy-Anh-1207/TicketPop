@@ -38,9 +38,13 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
     >
       <div className="poster-wrapper" onClick={() => handleGoDetail(false)}>
         <img
-          src={movie.anh_poster}
-          className="card-img-top"
+          src={
+            movie.anh_poster?.startsWith("http")
+              ? movie.anh_poster
+              : `${import.meta.env.VITE_API_BASE_URL}/storage/${movie.anh_poster.replace("posters/", "posters/")}`
+          }
           alt={movie.ten_phim}
+          className="card-img-top"
         />
         {isHovered && (
           <div className="movie-info-overlay">
@@ -74,7 +78,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
         </div>
         <button
           className="book-ticket"
-          onClick={() => handleGoDetail(true)} 
+          onClick={() => handleGoDetail(true)}
         >
           ĐẶT VÉ
         </button>

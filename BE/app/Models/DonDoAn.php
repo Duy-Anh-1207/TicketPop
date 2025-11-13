@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class DonDoAn extends Model
 {
     use HasFactory;
-    // use SoftDeletes;
     protected $table = 'don_do_an';
     protected $fillable = [
         'dat_ve_id',

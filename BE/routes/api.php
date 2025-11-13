@@ -25,6 +25,9 @@ use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
 use App\Http\Controllers\Admin\GiaVeController;
+use App\Http\Controllers\Client\MomoController;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
 
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
@@ -86,8 +89,8 @@ Route::prefix('don-do-an')->group(function(){
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
 Route::get('dat-ve',[DatVeController::class, 'danhSachDatVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
+Route::get('/dat-ve/{id}/chi-tiet', [DatVeController::class, 'chiTietVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
 
@@ -154,7 +157,7 @@ Route::prefix('thong-ke')->group(function () {
     Route::get('/doanh-thu-theo-thang', [ThongKeController::class, 'doanhThuTheoThang']);
 });
 
-Route::get('/tin-tuc', [TinTucController::class, 'index']);
+Route::get('/tin-tucs', [TinTucController::class, 'index']);
 Route::post('/tin-tucs', [TinTucController::class, 'store']);
 Route::get('/tin-tucs/{id}', [TinTucController::class, 'show']);
 Route::put('/tin-tucs/{id}', [TinTucController::class, 'update']);
@@ -181,4 +184,6 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 //gia ve
 Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 
-
+Route::post('/thanhtoan/momo', [MomoController::class,'create']);
+Route::get('/thanhtoan/momo/return', [MomoController::class,'return']);
+Route::post('/thanhtoan/momo/ipn', [MomoController::class,'ipn']);

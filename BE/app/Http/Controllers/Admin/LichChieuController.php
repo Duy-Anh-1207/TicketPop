@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Ghe;
 use App\Models\GiaVe;
 
 use App\Models\LichChieu;
@@ -42,7 +43,7 @@ class LichChieuController extends Controller
                 'message' => 'Danh sách lịch chiếu',
                 'data' => $lichChieu
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'status' => false,
                 'message' => 'Lỗi khi lấy danh sách lịch chiếu',
@@ -80,7 +81,7 @@ class LichChieuController extends Controller
 
                 // 🚫 Không cho phép lịch chiếu trong quá khứ
                 if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
-                    throw new \Exception('Không thể tạo lịch chiếu trong quá khứ!');
+                    throw new Exception('Không thể tạo lịch chiếu trong quá khứ!');
                 }
 
                 // 🚫 Kiểm tra trùng lịch trong cùng phòng
@@ -92,7 +93,7 @@ class LichChieuController extends Controller
                     ->exists();
 
                 if ($trungLich) {
-                    throw new \Exception("Phòng ID {$item['phong_id']} đã có lịch chiếu trùng thời gian.");
+                    throw new Exception("Phòng ID {$item['phong_id']} đã có lịch chiếu trùng thời gian.");
                 }
 
                 // ✅ Lấy phien_ban_id
@@ -137,6 +138,21 @@ class LichChieuController extends Controller
 
                 $created[] = $lichChieu;
             }
+            $gheList = Ghe::where('phong_id', $item['phong_id'])->get(['id']);
+            if ($gheList->isNotEmpty()) {
+                $checkGheData = $gheList->map(function ($ghe) use ($lichChieu) {
+                    return [
+                        'lich_chieu_id' => $lichChieu->id,
+                        'nguoi_dung_id' => null,
+                        'ghe_id' => $ghe->id,
+                        'trang_thai' => 'trong',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                })->toArray();
+
+                DB::table('check_ghe')->insert($checkGheData);
+            }
 
             DB::commit();
 
@@ -144,7 +160,7 @@ class LichChieuController extends Controller
                 'message' => 'Thêm nhiều lịch chiếu thành công',
                 'data' => $created
             ], 201);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
                 'error' => $e->getMessage()

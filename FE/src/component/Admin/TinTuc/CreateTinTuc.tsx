@@ -6,10 +6,6 @@ import {
   useUpdateTinTuc,
   useTinTucDetail,
 } from "../../../hook/TinTucHook";
-import type { TinTuc } from "../../../types/tin-tuc";
-
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 
 interface TinTucForm {
   tieu_de: string;
@@ -153,39 +149,6 @@ export default function CreateTinTuc() {
                 value={formData.tieu_de}
                 onChange={handleChange}
                 required
-              />
-            </div>
-
-            <div className="mb-3">
-              <label className="form-label fw-bold">Loại tin tức</label>
-              <select
-                name="type"
-                className="form-select"
-                value={formData.type}
-                onChange={handleChange} 
-                required
-              >
-                <option value="tin_tuc">Tin Tức</option>
-                <option value="uu_dai">Ưu Đãi</option>
-                <option value="su_kien">Sự Kiện</option>
-              </select>
-              <CKEditor
-                editor={ClassicEditor as any}
-                data={formData.noi_dung}
-                onChange={(_, editor) => {
-                  const data = editor.getData();
-                  setFormData((prev) => ({
-                    ...prev,
-                    noi_dung: data,
-                  }));
-                }}
-                onReady={(editor) => {
-                  const root = editor.editing.view.document.getRoot();
-                  editor.editing.view.change((writer: any) => {
-                    writer.setStyle("min-height", "200px", root);
-                  });
-                }}
-
               />
             </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 import { useUserPermissions } from "../../../hook/useUserPermissions";
@@ -12,7 +12,7 @@ const MENU_IDS = {
   LICH_CHIEU: 6,
   VOUCHER: 7,
   TIN_TUC: 8,
-  THONG_KE: 9
+  THONG_KE: 9,
 };
 
 interface MenuItem {
@@ -21,114 +21,105 @@ interface MenuItem {
   icon: string;
   path: string;
   color: string;
-  children?: {
-    title: string;
-    path: string;
-  }[];
+  children?: { title: string; path: string }[];
 }
 
 const MENU_CONFIG: MenuItem[] = [
   {
     id: MENU_IDS.PHIM,
-    title: 'Quản lý phim',
-    icon: 'solar:smart-speaker-minimalistic-line-duotone',
-    path: '/admin/phim',
-    color: 'indigo',
+    title: "Quản lý phim",
+    icon: "solar:smart-speaker-minimalistic-line-duotone",
+    path: "/admin/phim",
+    color: "indigo",
     children: [
-      { title: 'Danh sách phim', path: '/admin/phim' },
-      { title: 'Quản lý thể loại', path: '/admin/the-loai' }
-    ]
+      { title: "Danh sách phim", path: "/admin/phim" },
+      { title: "Quản lý thể loại", path: "/admin/the-loai" },
+    ],
   },
   {
     id: MENU_IDS.BANNER,
-    title: 'Quản lý Banner',
-    icon: 'solar:smart-speaker-minimalistic-line-duotone',
-    path: '/admin/banners',
-    color: 'indigo',
+    title: "Quản lý Banner",
+    icon: "solar:smart-speaker-minimalistic-line-duotone",
+    path: "/admin/banners",
+    color: "indigo",
     children: [
-      { title: 'Danh sách banner', path: '/admin/banners' },
-      { title: 'Thêm mới banner', path: '/admin/banners/them-moi' }
-    ]
+      { title: "Danh sách banner", path: "/admin/banners" },
+      { title: "Thêm mới banner", path: "/admin/banners/them-moi" },
+    ],
   },
   {
     id: MENU_IDS.TAI_KHOAN,
-    title: 'Quản lý tài khoản',
-    icon: 'solar:smart-speaker-minimalistic-line-duotone',
-    path: '/admin/nguoi-dung',
-    color: 'success',
+    title: "Quản lý tài khoản",
+    icon: "solar:user-circle-line-duotone",
+    path: "/admin/nguoi-dung",
+    color: "success",
     children: [
-      { title: 'Người dùng', path: '/admin/nguoi-dung' },
-      { title: 'Vai trò', path: '/admin/vai-tro' }
-    ]
+      { title: "Người dùng", path: "/admin/nguoi-dung" },
+      { title: "Vai trò", path: "/admin/vai-tro" },
+    ],
   },
   {
     id: MENU_IDS.PHONG_CHIEU,
-    title: 'Quản lý phòng chiếu',
-    icon: 'solar:pie-chart-3-line-duotone',
-    path: '/admin/roomxb',
-    color: 'warning',
+    title: "Quản lý phòng chiếu",
+    icon: "solar:pie-chart-3-line-duotone",
+    path: "/admin/roomxb",
+    color: "warning",
     children: [
-      { title: 'Phòng chiếu đã xuất bản', path: '/admin/roomxb' },
-      { title: 'Phòng chiếu chưa xuất bản', path: '/admin/roomcxb' },
-      { title: 'Thêm mới phòng chiếu', path: '/admin/room/them-moi' }
-    ]
+      { title: "Phòng chiếu đã xuất bản", path: "/admin/roomxb" },
+      { title: "Phòng chiếu chưa xuất bản", path: "/admin/roomcxb" },
+      { title: "Thêm mới phòng chiếu", path: "/admin/room/them-moi" },
+    ],
   },
   {
     id: MENU_IDS.DICH_VU,
-    title: 'Quản lý dịch vụ',
-    icon: 'solar:user-circle-line-duotone',
-    path: '/admin/foods',
-    color: 'danger',
+    title: "Quản lý dịch vụ",
+    icon: "solar:user-circle-line-duotone",
+    path: "/admin/foods",
+    color: "danger",
     children: [
-      { title: 'Quản lý đồ ăn', path: '/admin/foods' },
-      { title: 'Thêm mới đồ ăn', path: '/admin/foods/them-moi' },
-      { title: 'Quản lý menu', path: '/admin/menu' }
-    ]
+      { title: "Quản lý đồ ăn", path: "/admin/foods" },
+      { title: "Thêm mới đồ ăn", path: "/admin/foods/them-moi" },
+      { title: "Quản lý menu", path: "/admin/menu" },
+    ],
   },
   {
     id: MENU_IDS.LICH_CHIEU,
-    title: 'Quản lý lịch chiếu',
-    icon: 'solar:calendar-mark-line-duotone',
-    path: '/admin/lich-chieu',
-    color: 'danger',
+    title: "Quản lý lịch chiếu",
+    icon: "solar:calendar-mark-line-duotone",
+    path: "/admin/lich-chieu",
+    color: "danger",
     children: [
-      { title: 'Danh sách lịch chiếu', path: '/admin/lich-chieu' },
-      { title: 'Thêm mới lịch chiếu', path: '/admin/lich-chieu/them-moi' }
-    ]
+      { title: "Danh sách lịch chiếu", path: "/admin/lich-chieu" },
+      { title: "Thêm mới lịch chiếu", path: "/admin/lich-chieu/them-moi" },
+    ],
   },
   {
     id: MENU_IDS.VOUCHER,
-    title: 'Quản lý voucher',
-    icon: 'solar:calendar-mark-line-duotone',
-    path: '/admin/vouchers',
-    color: 'danger',
-    children: [
-      { title: 'Danh sách voucher', path: '/admin/vouchers' }
-    ]
+    title: "Quản lý voucher",
+    icon: "solar:calendar-mark-line-duotone",
+    path: "/admin/vouchers",
+    color: "danger",
+    children: [{ title: "Danh sách voucher", path: "/admin/vouchers" }],
   },
   {
     id: MENU_IDS.TIN_TUC,
-    title: 'Quản lý tin tức',
-    icon: 'solar:calendar-mark-line-duotone',
-    path: '/admin/tin-tuc',
-    color: 'danger',
-    children: [
-      { title: 'Danh sách tin tức', path: '/admin/tin-tuc' }
-    ]
+    title: "Quản lý tin tức",
+    icon: "solar:calendar-mark-line-duotone",
+    path: "/admin/tin-tuc",
+    color: "danger",
+    children: [{ title: "Danh sách tin tức", path: "/admin/tin-tuc" }],
   },
-
   {
     id: MENU_IDS.THONG_KE,
-    title: 'Thống kê',
-    icon: 'solar:chart-square-line-duotone',
-    path: '/admin/thong-ke',
-    color: 'primary',
+    title: "Thống kê",
+    icon: "solar:chart-square-line-duotone",
+    path: "/admin/thongke",
+    color: "primary",
     children: [
-      { title: 'Thống kê vé', path: '/admin/thong-ke/ve' },
-      { title: 'Thống kê doanh thu', path: '/admin/thong-ke/doanh-thu' },
-    ]
+      { title: "Thống kê doanh thu", path: "thong-ke/doanh-thu" },
+      { title: "Thống kê vé", path: "thong-ke/ve" },
+    ],
   },
-
 ];
 
 const Sidebar: React.FC = () => {
@@ -138,23 +129,12 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="left-sidebar with-vertical">
       <div className="brand-logo d-flex align-items-center justify-content-between">
-        <a
-          href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
-          className="text-nowrap logo-img"
-        >
+        <Link to="/admin/dashbroad" className="text-nowrap logo-img">
           <img
             src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
-            className="dark-logo"
-            alt="Logo-Dark"
+            alt="Logo"
           />
-        </a>
-        <a
-          href="#"
-          className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-          onClick={(e) => e.preventDefault()}
-        >
-          <i className="ti ti-x"></i>
-        </a>
+        </Link>
       </div>
 
       <div className="scroll-sidebar" data-simplebar>
@@ -172,43 +152,36 @@ const Sidebar: React.FC = () => {
               <Link
                 to="/admin/dashbroad"
                 className="sidebar-link primary-hover-bg"
-                id="get-url"
               >
                 <span className="aside-icon p-2 bg-primary-subtle rounded-1">
-                  <Icon
-                    icon="solar:screencast-2-line-duotone"
-                    className="fs-6"
-                  />
+                  <Icon icon="solar:screencast-2-line-duotone" className="fs-6" />
                 </span>
                 <span className="hide-menu ps-1">Dashboard</span>
               </Link>
             </li>
 
-            {/* Dynamic Menu Items */}
-            {MENU_CONFIG.map(menu => {
+            {MENU_CONFIG.map((menu) => {
               if (!canAccess(menu.id, 4)) return null;
-
               const isOpen = openMenus[menu.id] || false;
 
               return (
                 <li key={menu.id} className="sidebar-item">
                   <a
-                    className={`sidebar-link has-arrow ${menu.color}-hover-bg`}
                     href="#"
+                    className={`sidebar-link has-arrow ${menu.color}-hover-bg`}
                     aria-expanded={isOpen}
                     onClick={(e) => {
                       e.preventDefault();
-                      setOpenMenus(prev => ({
+                      setOpenMenus((prev) => ({
                         ...prev,
-                        [menu.id]: !prev[menu.id]
+                        [menu.id]: !prev[menu.id],
                       }));
                     }}
                   >
-                    <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
-                      <Icon
-                        icon={menu.icon}
-                        className="fs-6"
-                      />
+                    <span
+                      className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}
+                    >
+                      <Icon icon={menu.icon} className="fs-6" />
                     </span>
                     <span className="hide-menu ps-1">{menu.title}</span>
                   </a>
@@ -220,7 +193,6 @@ const Sidebar: React.FC = () => {
                     {menu.children?.map((child, idx) => (
                       <li key={`${menu.id}-${idx}`} className="sidebar-item">
                         <Link to={child.path} className="sidebar-link">
-                          <span className="sidebar-icon"></span>
                           <span className="hide-menu">{child.title}</span>
                         </Link>
                       </li>
@@ -231,37 +203,6 @@ const Sidebar: React.FC = () => {
             })}
           </ul>
         </nav>
-      </div>
-
-      <div className="fixed-profile mx-3 mt-3">
-        <div className="card bg-primary-subtle mb-0 shadow-none">
-          <div className="card-body p-4">
-            <div className="d-flex align-items-center justify-content-between gap-3">
-              <div className="d-flex align-items-center gap-3">
-                <img
-                  src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/profile/user-1.jpg"
-                  width="45"
-                  height="45"
-                  className="img-fluid rounded-circle"
-                  alt="spike-img"
-                />
-                <div>
-                  <h5 className="mb-1">Mike</h5>
-                  <p className="mb-0">Admin</p>
-                </div>
-              </div>
-              <a
-                href="https://bootstrapdemos.wrappixel.com/spike/dist/main/authentication-login.html"
-                className="position-relative"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                data-bs-title="Logout"
-              >
-                <Icon icon="solar:logout-line-duotone" className="fs-8" />
-              </a>
-            </div>
-          </div>
-        </div>
       </div>
     </aside>
   );

@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('ma_cha', 250)->nullable();
             $table->string('ten_chuc_nang', 250);
             $table->text('state');
+            $table->string('path', 255)->nullable();
             $table->string('stt')->nullable();
             $table->boolean('trang_thai')->default(true);
             $table->timestamps();

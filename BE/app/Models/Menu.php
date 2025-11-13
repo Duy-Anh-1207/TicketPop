@@ -15,10 +15,12 @@ class Menu extends Model
         'ma_chuc_nang',
         'ma_cha',
         'ten_chuc_nang',
+        'path',
+        'icon',
+        'color',
         'state',
         'stt',
         'trang_thai',
-
     ];
 
     // Quan hệ cha–con dựa trên mã

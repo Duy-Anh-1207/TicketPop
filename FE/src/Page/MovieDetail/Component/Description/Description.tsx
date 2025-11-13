@@ -4,6 +4,7 @@ import { getPhimById } from "../../../../provider/PhimProvider";
 import type { Phim } from "../../../../types/phim";
 import "./Description.scss";
 
+
 const Description = () => {
   const { slug } = useParams();
   const location = useLocation();
@@ -68,7 +69,15 @@ const Description = () => {
     <div className="description-wrapper">
       {/* Cột trái - Ảnh */}
       <div className="description-left">
-        <img src={movie.anh_poster} alt={movie.ten_phim} />
+        <img
+          src={
+            movie.anh_poster?.startsWith("http")
+              ? movie.anh_poster
+              : `${import.meta.env.VITE_API_BASE_URL}/storage/${movie.anh_poster.replace("posters/", "posters/")}`
+          }
+          alt={movie.ten_phim}
+          className="card-img-top"
+        />
       </div>
 
       {/* Cột phải - Thông tin */}
@@ -79,6 +88,8 @@ const Description = () => {
           <p><strong>Thời lượng:</strong> {movie.thoi_luong} phút</p>
           <p><strong>Quốc gia:</strong> {movie.quoc_gia}</p>
           <p><strong>Ngôn ngữ:</strong> {movie.ngon_ngu}</p>
+          <p><strong>Thể loại:</strong> {movie.the_loai}</p>
+          <p><strong>Phiên bản:</strong> {movie.phien_ban}</p>
           <p><strong>Khởi chiếu:</strong> {new Date(movie.ngay_cong_chieu).toLocaleDateString()}</p>
         </div>
 
