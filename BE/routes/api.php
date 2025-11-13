@@ -77,7 +77,7 @@ Route::get('/deleted', [LichChieuController::class, 'deleted']);
 Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
 
 // don do an
-Route::prefix('don-do-an')->group(function(){
+Route::prefix('don-do-an')->group(function () {
     Route::get('/', [DonDoAnController::class, 'index']);
     Route::post('/', [DonDoAnController::class, 'store']);
     Route::put('/{id}', [DonDoAnController::class, 'update']);
@@ -88,9 +88,11 @@ Route::prefix('don-do-an')->group(function(){
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
-Route::get('dat-ve',[DatVeController::class, 'danhSachDatVe']);
+Route::get('dat-ve', [DatVeController::class, 'danhSachDatVe']);
 Route::get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
 Route::get('/dat-ve/{id}/chi-tiet', [DatVeController::class, 'chiTietVe']);
+Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
+Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
 
@@ -184,6 +186,6 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 //gia ve
 Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 
-Route::post('/thanhtoan/momo', [MomoController::class,'create']);
-Route::get('/thanhtoan/momo/return', [MomoController::class,'return']);
-Route::post('/thanhtoan/momo/ipn', [MomoController::class,'ipn']);
+Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
+Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
+Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
