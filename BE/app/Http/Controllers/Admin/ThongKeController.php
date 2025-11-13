@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -7,159 +8,174 @@ use Illuminate\Support\Facades\DB;
 
 class ThongKeController extends Controller
 {
-    // Thống kê doanh thu theo ngày hoặc tháng
-    public function doanhThu(Request $request)
+    // ==================== I. THỐNG KÊ VÉ ====================
+
+    // Các giờ được mua nhiều nhất
+    public function gioMuaNhieuNhat(Request $request)
     {
-        $type = $request->query('type', 'month'); // 'day' hoặc 'month'
+        $phimId = $request->query('phim_id');
+        $ngay = $request->query('ngay'); // dạng YYYY-MM-DD
 
-        try {
-            if ($type === 'day') {
-                // Doanh thu theo ngày
-                $data = DB::table('dat_ve')
-                    ->select(
-                        DB::raw('DATE(created_at) as label'),
-                        DB::raw('SUM(tong_tien) as revenue')
-                    )
-                    ->groupBy(DB::raw('DATE(created_at)'))
-                    ->orderBy('label', 'asc')
-                    ->get();
-            } else {
-                // Doanh thu theo tháng
-                $data = DB::table('dat_ve')
-                    ->select(
-                        DB::raw('DATE_FORMAT(created_at, "%Y-%m") as label'),
-                        DB::raw('SUM(tong_tien) as revenue')
-                    )
-                    ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
-                    ->orderBy('label', 'asc')
-                    ->get();
-            }
-
-            return response()->json([
-                'status' => true,
-                'type' => $type,
-                'data' => $data
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-    
-
-    // số lượng vé bán ra
-    public function veBan()
-    {
-        try {
-            $tongVeBan = DB::table('dat_ve')->count();
-
-            return response()->json([
-                'status' => true,
-                'tong_ve_ban' => $tongVeBan,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    // Top 5 phim có doanh thu cao nhất
-   public function topPhim()
-{
-    try {
-        $data = DB::table('dat_ve')
+        $query = DB::table('thanh_toan')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
-            ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
+            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
             ->select(
-                'phim.ten_phim',
-                'phim.anh_poster',
-                DB::raw('SUM(dat_ve.tong_tien) as tong_doanh_thu'),
-                DB::raw('COUNT(dat_ve.id) as tong_ve')
+                DB::raw('HOUR(thanh_toan.created_at) as gio'),
+                DB::raw('COUNT(thanh_toan.id) as so_luong')
             )
-            ->groupBy('phim.id', 'phim.ten_phim', 'phim.anh_poster')
-            ->orderByDesc('tong_doanh_thu')
+            ->groupBy(DB::raw('HOUR(thanh_toan.created_at)'))
+            ->orderByDesc('so_luong')
             ->limit(5)
             ->get();
 
-        // Ép kiểu số để frontend format đúng
-        $data = $data->map(function ($item) {
-            return [
-                'ten_phim' => $item->ten_phim,
-                'anh_poster' => $item->anh_poster,
-                'tong_doanh_thu' => (int) $item->tong_doanh_thu,
-                'tong_ve' => (int) $item->tong_ve,
-            ];
-        });
-
         return response()->json([
             'status' => true,
-            'data' => $data,
+            'data' => $query
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => $e->getMessage(),
-        ], 500);
     }
-}
 
-    
+    // Top phim bán chạy
+    public function topPhimBanChay(Request $request)
+    {
+        $phimId = $request->query('phim_id');
+        $ngay = $request->query('ngay');
 
-    // Số lượng đồ ăn bán ra
-    public function doAnBanRa()
+        $query = DB::table('thanh_toan')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
+            ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
+            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->select(
+                'phim.ten_phim',
+                'phim.anh_poster',
+                DB::raw('COUNT(thanh_toan.id) as tong_ve'),
+                DB::raw('SUM(thanh_toan.tong_tien_goc) as tong_tien')
+            )
+            ->groupBy('phim.id', 'phim.ten_phim', 'phim.anh_poster')
+            ->orderByDesc('tong_ve')
+            ->limit(5)
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $query]);
+    }
+
+    // Phân bố theo loại vé (thường, VIP)
+    public function phanBoLoaiVe(Request $request)
+    {
+        $phimId = $request->query('phim_id');
+        $ngay = $request->query('ngay');
+
+        $query = DB::table('thanh_toan')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->join('ghe', 'dat_ve.ghe_id', '=', 'ghe.id')
+            ->join('loai_ghe', 'ghe.loai_ghe_id', '=', 'loai_ghe.id')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->select(
+                'loai_ghe.ten_loai',
+                DB::raw('COUNT(loai_ghe.id) as so_luong')
+            )
+            ->groupBy('loai_ghe.ten_loai')
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $query]);
+    }
+
+    // Số lượng vé bán ra theo giờ trong hôm nay
+    public function veTheoGioHomNay(Request $request)
+    {
+        $phimId = $request->query('phim_id');
+
+        $query = DB::table('thanh_toan')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+            ->whereDate('thanh_toan.created_at', now()->toDateString())
+            ->select(
+                DB::raw('HOUR(thanh_toan.created_at) as gio'),
+                DB::raw('COUNT(thanh_toan.id) as so_luong')
+            )
+            ->groupBy(DB::raw('HOUR(thanh_toan.created_at)'))
+            ->orderBy('gio', 'asc')
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $query]);
+    }
+
+    // ==================== II. THỐNG KÊ DOANH THU ====================
+
+    // Tỷ lệ phương thức thanh toán
+    public function tyLePhuongThucThanhToan(Request $request)
+    {
+        $phimId = $request->query('phim_id');
+        $ngay = $request->query('ngay');
+
+        $query = DB::table('thanh_toan')
+            ->join('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->select(
+                'phuong_thuc_thanh_toan.ten_phuong_thuc',
+                DB::raw('COUNT(thanh_toan.id) as so_luong')
+            )
+            ->groupBy('phuong_thuc_thanh_toan.ten_phuong_thuc')
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $query]);
+    }
+
+    // Doanh thu phim
+    public function doanhThuPhim(Request $request)
+    {
+        $phimId = $request->query('phim_id');
+        $ngay = $request->query('ngay');
+
+        $query = DB::table('thanh_toan')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
+            ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
+            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->select(
+                'phim.ten_phim',
+                DB::raw('SUM(thanh_toan.tong_tien_goc) as doanh_thu')
+            )
+            ->groupBy('phim.ten_phim')
+            ->orderByDesc('doanh_thu')
+            ->get();
+
+        return response()->json(['status' => true, 'data' => $query]);
+    }
+
+    // Doanh thu đồ ăn
+    public function doanhThuDoAn(Request $request)
     {
         try {
-            $tong = DB::table('don_do_an')->sum('so_luong');
-
-            return response()->json([
-                'status' => true,
-                'tong_do_an_ban_ra' => (int) $tong
-            ]);
+            $tong = DB::table('don_do_an')->sum('tong_tien');
+            return response()->json(['status' => true, 'tong_doanh_thu_do_an' => $tong]);
         } catch (\Exception $e) {
             return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
-     // Tổng doanh thu hiện tại
-
-    public function tongDoanhThu()
+    // Doanh thu theo tháng
+    public function doanhThuTheoThang()
     {
-        try {
-            $tong = DB::table('dat_ve')->sum('tong_tien');
+        $data = DB::table('thanh_toan')
+            ->select(
+                DB::raw('DATE_FORMAT(created_at, "%Y-%m") as thang'),
+                DB::raw('SUM(tong_tien_goc) as tong_doanh_thu')
+            )
+            ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
+            ->orderBy('thang', 'asc')
+            ->get();
 
-            return response()->json([
-                'status' => true,
-                'tong_doanh_thu' => (float) $tong
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json(['status' => true, 'data' => $data]);
     }
-
-    // Khách hàng mới trong tháng
-    
-    public function khachHangMoi()
-    {
-        try {
-            $soLuong = DB::table('nguoi_dung')
-                ->whereMonth('created_at', now()->month)
-                ->whereYear('created_at', now()->year)
-                ->count();
-
-            return response()->json([
-                'status' => true,
-                'khach_hang_moi' => $soLuong
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
-        }
-    }
-
-
-
-
 }

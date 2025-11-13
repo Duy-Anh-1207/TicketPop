@@ -118,15 +118,16 @@ const MENU_CONFIG: MenuItem[] = [
   },
 
   {
-  id: MENU_IDS.THONG_KE,
-  title: 'Thống kê',
-  icon: 'solar:chart-square-line-duotone',
-  path: '/admin/thongke',
-  color: 'primary',
-  children: [
-    { title: 'Tổng quan', path: '/admin/thongke' },
-  ]
-},
+    id: MENU_IDS.THONG_KE,
+    title: 'Thống kê',
+    icon: 'solar:chart-square-line-duotone',
+    path: '/admin/thong-ke',
+    color: 'primary',
+    children: [
+      { title: 'Thống kê vé', path: '/admin/thong-ke/ve' },
+      { title: 'Thống kê doanh thu', path: '/admin/thong-ke/doanh-thu' },
+    ]
+  },
 
 ];
 
@@ -168,11 +169,10 @@ const Sidebar: React.FC = () => {
             </li>
 
             <li className="sidebar-item">
-              <a
+              <Link
+                to="/admin/dashbroad"
                 className="sidebar-link primary-hover-bg"
-                href="#"
                 id="get-url"
-                aria-expanded="false"
               >
                 <span className="aside-icon p-2 bg-primary-subtle rounded-1">
                   <Icon
@@ -181,7 +181,7 @@ const Sidebar: React.FC = () => {
                   />
                 </span>
                 <span className="hide-menu ps-1">Dashboard</span>
-              </a>
+              </Link>
             </li>
 
             {/* Dynamic Menu Items */}

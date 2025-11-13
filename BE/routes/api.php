@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ThongKeController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\FoodController;
@@ -130,13 +131,27 @@ Route::get('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'show']);
 Route::put('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'update']);
 Route::delete('/ma-giam-gia/{id}', [MaGiamGiaController::class, 'destroy']);
 
+Route::prefix('dashbroad')->group(function () {
+    Route::get('/doanh-thu', [DashboardController::class, 'doanhThu']);
+    Route::get('/ve-ban', [DashboardController::class, 'veBan']);
+    Route::get('/top-phim', [DashboardController::class, 'topPhim']);
+    Route::get('/do-an-ban-ra', [DashboardController::class, 'doAnBanRa']);
+    Route::get('/tong-doanh-thu', [DashboardController::class, 'tongDoanhThu']);
+    Route::get('/khach-hang-moi', [DashboardController::class, 'khachHangMoi']);
+});
+
 Route::prefix('thong-ke')->group(function () {
-    Route::get('/doanh-thu', [ThongKeController::class, 'doanhThu']);
-    Route::get('/ve-ban', [ThongKeController::class, 'veBan']);
-    Route::get('/top-phim', [ThongKeController::class, 'topPhim']);
-    Route::get('/do-an-ban-ra', [ThongKeController::class, 'doAnBanRa']);
-    Route::get('/tong-doanh-thu', [ThongKeController::class, 'tongDoanhThu']);
-    Route::get('/khach-hang-moi', [ThongKeController::class, 'khachHangMoi']);
+    // THỐNG KÊ VÉ
+    Route::get('/gio-mua-nhieu-nhat', [ThongKeController::class, 'gioMuaNhieuNhat']);
+    Route::get('/top-phim-ban-chay', [ThongKeController::class, 'topPhimBanChay']);
+    Route::get('/phan-bo-loai-ve', [ThongKeController::class, 'phanBoLoaiVe']);
+    Route::get('/ve-theo-gio-hom-nay', [ThongKeController::class, 'veTheoGioHomNay']);
+
+    // THỐNG KÊ DOANH THU
+    Route::get('/ty-le-phuong-thuc-thanh-toan', [ThongKeController::class, 'tyLePhuongThucThanhToan']);
+    Route::get('/doanh-thu-phim', [ThongKeController::class, 'doanhThuPhim']);
+    Route::get('/doanh-thu-do-an', [ThongKeController::class, 'doanhThuDoAn']);
+    Route::get('/doanh-thu-theo-thang', [ThongKeController::class, 'doanhThuTheoThang']);
 });
 
 Route::get('/tin-tuc', [TinTucController::class, 'index']);

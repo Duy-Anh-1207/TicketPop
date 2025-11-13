@@ -1,18 +1,19 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import "./ThongKe.css";
+import "./Dashboard.css";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const API_URL = "http://localhost:8000/api/";
 
-const fetchThongKe = async () => {
+// 🧩 Gọi API mới theo route /dashbroad
+const fetchDashboard = async () => {
   const [doanhThu, veBan, khachHang, doAn, topPhim] = await Promise.all([
-    axios.get(`${API_URL}thong-ke/doanh-thu?type=month`),
-    axios.get(`${API_URL}thong-ke/ve-ban`),
-    axios.get(`${API_URL}thong-ke/khach-hang-moi`),
-    axios.get(`${API_URL}thong-ke/do-an-ban-ra`),
-    axios.get(`${API_URL}thong-ke/top-phim`),
+    axios.get(`${API_URL}dashbroad/doanh-thu?type=month`),
+    axios.get(`${API_URL}dashbroad/ve-ban`),
+    axios.get(`${API_URL}dashbroad/khach-hang-moi`),
+    axios.get(`${API_URL}dashbroad/do-an-ban-ra`),
+    axios.get(`${API_URL}dashbroad/top-phim`),
   ]);
 
   return {
@@ -24,16 +25,17 @@ const fetchThongKe = async () => {
   };
 };
 
-const ThongKe: React.FC = () => {
+const Dashboard: React.FC = () => {
   const { data, isLoading } = useQuery({
-    queryKey: ["thongke"],
-    queryFn: fetchThongKe,
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboard,
   });
 
-  if (isLoading) return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
+  if (isLoading)
+    return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
 
-  const tongDoanhThu = data?.doanhThu?.reduce((sum, x) => sum + (x.revenue || 0), 0) ?? 0;
-  
+  const tongDoanhThu =
+    data?.doanhThu?.reduce((sum, x) => sum + (x.revenue || 0), 0) ?? 0;
 
   const stats = [
     {
@@ -64,8 +66,8 @@ const ThongKe: React.FC = () => {
 
   return (
     <div className="thongke-container">
-      <h1 className="title">Thống kê</h1>
- 
+      <h1 className="title">Dashboard Tổng Quan</h1>
+
       {/* 4 ô thống kê */}
       <div className="thongke-grid">
         {stats.map((item, i) => (
@@ -73,8 +75,7 @@ const ThongKe: React.FC = () => {
             <div className="card-content">
               <div className="card-info">
                 <p className="card-label">{item.label}</p>
-               <h2 className="card-value">{item.value}</h2>
-
+                <h2 className="card-value">{item.value}</h2>
               </div>
               <div className="card-icon">{item.icon}</div>
             </div>
@@ -84,7 +85,7 @@ const ThongKe: React.FC = () => {
 
       <div className="compare-text">So với tháng trước</div>
 
-      {/* Biểu đồ */}
+      {/* Biểu đồ doanh thu */}
       <div className="chart-card">
         <h2 className="chart-title">📊 Doanh thu theo thời gian</h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -119,7 +120,10 @@ const ThongKe: React.FC = () => {
                   </span>
                 </p>
                 <p>
-                  Số vé: <span className="highlight">{(phim.tong_ve ?? 0).toLocaleString()}</span>
+                  Số vé:{" "}
+                  <span className="highlight">
+                    {(phim.tong_ve ?? 0).toLocaleString()}
+                  </span>
                 </p>
               </div>
             </div>
@@ -134,4 +138,4 @@ const ThongKe: React.FC = () => {
   );
 };
 
-export default ThongKe;
+export default Dashboard;
