@@ -1,7 +1,6 @@
-// src/component/Admin/Phim/ListPhim.tsx
-// --- CÓ THÊM LOGIC LỌC & PHÂN TRANG (CLIENT-SIDE) ---
 
-import { useState, useMemo } from "react"; // <-- 1. THÊM useState, useMemo
+
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { useListPhim, useDeletePhim } from "../../../hook/PhimHook";
@@ -9,43 +8,42 @@ import { useListTheLoai } from "../../../hook/TheLoaiHook";
 import { useListPhienBan } from "../../../hook/PhienBanHook";
 import { canAccess } from "../../../utils/permissions";
 
-const MENU_ID = 1; // menu_id cho Quản lý Phim
-const ITEMS_PER_PAGE = 5; // <-- 2. ĐỊNH NGHĨA SỐ ITEM MỖI TRANG (bạn có thể đổi số này)
+const MENU_ID = 1;
+const ITEMS_PER_PAGE = 5;
 
 const DanhSachPhimTable = () => {
   const navigate = useNavigate();
 
-  // 3. GIỮ NGUYÊN HOOK LẤY TẤT CẢ DATA
-  const { data: allPhims, isLoading } = useListPhim({}); // <-- Đây là toàn bộ phim
+
+  const { data: allPhims, isLoading } = useListPhim({});
   const { data: theloais, isLoading: loadingTheLoai } = useListTheLoai();
   const { data: phienbans, isLoading: loadingPhienBan } = useListPhienBan();
   const deletePhimMutation = useDeletePhim({});
 
-  // 4. THÊM STATE CHO LỌC VÀ TRANG
+
   const [search, setSearch] = useState("");
   const [loaiSuat, setLoaiSuat] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 5. LOGIC LỌC (THEO TÊN VÀ LOẠI SUẤT) BẰNG useMemo
+
   const filteredPhims = useMemo(() => {
-    if (!allPhims) return []; // Nếu chưa có data thì trả về mảng rỗng
+    if (!allPhims) return [];
     return allPhims.filter((phim: any) => {
       const matchSearch = phim.ten_phim.toLowerCase().includes(search.toLowerCase());
       const matchLoaiSuat = !loaiSuat || phim.loai_suat_chieu === loaiSuat;
       return matchSearch && matchLoaiSuat;
     });
-  }, [allPhims, search, loaiSuat]); // Chỉ tính toán lại khi `allPhims`, `search`, `loaiSuat` thay đổi
+  }, [allPhims, search, loaiSuat]);
 
-  // 6. LOGIC PHÂN TRANG BẰNG useMemo
+
   const paginatedPhims = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
-    return filteredPhims.slice(start, end); // Cắt mảng đã lọc
-  }, [filteredPhims, currentPage]); // Chỉ tính toán lại khi `filteredPhims` hoặc `currentPage` thay đổi
-
+    return filteredPhims.slice(start, end);
+  }, [filteredPhims, currentPage]);
   const totalPages = Math.ceil(filteredPhims.length / ITEMS_PER_PAGE);
 
-  // ... (các hàm handle... giữ nguyên) ...
+
   const handleAdd = () => navigate("/admin/phim/create");
   const handleEdit = (id: number | string) => navigate(`/admin/phim/edit/${id}`);
   const handleDelete = (id: number | string) => {
@@ -79,7 +77,7 @@ const DanhSachPhimTable = () => {
         )}
       </div>
 
-      {/* 7. THÊM UI BỘ LỌC */}
+
       <div className="row g-3 mb-3">
         <div className="col-md-6">
           <input
@@ -89,7 +87,7 @@ const DanhSachPhimTable = () => {
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setCurrentPage(1); // Reset về trang 1 khi tìm kiếm
+              setCurrentPage(1);
             }}
           />
         </div>
@@ -99,7 +97,7 @@ const DanhSachPhimTable = () => {
             value={loaiSuat}
             onChange={(e) => {
               setLoaiSuat(e.target.value);
-              setCurrentPage(1); // Reset về trang 1 khi lọc
+              setCurrentPage(1);
             }}
           >
             <option value="">Tất cả loại suất</option>
@@ -110,7 +108,7 @@ const DanhSachPhimTable = () => {
         </div>
       </div>
 
-      {/* 8. SỬA ĐIỀU KIỆN `allPhims` */}
+
       {allPhims && allPhims.length > 0 ? (
         <div className="table-responsive">
           <table className="table table-bordered table-hover text-center align-middle">
@@ -129,7 +127,6 @@ const DanhSachPhimTable = () => {
               </tr>
             </thead>
             <tbody>
-              {/* 9. THAY `phims.map` THÀNH `paginatedPhims.map` */}
               {paginatedPhims.length > 0 ? (
                 paginatedPhims.map((phim: any, index: number) => {
                   const theLoaiIds: number[] = Array.isArray(phim.the_loai_id)
@@ -250,13 +247,12 @@ const DanhSachPhimTable = () => {
         <p>Chưa có phim nào.</p>
       )}
 
-      {/* 10. THÊM UI PHÂN TRANG */}
       {totalPages > 1 && (
         <nav>
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <button 
-                className="page-link" 
+              <button
+                className="page-link"
                 onClick={() => setCurrentPage(p => p - 1)}
                 disabled={currentPage === 1}
               >
@@ -264,11 +260,11 @@ const DanhSachPhimTable = () => {
               </button>
             </li>
             <li className="page-item active">
-               <span className="page-link">{currentPage} / {totalPages}</span>
+              <span className="page-link">{currentPage} / {totalPages}</span>
             </li>
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <button 
-                className="page-link" 
+              <button
+                className="page-link"
                 onClick={() => setCurrentPage(p => p + 1)}
                 disabled={currentPage === totalPages}
               >
