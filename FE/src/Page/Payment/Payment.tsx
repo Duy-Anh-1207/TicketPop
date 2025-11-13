@@ -26,6 +26,25 @@ const Payment = () => {
     }
   };
 
+  const handleThanhToanVNPAY = async () => {
+    try {
+      const { data } = await axios.post(
+        "http://127.0.0.1:8000/api/thanhtoan/vnpay",
+        {
+          dat_ve_id: datVe.id,
+          amount: Number(datVe.tong_tien),
+          return_url: window.location.origin + "/ket-qua-thanh-toan",
+        }
+      );
+      const url = data?.payment_url;
+      if (url) window.location.assign(url);
+      else message.error("Không nhận được liên kết thanh toán từ VNPAY");
+    } catch (e: any) {
+      message.error(e?.response?.data?.message || "Không thể thanh toán!");
+    }
+  };
+
+
   const datVeId = location.state?.datVeId;
   const [loading, setLoading] = useState(false);
   const [datVe, setDatVe] = useState<any>(null);
@@ -202,8 +221,47 @@ const Payment = () => {
                 block
                 onClick={handleThanhToanMoMo}
                 className="momo-btn"
+                style={{
+                  backgroundColor: "#a50064",
+                  borderColor: "#a50064",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                }}
               >
+                <img
+                  src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                  alt="MoMo"
+                  style={{ width: 28, height: 28, borderRadius: "50%" }}
+                />
+
                 Thanh toán qua MoMo
+              </Button>
+            </div>
+            <br />
+            <div className="payment-methods">
+              <Button
+                type="primary"
+                size="large"
+                block
+                onClick={handleThanhToanVNPAY}
+                className="momo-btn"
+                style={{
+                  backgroundColor: "#a50064",
+                  borderColor: "#a50064",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "10px",
+                }}
+              >
+                <img
+                  src="https://images.seeklogo.com/logo-png/42/1/vnpay-logo-png_seeklogo-428006.png"
+                  alt="VNPAY"
+                  style={{ width: 28, height: 28, borderRadius: "50%" }}
+                />
+                Thanh toán qua VNPAY
               </Button>
             </div>
           </div>

@@ -264,6 +264,15 @@ class MenuSeeder extends Seeder
                 'stt'          => 2,
                 'trang_thai'   => true,
             ],
+            [
+                'ma_chuc_nang' => 'DELTE_LICH_CHIEU',
+                'ma_cha'       => 'QL_LICH_CHIEU',
+                'ten_chuc_nang'=> 'Danh sách xoá mềm',
+                'path'         => '/admin/lich-chieu/deleted',
+                'state'        => 'active',
+                'stt'          => 2,
+                'trang_thai'   => true,
+            ],
 
             // Quản lý voucher
             [
