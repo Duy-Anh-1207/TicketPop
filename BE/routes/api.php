@@ -87,9 +87,12 @@ Route::prefix('don-do-an')->group(function(){
 
 // dat ve
 Route::post('/dat-ve', [DatVeController::class, 'datVe']);
-Route::get('dat-ve',[DatVeController::class, 'danhSachDatVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::get('/dat-ve',[DatVeController::class, 'danhSachDatVe']);
+Route::get('/dat-ve/in/{id}', [DatVeController::class, 'inVe']);
+Route::get('/dat-ve/chi-tiet/{id}', [DatVeController::class, 'chiTietVe']);
+
+
+
 
 Route::get('/banners', [BannerController::class, 'index']);
 

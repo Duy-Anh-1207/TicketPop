@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\DonDoAn;
+use App\Models\NguoiDung;
+use App\Models\ThanhToan;
 use Exception;
 
 class DatVeController extends Controller
@@ -121,22 +123,35 @@ class DatVeController extends Controller
 
     public function danhSachDatVe()
     {
-        $user = Auth::user() ?? \App\Models\NguoiDung::first();
+        $user = Auth::user() ?? NguoiDung::first();
 
-        $datVe = DatVe::with([
-            'nguoiDung:email',
-            'lichChieu:id,gio_chieu,phim_id,phong_id',
-            'lichChieu.phim:ten_phim',
-            'lichChieu.phong:id,ten_phong',
+        $thanhToan = ThanhToan::with([
+            'datVe.lichChieu:id,gio_chieu,phim_id,phong_id',
+            'datVe.lichChieu.phim:id,ten_phim',
+            'datVe.lichChieu.phong:id,ten_phong',
+            'phuongThucThanhToan:id,ten_phuong_thuc',
         ])
             ->where('nguoi_dung_id', $user->id)
-            ->get();
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'ma_don_hang' => $item->ma_giao_dich,
+                    'email' => $item->email,
+                    'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
+                    'ngay_dat' => $item->created_at->format('d/m/Y'),
+                    'thanh_toan' => $item->phuongThucThanhToan->ten_phuong_thuc ?? 'Không rõ',
+                    'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
+                ];
+            });
 
         return response()->json([
-            'message' => 'Danh sách vé đã đặt',
-            'data' => $datVe
+            'message' => 'Danh sách vé đã thanh toán',
+            'data' => $thanhToan
         ]);
     }
+
+
 
     public function inVe($id)
     {
@@ -213,7 +228,7 @@ class DatVeController extends Controller
                 ];
             });
 
-            unset($datVe->donDoAn); 
+            unset($datVe->donDoAn);
 
             return response()->json([
                 'message' => 'Lấy chi tiết vé thành công!',
