@@ -27,6 +27,7 @@ interface MenuGroup {
 }
 
 const Sidebar: React.FC = () => {
+  const user = JSON.parse(localStorage.getItem("user") || "null");
   const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
   const [menus, setMenus] = useState<MenuGroup[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,8 @@ const Sidebar: React.FC = () => {
     const fetchMenus = async () => {
       try {
         // VITE_API_URL trong .env có dạng: http://127.0.0.1:8000/api
+        
+
         const apiBase = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
         const response = await axios.get(`${apiBase}/menu`);
         
@@ -208,35 +211,42 @@ const Sidebar: React.FC = () => {
       </div>
 
       <div className="fixed-profile mx-3 mt-3">
-        <div className="card bg-primary-subtle mb-0 shadow-none">
-          <div className="card-body p-4">
-            <div className="d-flex align-items-center justify-content-between gap-3">
-              <div className="d-flex align-items-center gap-3">
-                <img
-                  src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/profile/user-1.jpg"
-                  width="45"
-                  height="45"
-                  className="img-fluid rounded-circle"
-                  alt="spike-img"
-                />
-                <div>
-                  <h5 className="mb-1">Mike</h5>
-                  <p className="mb-0">Admin</p>
-                </div>
-              </div>
-              <a
-                href="https://bootstrapdemos.wrappixel.com/spike/dist/main/authentication-login.html"
-                className="position-relative"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                data-bs-title="Logout"
-              >
-                <Icon icon="solar:logout-line-duotone" className="fs-8" />
-              </a>
-            </div>
+  <div className="card bg-primary-subtle mb-0 shadow-none">
+    <div className="card-body p-4">
+      <div className="d-flex align-items-center justify-content-between gap-3">
+        <div className="d-flex align-items-center gap-3">
+
+          <img
+            src={user?.anh_dai_dien || "/default-avatar.png"}
+            width="45"
+            height="45"
+            className="img-fluid rounded-circle"
+            alt="avatar"
+          />
+
+          <div>
+            <h5 className="mb-1">{user?.ten || "Không xác định"}</h5>
+            <p className="mb-0">{user?.vai_tro || "User"}</p>
           </div>
         </div>
+
+        <a
+          href="#"
+          className="position-relative"
+          data-bs-toggle="tooltip"
+          data-bs-placement="top"
+          data-bs-title="Logout"
+          onClick={() => {
+            localStorage.removeItem("user");
+            window.location.href = "/login";
+          }}
+        >
+          <Icon icon="solar:logout-line-duotone" className="fs-8" />
+        </a>
       </div>
+    </div>
+  </div>
+</div>
     </aside>
   );
 };
