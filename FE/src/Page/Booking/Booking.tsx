@@ -63,16 +63,28 @@ const Booking = () => {
   }, [lichChieuId]);
 
   // --- Lấy danh sách ghế ---
+  // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---
   useEffect(() => {
-    if (!lichChieu?.phong?.id) return;
+    if (!lichChieuId) return;
 
     const fetchGhe = async () => {
       setLoadingGhe(true);
       try {
         const res = await axios.get(
-          `http://127.0.0.1:8000/api/ghe/${lichChieu.phong?.id}`
+          `http://127.0.0.1:8000/api/check-ghe/lich-chieu/${lichChieuId}`
         );
-        setGheList(res.data.data || []);
+
+        // map dữ liệu ghế về dạng dễ dùng
+        const gheFormatted = (res.data.data || []).map((item: any) => ({
+          id: item.ghe.id,
+          so_ghe: item.ghe.so_ghe,
+          hang: item.ghe.hang,
+          cot: item.ghe.cot,
+          loai_ghe_id: item.ghe.loai_ghe_id,
+          trang_thai: item.trang_thai, // "trong" hoặc "da_dat"
+        }));
+
+        setGheList(gheFormatted);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách ghế:", error);
         message.error("Không thể tải danh sách ghế!");
@@ -82,23 +94,26 @@ const Booking = () => {
     };
 
     fetchGhe();
-  }, [lichChieu?.phong?.id]);
+  }, [lichChieuId]);
 
-  // --- Chọn ghế ---
+  // --- Chọn ghế (chỉ ghế trống mới chọn được) ---
   const toggleSeat = (ghe: any) => {
-    const isSelected = selectedSeats.some((s) => s.id === ghe.id);
+    if (ghe.trang_thai === "da_dat") {
+      message.warning(`Ghế ${ghe.so_ghe} đã được đặt!`);
+      return;
+    }
 
+    const isSelected = selectedSeats.some((s) => s.id === ghe.id);
     if (isSelected) {
       setSelectedSeats(selectedSeats.filter((s) => s.id !== ghe.id));
     } else {
       const giaVe = giaVeList.find((gv) => gv.loai_ghe_id === ghe.loai_ghe_id);
-      const gia = giaVe ? giaVe.gia_ve : 0;
-
+      const gia = giaVe?.gia_ve ?? 0;
       if (gia === 0) message.warning("Không tìm thấy giá vé cho loại ghế này!");
-
       setSelectedSeats([...selectedSeats, { ...ghe, gia }]);
     }
   };
+
 
   // --- Chọn đồ ăn ---
   const updateFoodQuantity = (food: Food, delta: number) => {
@@ -206,9 +221,8 @@ const Booking = () => {
             src={
               lichChieu.phim?.anh_poster?.startsWith("http")
                 ? lichChieu.phim?.anh_poster
-                : `${import.meta.env.VITE_API_BASE_URL}/storage/${
-                    lichChieu.phim?.anh_poster
-                  }`
+                : `${import.meta.env.VITE_API_BASE_URL}/storage/${lichChieu.phim?.anh_poster
+                }`
             }
             alt={lichChieu.phim?.ten_phim}
             className="booking-poster"
@@ -266,9 +280,8 @@ const Booking = () => {
                         return (
                           <div
                             key={ghe.id}
-                            className={`seat-item ${
-                              ghe.loai_ghe_id === 2 ? "vip" : "thuong"
-                            } ${isSelected ? "selected" : ""}`}
+                            className={`seat-item ${ghe.loai_ghe_id === 2 ? "vip" : "thuong"
+                              } ${isSelected ? "selected" : ""}`}
                             onClick={() => toggleSeat(ghe)}
                           >
                             {ghe.so_ghe}
