@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\XoaDonHang;
 use App\Models\CheckGhe;
 use App\Models\DatVe;
 use App\Models\DatVeChiTiet;
@@ -80,8 +81,9 @@ class DatVeController extends Controller
     CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
         ->where('ghe_id', $ghe->id)
         ->update([
-            'trang_thai' => 'dang_dat',
+            'trang_thai' => 'da_dat',
             'nguoi_dung_id' => $user->id,
+            'expires_at' => now()->addMinutes(10),
         ]);
             }
 
@@ -105,6 +107,8 @@ class DatVeController extends Controller
 
                 $datVe->update(['tong_tien' => $tongTien]);
             }
+
+            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(10));
 
             DB::commit();
 

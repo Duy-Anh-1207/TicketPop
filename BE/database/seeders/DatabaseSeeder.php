@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
         DoAnSeeder::class,
         PhimSeeder::class,
         MenuSeeder::class,
+        PhuongThucThanhToanSeeder::class,
     ]);
 }
 }

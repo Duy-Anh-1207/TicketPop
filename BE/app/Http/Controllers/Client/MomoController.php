@@ -106,43 +106,75 @@ class MomoController extends Controller
         $url = config('services.momo.front_result_url', 'http://localhost:5173/ket-qua-thanh-toan');
         return redirect()->to($url . '?status=' . $status . '&message=' . urlencode($req->message ?? ''));
     }
+    public function momoIpn(Request $request)
+    {
+        $orderId = $request->orderId;  // Mã đơn của bạn
+        $datVe = DatVe::with('datVeChiTiet')->find($orderId);
+
+        if (!$datVe) {
+            return response('Order not found', 404);
+        }
+
+        // Kiểm tra chữ ký MoMo -> OK mới xử lý
+
+        foreach ($datVe->datVeChiTiet as $ct) {
+            CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
+                ->where('ghe_id', $ct->ghe_id)
+                ->update([
+                    'trang_thai' => 'da_dat',
+                    'expires_at' => null
+                ]);
+        }
+
+        return response('OK', 200);
+    }
+
 
     public function ipn(Request $req)
     {
-        // (Khuyến nghị) kiểm tra chữ ký ở đây nếu cần
         $extra = json_decode(base64_decode($req->extraData ?? ''), true);
         $ttId  = $extra['tt_id'] ?? null;
 
-        if ($ttId && (int)$req->resultCode === 0) {
-            DB::beginTransaction();
-    try {
-        $tt = ThanhToan::find($ttId);
+        // Nếu không thành công => bỏ qua
+        if (!$ttId || (int)$req->resultCode !== 0) {
+            return response()->json(['message' => 'ignore']);
+        }
 
-        if ($tt) {
-            $tt->update(['ma_giao_dich' => $req->transId ?? $req->orderId]);
+        DB::beginTransaction();
+        try {
+            $tt = ThanhToan::find($ttId);
 
-            // Tìm vé tương ứng
+            if (!$tt) {
+                throw new \Exception("Không tìm thấy bản ghi thanh toán");
+            }
+
+            // Cập nhật mã giao dịch thực tế từ MoMo
+            $tt->update([
+                'ma_giao_dich' => $req->transId ?? $req->orderId,
+                'trang_thai'   => 'da_thanh_toan'
+            ]);
+
+            // Lấy đơn vé
             $datVe = DatVe::find($tt->dat_ve_id);
 
-            if ($datVe) {
-                // Lấy tất cả ghế trong vé
-                $chiTiet = DatVeChiTiet::where('dat_ve_id', $datVe->id)->get();
-
-                foreach ($chiTiet as $ct) {
-                    CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
-                        ->where('ghe_id', $ct->ghe_id)
-                        ->update(['trang_thai' => 'da_dat']);
-                }
+            if (!$datVe) {
+                throw new \Exception("Không tìm thấy dat_ve để cập nhật ghế");
             }
-        }
 
-        DB::commit();
-        return response()->json(['message' => 'ok']);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
-    }
+            // Update ghế sang da_dat
+            CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
+                ->whereIn('ghe_id', $datVe->datVeChiTiet->pluck('ghe_id'))
+                ->update([
+                    'trang_thai' => 'da_dat',
+                    'expires_at' => null,
+                ]);
+
+
+            DB::commit();
+            return response()->json(['message' => 'ok']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
         }
-        return response()->json(['message' => 'ok']);
     }
 }

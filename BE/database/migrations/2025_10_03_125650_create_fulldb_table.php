@@ -176,6 +176,7 @@ return new class extends Migration
             $table->string('nguoi_dung_id', 100)->nullable();
             $table->foreignId('ghe_id')->constrained('ghe')->onUpdate('cascade')->onDelete('cascade');
             $table->enum('trang_thai', ['trong', 'da_dat', 'dang_dat']);
+            $table->timestamp('expires_at')->nullable();
 
             $table->timestamps();
         });
