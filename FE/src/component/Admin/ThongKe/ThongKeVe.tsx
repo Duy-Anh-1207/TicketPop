@@ -17,6 +17,8 @@ const fetchThongKeVe = async () => {
     axios.get(`${API_URL}/thong-ke/ve-theo-gio-hom-nay`),
   ]);
 
+
+  
   return {
     gioMuaNhieuNhat: gio.data.data || [],
     topPhimBanChay: topPhim.data.data || [],

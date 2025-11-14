@@ -17,6 +17,8 @@ const fetchData = async () => {
     axios.get(`${API_URL}/doanh-thu-theo-thang`),
   ]);
 
+  
+
   return {
     tyLePhuongThuc: tyLePT.data.data || [],
     doanhThuPhim: doanhThuPhim.data.data || [],
@@ -34,7 +36,7 @@ const ThongKeDoanhThu: React.FC = () => {
   });
  if (isLoading)
     return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
- 
+
   return (
     <div className="thongke-container">
       <h2>Thống kê doanh thu</h2>

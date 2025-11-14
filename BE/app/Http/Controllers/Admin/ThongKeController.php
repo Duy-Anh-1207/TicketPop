@@ -170,6 +170,8 @@ class ThongKeController extends Controller
             ->select(DB::raw('SUM(so_luong * gia_ban) as doanh_thu'))
             ->value('doanh_thu');
 
+
+            
         return response()->json([
             'status' => true,
             'doanh_thu_do_an' => (int) $tong
