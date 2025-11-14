@@ -28,10 +28,12 @@ const fetchThongKeVe = async () => {
 const COLORS = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"];
 
 const ThongKeVe: React.FC = () => {
-  const { data } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["thongKeVe"],
     queryFn: fetchThongKeVe,
   });
+   if (isLoading)
+    return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
 
   return (
     <div className="thongke-container">

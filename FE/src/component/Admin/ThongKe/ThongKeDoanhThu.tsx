@@ -20,7 +20,7 @@ const fetchData = async () => {
   return {
     tyLePhuongThuc: tyLePT.data.data || [],
     doanhThuPhim: doanhThuPhim.data.data || [],
-    doanhThuDoAn: doanhThuDoAn.data.tong_doanh_thu_do_an || 0,
+    doanhThuDoAn: doanhThuDoAn.data.doanh_thu_do_an || 0,
     doanhThuTheoThang: theoThang.data.data || [],
   };
 };
@@ -28,11 +28,13 @@ const fetchData = async () => {
 const COLORS = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"];
 
 const ThongKeDoanhThu: React.FC = () => {
-  const { data } = useQuery({
+  const { data, isLoading} = useQuery({
     queryKey: ["ThongKeDoanhThu"],
     queryFn: fetchData,
   });
-
+ if (isLoading)
+    return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
+ 
   return (
     <div className="thongke-container">
       <h2>Thống kê doanh thu</h2>

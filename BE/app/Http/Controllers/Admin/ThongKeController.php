@@ -164,18 +164,25 @@ class ThongKeController extends Controller
 
     // Doanh thu đồ ăn
     public function doanhThuDoAn(Request $request)
-    {
-        try {
-            $tong = DB::table('don_do_an')->sum('so_luong');
+{
+    try {
+        $tong = DB::table('don_do_an')
+            ->select(DB::raw('SUM(so_luong * gia_ban) as doanh_thu'))
+            ->value('doanh_thu');
 
-            return response()->json([
-                'status' => true,
-                'tong_do_an_ban_ra' => (int) $tong
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['status' => false, 'message' => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'status' => true,
+            'doanh_thu_do_an' => (int) $tong
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => false,
+            'message' => $e->getMessage()
+        ], 500);
     }
+}
+
+
 
     // Doanh thu theo tháng
     public function doanhThuTheoThang()
