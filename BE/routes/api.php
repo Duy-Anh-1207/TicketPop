@@ -25,6 +25,7 @@ use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
 use App\Http\Controllers\Admin\GiaVeController;
+use App\Http\Controllers\Client\CheckGheController;
 use App\Http\Controllers\Client\MomoController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -128,6 +129,9 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::apiResource('ghe', GheController::class);
+Route::get('/check-ghe/show-all/{gheId}', [CheckGheController::class, 'showAllCheckGhe']);
+Route::get('/check-ghe/lich-chieu/{lichChieuId}', [CheckGheController::class, 'getGheByLichChieu']);
+
 
 
 Route::get('/ma-giam-gia', [MaGiamGiaController::class, 'index']);
