@@ -219,6 +219,7 @@ const Payment = () => {
                 type="primary"
                 size="large"
                 block
+                disabled={!datVe}
                 onClick={handleThanhToanMoMo}
                 className="momo-btn"
                 style={{
