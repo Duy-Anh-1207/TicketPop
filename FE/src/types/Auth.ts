@@ -8,6 +8,7 @@ export type LoginData = {
   id: number;
   ten: string;
   email: string;
+  so_dien_thoai?: string | null;
   vai_tro: string;
   vai_tro_id: number;
   can_access_admin: boolean;

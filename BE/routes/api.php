@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\QuyenTruyCapController;
 use App\Http\Controllers\Admin\GiaVeController;
 use App\Http\Controllers\Client\CheckGheController;
 use App\Http\Controllers\Client\MomoController;
+use App\Http\Controllers\Client\VnpayController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -209,3 +210,8 @@ Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLich
 Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
 Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
 Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
+Route::prefix('vnpay')->group(function () {
+    Route::post('/create', [VnpayController::class, 'create']);   // FE gọi để tạo URL thanh toán
+    Route::get('/return', [VnpayController::class, 'return']);    // redirect sau khi user thanh toán
+    Route::get('/ipn',    [VnpayController::class, 'ipn']);       // IPN server-to-server
+});

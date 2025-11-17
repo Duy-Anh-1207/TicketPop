@@ -82,6 +82,7 @@ class DangNhapController extends Controller
                 'id'                => (int)$user->id,
                 'ten'               => $user->ten,
                 'email'             => $user->email,
+                'so_dien_thoai'     => $user->so_dien_thoai,
                 'vai_tro'           => $roleName,
                 'vai_tro_id'        => $roleId,          // FE dùng id để guard
                 'can_access_admin'  => $canAccessAdmin,  // FE điều hướng & guard

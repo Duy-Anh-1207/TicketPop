@@ -78,27 +78,47 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // 1. Validate tất cả các trường. 'current_password' LÀ BẮT BUỘC.
         $validated = $request->validate([
-            'ten' => 'sometimes|required|string|max:255',
+            'ten' => 'sometimes|required|string|max:255', // 'sometimes' = chỉ validate nếu trường đó được gửi lên
             'email' => 'sometimes|required|email|unique:nguoi_dung,email,' . $user->id,
             'so_dien_thoai' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:6',
-            'anh_dai_dien' => 'nullable|string|max:255',
-            'trang_thai' => 'nullable|in:0,1',
-            'vai_tro_id' => 'sometimes|required|integer|exists:vai_tro,id',
+            
+            'current_password' => 'required|string|min:6', // <-- THAY ĐỔI: Luôn YÊU CẦU mật khẩu hiện tại
+            'password' => 'nullable|string|min:6|confirmed', // Mật khẩu mới (có thể null)
         ]);
 
-        $user->update(array_filter($validated, fn($key) => $key !== 'password', ARRAY_FILTER_USE_KEY));
+        // 2. KIỂM TRA MẬT KHẨU HIỆN TẠI ĐẦU TIÊN
+        //    (Dùng $request->input thay vì $validated vì $validated['current_password'] có thể ko tồn tại nếu fail validation)
+        if (!Hash::check($request->input('current_password'), $user->password)) {
+            return response()->json([
+                'message' => 'Mật khẩu hiện tại không đúng!',
+                'errors' => [
+                    'current_password' => ['Mật khẩu hiện tại không đúng!']
+                ]
+            ], 422); // 422 Unprocessable Entity
+        }
 
+        // 3. Mật khẩu đúng -> Lấy các trường cần update (trừ các trường PW)
+        //    Sử dụng $request->only để chỉ lấy những gì FE gửi (ngoài PW)
+        $updateData = $request->only('ten', 'email', 'so_dien_thoai');
+
+        // 4. Cập nhật thông tin cơ bản (nếu có)
+        if (!empty($updateData)) {
+            $user->update($updateData);
+        }
+
+        // 5. Cập nhật mật khẩu mới (nếu FE có gửi 'password')
         if ($request->filled('password')) {
             $user->password = Hash::make($validated['password']);
             $user->save();
         }
 
+        // 6. Trả về response thành công
         return response()->json([
-            'message' => 'Người dùng đã được cập nhật',
-            'user' => $user
-        ]);
+            'message' => 'Cập nhật thông tin thành công!',
+            'user' => $user->fresh() // .fresh() để lấy dữ liệu mới nhất
+        ], 200);
     }
 
     // Xóa
