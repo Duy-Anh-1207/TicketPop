@@ -274,9 +274,17 @@ const Booking = () => {
                           <div
                             key={ghe.id}
                             className={`seat-item ${
-                              ghe.loai_ghe_id === 2 ? "vip" : "thuong"
-                            } ${isSelected ? "selected" : ""}`}
-                            onClick={() => toggleSeat(ghe)}
+                              ghe.trang_thai === "da_dat"
+                                ? "booked"
+                                : isSelected
+                                ? "selected"
+                                : ghe.loai_ghe_id === 2
+                                ? "vip"
+                                : "thuong"
+                            }`}
+                            onClick={() =>
+                              ghe.trang_thai !== "da_dat" && toggleSeat(ghe)
+                            }
                           >
                             {ghe.so_ghe}
                           </div>
@@ -302,6 +310,11 @@ const Booking = () => {
           <div className="legend-item">
             <div className="legend-box selected"></div>
             <span>Ghế Đang Chọn</span>
+          </div>
+
+          <div className="legend-item">
+            <div className="legend-box booked"></div>
+            <span>Ghế đã đặt</span>
           </div>
         </div>
       </div>
