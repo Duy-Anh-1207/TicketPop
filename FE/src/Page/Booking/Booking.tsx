@@ -75,7 +75,7 @@ const Booking = () => {
           `http://127.0.0.1:8000/api/check-ghe/lich-chieu/${lichChieuId}`
         );
 
-        const gheFormatted = res.data.data; 
+        const gheFormatted = res.data.data;
 
         setGheList(gheFormatted);
       } catch (error) {
@@ -287,6 +287,23 @@ const Booking = () => {
               ))}
           </div>
         )}
+        {/* --- Chú thích ghế --- */}
+        <div className="seat-legend">
+          <div className="legend-item">
+            <div className="legend-box thuong"></div>
+            <span>Ghế Thường</span>
+          </div>
+
+          <div className="legend-item">
+            <div className="legend-box vip"></div>
+            <span>Ghế VIP</span>
+          </div>
+
+          <div className="legend-item">
+            <div className="legend-box selected"></div>
+            <span>Ghế Đang Chọn</span>
+          </div>
+        </div>
       </div>
 
       {/* --- Đồ ăn --- */}
