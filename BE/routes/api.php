@@ -128,10 +128,26 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// GHẾ ĐỂ ADMIN QUẢN LÝ
 Route::apiResource('ghe', GheController::class);
-Route::get('/check-ghe/show-all/{gheId}', [CheckGheController::class, 'showAllCheckGhe']);
-Route::get('/check-ghe/lich-chieu/{lichChieuId}', [CheckGheController::class, 'getGheByLichChieu']);
 
+Route::prefix('check-ghe')->group(function () {
+
+    // Lấy toàn bộ check_ghe theo ID ghế
+    Route::get('/show-all/{gheId}', [CheckGheController::class, 'showAllCheckGhe']);
+
+    // Lấy danh sách ghế theo lịch chiếu
+    Route::get('/lich-chieu/{lichChieuId}', [CheckGheController::class, 'getGheByLichChieu']);
+
+    // Cập nhật trạng thái ghế
+    Route::put('/update/{id}', [CheckGheController::class, 'update']);
+
+    // Cập nhật trạng thái ghế hàng loạt (out trang)
+    Route::post('/bulk-update', [CheckGheController::class, 'bulkUpdate']);
+
+    // Xóa toàn bộ check_ghe thuộc lịch chiếu
+    Route::delete('/destroy/{lichChieuId}', [CheckGheController::class, 'destroy']);
+});
 
 
 Route::get('/ma-giam-gia', [MaGiamGiaController::class, 'index']);

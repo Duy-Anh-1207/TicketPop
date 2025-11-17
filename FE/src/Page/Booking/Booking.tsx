@@ -63,26 +63,19 @@ const Booking = () => {
   }, [lichChieuId]);
 
   // --- Lấy danh sách ghế ---
-  // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---
+  // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---x
   useEffect(() => {
     if (!lichChieuId) return;
 
     const fetchGhe = async () => {
       setLoadingGhe(true);
+
       try {
         const res = await axios.get(
           `http://127.0.0.1:8000/api/check-ghe/lich-chieu/${lichChieuId}`
         );
 
-        // map dữ liệu ghế về dạng dễ dùng
-        const gheFormatted = (res.data.data || []).map((item: any) => ({
-          id: item.ghe.id,
-          so_ghe: item.ghe.so_ghe,
-          hang: item.ghe.hang,
-          cot: item.ghe.cot,
-          loai_ghe_id: item.ghe.loai_ghe_id,
-          trang_thai: item.trang_thai, // "trong" hoặc "da_dat"
-        }));
+        const gheFormatted = res.data.data; 
 
         setGheList(gheFormatted);
       } catch (error) {
@@ -113,7 +106,6 @@ const Booking = () => {
       setSelectedSeats([...selectedSeats, { ...ghe, gia }]);
     }
   };
-
 
   // --- Chọn đồ ăn ---
   const updateFoodQuantity = (food: Food, delta: number) => {
@@ -221,8 +213,9 @@ const Booking = () => {
             src={
               lichChieu.phim?.anh_poster?.startsWith("http")
                 ? lichChieu.phim?.anh_poster
-                : `${import.meta.env.VITE_API_BASE_URL}/storage/${lichChieu.phim?.anh_poster
-                }`
+                : `${import.meta.env.VITE_API_BASE_URL}/storage/${
+                    lichChieu.phim?.anh_poster
+                  }`
             }
             alt={lichChieu.phim?.ten_phim}
             className="booking-poster"
@@ -280,8 +273,9 @@ const Booking = () => {
                         return (
                           <div
                             key={ghe.id}
-                            className={`seat-item ${ghe.loai_ghe_id === 2 ? "vip" : "thuong"
-                              } ${isSelected ? "selected" : ""}`}
+                            className={`seat-item ${
+                              ghe.loai_ghe_id === 2 ? "vip" : "thuong"
+                            } ${isSelected ? "selected" : ""}`}
                             onClick={() => toggleSeat(ghe)}
                           >
                             {ghe.so_ghe}

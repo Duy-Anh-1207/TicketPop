@@ -25,7 +25,6 @@ class CheckGheController extends Controller
         ]);
     }
 
-
     //LẤY DANH SÁCH CHECK GHẾ THEO ID GHẾ
     //ID GHẾ
     public function showAllCheckGhe(string $id)
@@ -39,29 +38,27 @@ class CheckGheController extends Controller
 
     public function getGheByLichChieu($lichChieuId)
     {
-        try {
-            $checkGheList = CheckGhe::with('ghe:id,so_ghe,hang,cot,loai_ghe_id')
-                ->where('lich_chieu_id', $lichChieuId)
-                ->get();
+        $checkGheList = CheckGhe::with('ghe')
+            ->where('lich_chieu_id', $lichChieuId)
+            ->get();
 
-            if ($checkGheList->isEmpty()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Chưa có ghế cho lịch chiếu này!'
-                ]);
-            }
+        $result = $checkGheList->map(function ($item) {
+            if (!$item->ghe) return null;
 
-            return response()->json([
-                'success' => true,
-                'data' => $checkGheList
-            ]);
-        } catch (Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi khi lấy ghế',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+            return [
+                'id' => $item->ghe->id,
+                'so_ghe' => $item->ghe->so_ghe,
+                'hang' => $item->ghe->hang,
+                'cot' => $item->ghe->cot,
+                'loai_ghe_id' => $item->ghe->loai_ghe_id,
+                'trang_thai' => $item->trang_thai
+            ];
+        })->filter()->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $result
+        ]);
     }
 
 

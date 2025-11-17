@@ -78,13 +78,12 @@ class DatVeController extends Controller
                 ]);
 
                 // Cập nhật trạng thái trong check_ghe
-    CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
-        ->where('ghe_id', $ghe->id)
-        ->update([
-            'trang_thai' => 'da_dat',
-            'nguoi_dung_id' => $user->id,
-            'expires_at' => now()->addMinutes(10),
-        ]);
+                CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
+                    ->where('ghe_id', $ghe->id)
+                    ->update([
+                        'trang_thai' => 'da_dat',
+                        'nguoi_dung_id' => $user->id,
+                    ]);
             }
 
             // ====== Xử lý đồ ăn ======
