@@ -2,17 +2,30 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import { useAuth } from "../../component/Auth/AuthContext";
 import { useUpdateUser } from "../../hook/UserHook";
-import type { User } from "../../types/user"; // Import kiểu dữ liệu User
+import type { User } from "../../types/user";
+
+// Icon con mắt (sử dụng Font Awesome đã import trong main.tsx)
+const EyeIcon = ({ visible }: { visible: boolean }) => (
+  <i className={`fa-solid ${visible ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+);
 
 const MyAccountPage = () => {
-  const { user, setUser } = useAuth(); // Lấy user và hàm cập nhật context
-  const updateUserMutation = useUpdateUser(); // Lấy hook cập nhật
+  const { user, setUser } = useAuth();
+  const updateUserMutation = useUpdateUser();
 
-  // State cho form, lấy giá trị mặc định từ context
+  // State cho thông tin chính
   const [ten, setTen] = useState(user?.ten || "");
   const [soDienThoai, setSoDienThoai] = useState(user?.so_dien_thoai || "");
-  const [password, setPassword] = useState(""); // Luôn để trống khi load
+
+  // State cho phần mật khẩu
+  const [currentPassword, setCurrentPassword] = useState(""); // <-- Luôn hiển thị
+  const [showPasswordFields, setShowPasswordFields] = useState(false); // <-- Chỉ toggle 2 trường mới
+  const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
+  
+  // State cho ẩn/hiện mật khẩu
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
 
   if (!user) {
     return (
@@ -23,29 +36,41 @@ const MyAccountPage = () => {
     );
   }
 
-  // Hàm xử lý khi nhấn nút "Cập nhật"
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 1. Kiểm tra mật khẩu nếu có nhập
-    if (password && password !== passwordConfirm) {
-      Swal.fire("Lỗi!", "Mật khẩu xác nhận không khớp.", "error");
+    // 1. Mật khẩu hiện tại LÀ BẮT BUỘC cho BẤT KỲ thay đổi nào
+    if (!currentPassword) {
+      Swal.fire("Lỗi!", "Vui lòng nhập Mật khẩu hiện tại để xác nhận thay đổi.", "error");
       return;
     }
 
-    // 2. Chuẩn bị dữ liệu gửi đi
+    // 2. Chuẩn bị payload (luôn có current_password)
     const updatedValues: {
-        ten: string;
-        so_dien_thoai: string;
-        password?: string;
-      } = {
-        ten: ten,
-        so_dien_thoai: soDienThoai,
-      };
+      ten: string;
+      so_dien_thoai: string;
+      current_password: string;
+      password?: string;
+      password_confirmation?: string;
+    } = {
+      ten: ten,
+      so_dien_thoai: soDienThoai,
+      current_password: currentPassword,
+    };
 
-    // 3. Chỉ thêm 'password' vào payload nếu người dùng đã nhập
-    if (password) {
+    // 3. Nếu người dùng đang MỞ form đổi mật khẩu, validate và thêm vào
+    if (showPasswordFields) {
+      if (!password || !passwordConfirm) {
+        Swal.fire("Lỗi!", "Vui lòng nhập Mật khẩu mới và Xác nhận mật khẩu.", "error");
+        return;
+      }
+      if (password !== passwordConfirm) {
+        Swal.fire("Lỗi!", "Mật khẩu mới và xác nhận không khớp.", "error");
+        return;
+      }
+      // Thêm vào payload
       updatedValues.password = password;
+      updatedValues.password_confirmation = passwordConfirm;
     }
 
     // 4. Gọi hook mutation
@@ -53,15 +78,15 @@ const MyAccountPage = () => {
       { id: user.id, values: updatedValues },
       {
         onSuccess: (response) => {
-          // 5. Lấy user mới nhất từ BE trả về
           const updatedUser = response.user as User;
+          setUser({ ...user, ...updatedUser });
 
-          // 6. Cập nhật lại AuthContext (và localStorage)
-          // Chúng ta cần kết hợp dữ liệu cũ (như token, permissions) với dữ liệu mới
-          setUser({ ...user, ...updatedUser }); 
-
-          Swal.fire("Thành công!", "Cập nhật thông tin thành công!", "success");
-          setPassword(""); // Xóa trường mật khẩu
+          Swal.fire("Thành công!", response.message || "Cập nhật thông tin thành công!", "success");
+          
+          // Reset form mật khẩu
+          setShowPasswordFields(false);
+          setCurrentPassword(""); // Quan trọng: Xóa mật khẩu hiện tại sau khi thành công
+          setPassword("");
           setPasswordConfirm("");
         },
         onError: (error: any) => {
@@ -83,6 +108,7 @@ const MyAccountPage = () => {
         </div>
         <div className="card-body p-4">
           <form onSubmit={handleSubmit}>
+            {/* THÔNG TIN CƠ BẢN */}
             <div className="mb-3">
               <label className="form-label fw-bold">Họ và tên</label>
               <input
@@ -99,7 +125,7 @@ const MyAccountPage = () => {
                 type="email"
                 className="form-control"
                 value={user.email}
-                disabled // Không cho sửa email
+                disabled
               />
             </div>
             <div className="mb-3">
@@ -114,28 +140,84 @@ const MyAccountPage = () => {
             
             <hr className="my-4" />
 
+            {/* MẬT KHẨU HIỆN TẠI (Luôn yêu cầu) */}
             <div className="mb-3">
-              <label className="form-label fw-bold">Mật khẩu mới</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Bỏ trống nếu không muốn thay đổi"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
+              <label className="form-label fw-bold">Mật khẩu hiện tại (Bắt buộc để lưu)</label>
+              <div className="input-group">
+                <input
+                  type={showCurrentPw ? "text" : "password"}
+                  className="form-control"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  placeholder="Nhập mật khẩu hiện tại để xác nhận"
+                  required // Thêm required
+                />
+                <button 
+                  type="button" 
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowCurrentPw(!showCurrentPw)}
+                >
+                  <EyeIcon visible={showCurrentPw} />
+                </button>
+              </div>
             </div>
-            <div className="mb-3">
-              <label className="form-label fw-bold">Xác nhận mật khẩu mới</label>
-              <input
-                type="password"
-                className="form-control"
-                placeholder="Nhập lại mật khẩu mới"
-                value={passwordConfirm}
-                onChange={(e) => setPasswordConfirm(e.target.value)}
-                disabled={!password} // Chỉ bật khi đã nhập mật khẩu
-              />
-            </div>
-            <div className="text-end">
+
+            {/* VÙNG THAY ĐỔI MẬT KHẨU MỚI */}
+            {!showPasswordFields ? (
+              // Nút "Thay đổi mật khẩu"
+              <div className="text-center">
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setShowPasswordFields(true)}
+                >
+                  Thay đổi mật khẩu
+                </button>
+              </div>
+            ) : (
+              // Form đổi mật khẩu
+              <div id="password-section">
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Mật khẩu mới</label>
+                  <div className="input-group">
+                    <input
+                      type={showNewPw ? "text" : "password"}
+                      className="form-control"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Nhập mật khẩu mới"
+                    />
+                    <button 
+                      type="button" 
+                      className="btn btn-outline-secondary"
+                      onClick={() => setShowNewPw(!showNewPw)}
+                    >
+                      <EyeIcon visible={showNewPw} />
+                    </button>
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Xác nhận mật khẩu mới</label>
+                  <input
+                    type={showNewPw ? "text" : "password"}
+                    className="form-control"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    placeholder="Nhập lại mật khẩu mới"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-link p-0"
+                  onClick={() => setShowPasswordFields(false)}
+                >
+                  Hủy đổi mật khẩu
+                </button>
+              </div>
+            )}
+            
+            {/* NÚT LƯU CHUNG */}
+            <div className="text-end mt-4">
               <button 
                 type="submit" 
                 className="btn btn-primary"
