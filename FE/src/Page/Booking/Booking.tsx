@@ -186,7 +186,6 @@ const Booking = () => {
       const createdVe = res?.dat_ve ?? res?.data ?? null;
 
       if (res?.message && createdVe?.id) {
-        message.success(res.message);
 
         navigate("/booking/payment", {
           state: { datVeId: createdVe.id, tongTien: totalPrice },
