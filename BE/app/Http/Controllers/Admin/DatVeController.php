@@ -180,6 +180,7 @@ class DatVeController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
+                    'id' => $item->id,
                     'ma_don_hang' => $item->ma_giao_dich,
                     'email' => $item->email,
                     'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,

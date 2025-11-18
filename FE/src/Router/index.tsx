@@ -77,6 +77,8 @@ import Dashbroad from "../component/Admin/Dashboard/Dashboard";
 // ✅ Tin tức (CLIENT)
 import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
+import ListDonVe from "../component/Admin/DonVe/ListDonVe";
+import ChiTietDonVe from "../component/Admin/DonVe/ChiTietDonVe";
 
 
 
@@ -97,18 +99,18 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
-        { path: "booking/:slug", element: <Booking/> },
+        { path: "booking/:slug", element: <Booking /> },
 
         //
         { path: "thong-tin-tai-khoan", element: <MyAccountPage /> },
-        
+
 
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
-        
-        { path: "booking/:slug", element: <Booking/> },
-        { path: "booking/payment", element: <Payment/> },
+
+        { path: "booking/:slug", element: <Booking /> },
+        { path: "booking/payment", element: <Payment /> },
       ],
     },
 
@@ -163,7 +165,7 @@ const Routermain = () => {
         { path: "vouchers/edit/:id", element: <EditVoucher /> },
         { path: "vouchers/view/:id", element: <ViewVoucher /> },
 
-        
+
 
         // Tin tức
         { path: "tin-tuc", element: <TinTucList /> },
@@ -178,7 +180,8 @@ const Routermain = () => {
         { path: "thong-ke/doanh-thu", element: <ThongKeDoanhThu /> },
         //dashbroad
         { path: "dashbroad", element: <Dashbroad /> },
-
+        { path: "ve", element: <ListDonVe /> }, 
+        { path: "ve/:id", element: <ChiTietDonVe /> },
 
       ],
     },
