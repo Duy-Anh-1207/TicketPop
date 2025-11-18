@@ -89,12 +89,10 @@ Route::prefix('don-do-an')->group(function () {
 
 
 // dat ve
-Route::post('/dat-ve', [DatVeController::class, 'datVe']);
-Route::get('dat-ve', [DatVeController::class, 'danhSachDatVe']);
-Route::get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
-Route::get('/dat-ve/{id}/chi-tiet', [DatVeController::class, 'chiTietVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::middleware('auth:sanctum')->post('/dat-ve', [DatVeController::class, 'datVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve', [DatVeController::class, 'danhSachDatVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
 
