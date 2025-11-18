@@ -32,6 +32,9 @@ const MyAccountPage = () => {
 
   // State cho chi tiết vé
   const [bookingDetails, setBookingDetails] = useState<Map<string, any>>(new Map());
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
+  const [selectedBookingDetails, setSelectedBookingDetails] = useState<any>(null);
 
   // Fetch booking history
   const apiBase = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
@@ -77,16 +80,32 @@ const MyAccountPage = () => {
     }
   }, [bookingDetails, apiBase]);
 
-  // Auto fetch details khi bookings thay đổi
+  // Auto fetch details khi bookings thay đổi (dùng dat_ve_id trả về từ API)
   React.useEffect(() => {
     if (bookings.length > 0 && activeTab === "bookings") {
       bookings.forEach((booking: any) => {
-        if (!bookingDetails.has(booking.ma_don_hang)) {
-          fetchBookingDetails(booking.ma_don_hang);
+        const id = booking.dat_ve_id ?? null;
+        if (id && !bookingDetails.has(String(id))) {
+          fetchBookingDetails(String(id));
         }
       });
     }
   }, [bookings, activeTab, bookingDetails, fetchBookingDetails]);
+
+  // Hàm tính trạng thái vé dựa vào thời gian bắt đầu/kết thúc của lịch chiếu
+  const getShowStatus = (booking: any, details: any) => {
+    const showtimeStr = booking?.lich_chieu?.gio_chieu || details?.lich_chieu?.gio_chieu;
+    if (!showtimeStr) return { label: "Không rõ", color: "secondary" };
+
+    const start = new Date(showtimeStr);
+    const endStr = booking?.lich_chieu?.gio_ket_thuc || details?.lich_chieu?.gio_ket_thuc;
+    const end = endStr ? new Date(endStr) : new Date(start.getTime() + 1000 * 60 * 60 * 2); // fallback 2 giờ
+
+    const now = new Date();
+    if (now < start) return { label: "Chưa chiếu", color: "info" };
+    if (now >= start && now <= end) return { label: "Đang chiếu", color: "success" };
+    return { label: "Đã chiếu", color: "secondary" };
+  };
 
   if (!user) {
     return (
@@ -162,7 +181,8 @@ const MyAccountPage = () => {
   };
 
   return (
-    <div className="container mt-4 mb-5" style={{ maxWidth: "900px" }}>
+    <>
+      <div className="container mt-4 mb-5" style={{ maxWidth: "900px" }}>
       {/* Tabs */}
       <div className="d-flex gap-2 mb-3">
         <button
@@ -335,13 +355,15 @@ const MyAccountPage = () => {
                       <th>Mã đơn hàng</th>
                       <th>Phim</th>
                       <th>Ngày đặt</th>
-                      <th>Phương thức thanh toán</th>
+                      <th>Trạng thái</th>
                       <th>Tổng tiền</th>
+                      <th>Hành động</th>
                     </tr>
                   </thead>
                   <tbody>
                     {bookings.map((booking: any, idx: number) => {
-                      const details = bookingDetails.get(booking.ma_don_hang);
+                      const datVeId = booking.dat_ve_id ?? null;
+                      const details = datVeId ? bookingDetails.get(String(datVeId)) : null;
                       return (
                         <React.Fragment key={idx}>
                           <tr>
@@ -353,15 +375,36 @@ const MyAccountPage = () => {
                             </td>
                             <td>{booking.ngay_dat}</td>
                             <td>
-                              <span className="badge bg-info">{booking.thanh_toan}</span>
+                              {(() => {
+                                const st = getShowStatus(booking, details);
+                                return <span className={`badge bg-${st.color}`}>{st.label}</span>;
+                              })()}
                             </td>
                             <td>
                               <strong className="text-danger">{booking.tong_tien}</strong>
                             </td>
+                            <td>
+                              <button
+                                type="button"
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={async () => {
+                                  if (!datVeId) {
+                                    Swal.fire("Lỗi","Không có ID vé để lấy chi tiết","error");
+                                    return;
+                                  }
+                                  const det = await fetchBookingDetails(String(datVeId));
+                                  setSelectedBookingDetails(det || bookingDetails.get(String(datVeId)));
+                                  setSelectedBookingId(String(datVeId));
+                                  setShowDetailModal(true);
+                                }}
+                              >
+                                Xem chi tiết
+                              </button>
+                            </td>
                           </tr>
                           {details && (
                             <tr>
-                              <td colSpan={5}>
+                              <td colSpan={6}>
                                 <div className="p-3 bg-light border-top">
                                   <div className="row g-3">
                                     {details.chi_tiet && details.chi_tiet.length > 0 && (
@@ -423,7 +466,79 @@ const MyAccountPage = () => {
         </div>
       )}
     </div>
-  );
+      {/* Modal chi tiết đơn hàng */}
+      {showDetailModal && (
+        <>
+          <div className="modal d-block" tabIndex={-1} role="dialog">
+            <div className="modal-dialog modal-lg" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Chi tiết đơn {selectedBookingId}</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowDetailModal(false)} aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                  {(() => {
+                    const det = selectedBookingDetails || (selectedBookingId ? bookingDetails.get(selectedBookingId as string) : null);
+                    if (!det) return <p>Đang tải chi tiết...</p>;
+
+                    return (
+                      <div>
+                        <h5>{det.lich_chieu?.phim?.ten_phim || det.phim || 'Không rõ phim'}</h5>
+                        <p>Phòng: {det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ'}</p>
+                        <p>Thời gian: {det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu).toLocaleString() : 'Không rõ'}</p>
+
+                        {det.chi_tiet && det.chi_tiet.length > 0 && (
+                          <div className="mb-3">
+                            <h6>Ghế</h6>
+                            <div className="d-flex flex-wrap gap-2">
+                              {det.chi_tiet.map((ct: any, i: number) => (
+                                <div key={i} className="p-2 border rounded">
+                                  <div>Ghế: <strong>{ct.ghe?.so_ghe}</strong></div>
+                                  <div>Loại: {ct.ghe?.loai_ghe?.ten_loai_ghe || '—'}</div>
+                                  <div>Giá vé: {ct.gia ? ct.gia + ' đ' : '—'}</div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {det.do_an && det.do_an.length > 0 && (
+                          <div>
+                            <h6>Đồ ăn</h6>
+                            <ul className="list-unstyled">
+                              {det.do_an.map((f: any, i: number) => (
+                                <li key={i} className="d-flex justify-content-between border-bottom py-2">
+                                  <div>
+                                    <strong>{f.ten_do_an}</strong>
+                                    <div className="text-muted">Số lượng: {f.so_luong}</div>
+                                  </div>
+                                  <div>{f.gia_ban} đ</div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        <hr />
+                        <div className="d-flex justify-content-between">
+                          <div>Tổng tiền:</div>
+                          <div><strong className="text-danger">{det.tong_tien || det.tong || '—'}</strong></div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowDetailModal(false)}>Đóng</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop show"></div>
+        </>
+      )}
+      </>
+      );
 };
 
 export default MyAccountPage;

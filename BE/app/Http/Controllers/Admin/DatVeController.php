@@ -180,6 +180,7 @@ class DatVeController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
+
                     'id' => $item->id,
                     'ma_don_hang' => $item->ma_giao_dich,
                     'email' => $item->email,
@@ -188,6 +189,7 @@ class DatVeController extends Controller
                     'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
                     'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
                 ];
+
             });
 
         return response()->json([
