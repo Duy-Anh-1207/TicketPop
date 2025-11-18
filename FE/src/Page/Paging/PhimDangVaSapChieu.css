@@ -29,8 +29,8 @@
 
 /* Poster */
 .poster-list {
-  width: 120px;
-  /* giảm từ 180px */
+  width: 150px;
+
   object-fit: cover;
   cursor: pointer;
 }
@@ -38,7 +38,7 @@
 /* Info section */
 .movie-info-list {
   padding: 0.8rem;
-  /* giảm padding */
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -46,14 +46,14 @@
 
 .movie-info-list h3 {
   font-size: 1.1rem;
-  /* giảm font */
+
   cursor: pointer;
   margin-bottom: 0.3rem;
 }
 
 .movie-info-list p {
   font-size: 0.9rem;
-  /* nhỏ hơn */
+
   margin: 0.2rem 0;
 }
 
@@ -61,7 +61,7 @@
 .movie-actions-list {
   display: flex;
   gap: 0.5rem;
-  /* giảm khoảng cách */
+
   margin-top: 0.5rem;
 }
 
@@ -88,14 +88,14 @@
   position: relative;
   width: 80%;
   max-width: 700px;
-  /* giảm max-width */
+
   background: #000;
 }
 
 .trailer-content iframe {
   width: 100%;
   height: 400px;
-  /* giảm chiều cao */
+
 }
 
 .close-trailer {
@@ -103,7 +103,7 @@
   top: 5px;
   right: 10px;
   font-size: 1.2rem;
-  /* nhỏ hơn */
+
   color: #fff;
   background: transparent;
   border: none;

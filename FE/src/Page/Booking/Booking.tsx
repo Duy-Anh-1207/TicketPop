@@ -78,7 +78,7 @@ const Booking = () => {
         );
 
         const gheFormatted = res.data.data;
-        const gheFormatted = res.data.data;
+        // const gheFormatted = res.data.data;
 
         setGheList(gheFormatted);
       } catch (error) {
