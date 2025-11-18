@@ -73,5 +73,10 @@ export const getListMenu = async () => {
 };
 
 
+export const getMenuTree = async () => {
+  const res = await axiosClient.get("/menu/tree"); // Laravel đã có route này
+  return res.data;
+};
+
 
 export default axiosClient;

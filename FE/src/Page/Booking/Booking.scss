@@ -30,6 +30,28 @@
   }
 }
 
+.food-image {
+  width: 100%;
+  height: 80px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .food-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .food-icon {
+    font-size: 32px;
+  }
+}
+
+
 .booking-poster {
   width: 180px;
   height: 260px;

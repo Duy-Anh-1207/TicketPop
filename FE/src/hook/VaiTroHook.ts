@@ -5,11 +5,13 @@ import {
   updateVaiTro,
   deleteVaiTro,
   getListMenu,
+  getMenuTree,
 } from "../provider/VaiTroProvider";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Swal from "sweetalert2";
 import type { VaiTro } from "../types/vaitro";
+import type { Menu } from "../types/menu";
 
 // 🔹 Lấy danh sách vai trò
 export const useListVaiTro = () =>
@@ -101,3 +103,11 @@ export const useListMenu = () =>
     queryKey: ["menu"],
     queryFn: getListMenu,
   });
+
+  // 🔹 Lấy menu dạng cây (cha - con - cháu)
+export const useMenuTree = () =>
+  useQuery<Menu[]>({
+    queryKey: ["menu-tree"],
+    queryFn: getMenuTree,
+  });
+

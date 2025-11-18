@@ -212,9 +212,8 @@ const Booking = () => {
             src={
               lichChieu.phim?.anh_poster?.startsWith("http")
                 ? lichChieu.phim?.anh_poster
-                : `${import.meta.env.VITE_API_BASE_URL}/storage/${
-                    lichChieu.phim?.anh_poster
-                  }`
+                : `${import.meta.env.VITE_API_BASE_URL}/storage/${lichChieu.phim?.anh_poster
+                }`
             }
             alt={lichChieu.phim?.ten_phim}
             className="booking-poster"
@@ -272,15 +271,14 @@ const Booking = () => {
                         return (
                           <div
                             key={ghe.id}
-                            className={`seat-item ${
-                              ghe.trang_thai === "da_dat"
+                            className={`seat-item ${ghe.trang_thai === "da_dat"
                                 ? "booked"
                                 : isSelected
-                                ? "selected"
-                                : ghe.loai_ghe_id === 2
-                                ? "vip"
-                                : "thuong"
-                            }`}
+                                  ? "selected"
+                                  : ghe.loai_ghe_id === 2
+                                    ? "vip"
+                                    : "thuong"
+                              }`}
                             onClick={() =>
                               ghe.trang_thai !== "da_dat" && toggleSeat(ghe)
                             }
@@ -331,11 +329,22 @@ const Booking = () => {
                 0;
               return (
                 <div key={food.id} className="food-item">
-                  <div className="food-image-placeholder">
-                    <span role="img" aria-label="food">
-                      🍿
-                    </span>
+                  <div className="food-image">
+                    {food.image ? (
+                      <img
+                        src={
+                          food.image.startsWith("http")
+                            ? food.image
+                            : `${import.meta.env.VITE_API_BASE_URL}${food.image}`
+                        }
+                        alt={food.ten_do_an}
+                        className="food-img"
+                      />
+                    ) : (
+                      <span className="food-icon" role="img" aria-label="food">🍿</span>
+                    )}
                   </div>
+
                   <div className="food-info">
                     <p className="food-name">{food.ten_do_an}</p>
                     <p className="food-price">
