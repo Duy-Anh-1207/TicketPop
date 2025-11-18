@@ -185,7 +185,7 @@ export default function RolePermissionModal({ role, onClose }: Props) {
               Lưu quyền
             </button>
           </div>
-        </div>
+        </div> 
       </div>
     </div>
   );
