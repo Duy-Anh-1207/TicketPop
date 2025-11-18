@@ -13,7 +13,7 @@ import Booking from "../Page/Booking/Booking";
 
 
 import PhimDangChieu from "../Page/Paging/PhimDangChieu";
-// import PhimSapChieu from "../Page/Paging/PhimSapChieu";
+import PhimSapChieu from "../Page/Paging/PhimSapChieu";
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
@@ -102,12 +102,12 @@ const Routermain = () => {
       children: [
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
-        { path: "booking/:slug", element: <Booking/> },
-        {path: "dang-chieu", element: <PhimDangChieu />},
-        //  {path: "sap-chieu", element: <PhimSapChieu />},
-       
+        { path: "booking/:slug", element: <Booking /> },
+        { path: "dang-chieu", element: <PhimDangChieu /> },
+        { path: "sap-chieu", element: <PhimSapChieu /> },
 
-        
+
+
 
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
@@ -184,7 +184,7 @@ const Routermain = () => {
         { path: "thong-ke/doanh-thu", element: <ThongKeDoanhThu /> },
         //dashbroad
         { path: "dashbroad", element: <Dashbroad /> },
-        { path: "ve", element: <ListDonVe /> }, 
+        { path: "ve", element: <ListDonVe /> },
         { path: "ve/:id", element: <ChiTietDonVe /> },
 
       ],
