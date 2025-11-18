@@ -9,7 +9,7 @@ export default function FoodCreate() {
 
   // state form
   const [tenDoAn, setTenDoAn] = useState("");
-  const [image, setImage] = useState("");
+  const [image, setImage] = useState<File | null>(null);
   const [moTa, setMoTa] = useState("");
   const [giaNhap, setGiaNhap] = useState<number | "">("");
   const [giaBan, setGiaBan] = useState<number | "">("");
@@ -20,7 +20,7 @@ export default function FoodCreate() {
       Swal.fire("⚠️ Lỗi!", "Tên món ăn không được để trống.", "warning");
       return;
     }
-    if (!image.trim()) {
+    if (!image) {
       Swal.fire("⚠️ Lỗi!", "Ảnh món ăn không được để trống.", "warning");
       return;
     }
@@ -29,22 +29,21 @@ export default function FoodCreate() {
       return;
     }
 
-    createFood.mutate(
-      {
-        ten_do_an: tenDoAn,
-        image,
-        mo_ta: moTa,
-        gia_nhap: Number(giaNhap),
-        gia_ban: Number(giaBan),
-        so_luong_ton: Number(soLuongTon),
+    // tạo FormData
+    const formData = new FormData();
+    formData.append("ten_do_an", tenDoAn);
+    formData.append("mo_ta", moTa);
+    formData.append("gia_nhap", String(giaNhap));
+    formData.append("gia_ban", String(giaBan));
+    formData.append("so_luong_ton", String(soLuongTon));
+    formData.append("image", image);
+
+    createFood.mutate(formData, {
+      onSuccess: () => {
+        Swal.fire("✅ Thành công!", "Đã thêm món ăn mới.", "success");
+        navigate("/food");
       },
-      {
-        onSuccess: () => {
-          Swal.fire("✅ Thành công!", "Đã thêm món ăn mới.", "success");
-          navigate("/food"); // quay lại danh sách
-        },
-      }
-    );
+    });
   };
 
   return (
@@ -65,10 +64,10 @@ export default function FoodCreate() {
         <div className="mb-3">
           <label className="form-label">Ảnh</label>
           <input
-            type="text"
+            type="file"
             className="form-control"
-            value={image}
-            onChange={(e) => setImage(e.target.value)}
+            accept="image/*"
+            onChange={(e) => setImage(e.target.files ? e.target.files[0] : null)}
           />
         </div>
 
@@ -121,7 +120,7 @@ export default function FoodCreate() {
           </button>
           <button
             className="btn btn-secondary"
-            onClick={() => navigate("/food")}
+            onClick={() => navigate("/foods")}
           >
             Hủy
           </button>
