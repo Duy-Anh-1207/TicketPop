@@ -160,13 +160,14 @@ class DatVeController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
-                    'ma_don_hang' => $item->ma_giao_dich,
-                    'email' => $item->email,
-                    'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
-                    'ngay_dat' => $item->created_at->format('d/m/Y'),
-                    'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
-                    'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
-                ];
+                        'ma_don_hang' => $item->ma_giao_dich,
+                        'dat_ve_id' => $item->datVe?->id ?? null,
+                        'email' => $item->email,
+                        'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
+                        'ngay_dat' => $item->created_at->format('d/m/Y'),
+                        'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
+                        'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
+                    ];
             });
 
         return response()->json([
