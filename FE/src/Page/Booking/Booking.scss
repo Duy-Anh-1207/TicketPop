@@ -242,6 +242,10 @@
         background: linear-gradient(135deg, #fff7ed, #fed7aa);
         border: 2px solid #fb923c;
       }
+      .legend-box.booked {
+        background-color: #dc2626;
+        border: 2px solid #b91c1c;
+      }
     }
   }
 }
@@ -678,5 +682,18 @@
     .total-price {
       font-size: 18px;
     }
+  }
+}
+
+.seat-item.booked {
+  background-color: #dc2626;
+  border: 2px solid #b91c1c;
+  cursor: not-allowed;
+  opacity: 1;
+  color: #ffffff;
+
+  &:hover {
+    transform: none;
+    box-shadow: none;
   }
 }

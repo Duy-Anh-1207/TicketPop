@@ -110,17 +110,37 @@ export default function LoginButton() {
         <div
           className="position-absolute end-0 mt-2 bg-white shadow-lg border rounded-3 py-2"
           style={{
-            minWidth: "160px",
+            minWidth: "180px", // Tăng độ rộng 1 chút
             top: "100%",
             right: 0,
             zIndex: 9999,
           }}
         >
+          {/* === NÚT MỚI: THÔNG TIN TÀI KHOẢN === */}
+          <Link
+            to="/thong-tin-tai-khoan" // 1. Đường dẫn đến trang profile
+            onClick={() => setShowMenu(false)} // 2. Đóng menu khi click
+            className="d-flex align-items-center gap-2 w-100 px-3 py-2 text-start border-0 bg-transparent"
+            style={{
+              color: "#333", // 3. Style giống nút cũ
+              fontSize: "14px",
+              cursor: "pointer",
+              backgroundColor: "transparent",
+              textDecoration: "none", // 4. Bỏ gạch chân
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f3f3")}
+            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+          >
+            <User size={18} /> {/* 5. Dùng icon User đã import */}
+            <span>Thông tin tài khoản</span>
+          </Link>
+
+          {/* === NÚT ĐĂNG XUẤT (SỬA LẠI MÀU) === */}
           <button
             onClick={handleLogout}
             className="d-flex align-items-center gap-2 w-100 px-3 py-2 text-start border-0 bg-transparent"
             style={{
-              color: "#333",
+              color: "#dc3545", // <-- Đổi màu đỏ
               fontSize: "14px",
               cursor: "pointer",
               backgroundColor: "transparent",

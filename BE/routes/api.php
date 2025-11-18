@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\QuyenTruyCapController;
 use App\Http\Controllers\Admin\GiaVeController;
 use App\Http\Controllers\Client\CheckGheController;
 use App\Http\Controllers\Client\MomoController;
+use App\Http\Controllers\Client\VnpayController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -88,12 +89,10 @@ Route::prefix('don-do-an')->group(function () {
 
 
 // dat ve
-Route::post('/dat-ve', [DatVeController::class, 'datVe']);
-Route::get('dat-ve', [DatVeController::class, 'danhSachDatVe']);
-Route::get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
-Route::get('/dat-ve/{id}/chi-tiet', [DatVeController::class, 'chiTietVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'inVe']);
-Route::get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::middleware('auth:sanctum')->post('/dat-ve', [DatVeController::class, 'datVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve', [DatVeController::class, 'danhSachDatVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
 
@@ -128,10 +127,26 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+// GHẾ ĐỂ ADMIN QUẢN LÝ
 Route::apiResource('ghe', GheController::class);
-Route::get('/check-ghe/show-all/{gheId}', [CheckGheController::class, 'showAllCheckGhe']);
-Route::get('/check-ghe/lich-chieu/{lichChieuId}', [CheckGheController::class, 'getGheByLichChieu']);
 
+Route::prefix('check-ghe')->group(function () {
+
+    // Lấy toàn bộ check_ghe theo ID ghế
+    Route::get('/show-all/{gheId}', [CheckGheController::class, 'showAllCheckGhe']);
+
+    // Lấy danh sách ghế theo lịch chiếu
+    Route::get('/lich-chieu/{lichChieuId}', [CheckGheController::class, 'getGheByLichChieu']);
+
+    // Cập nhật trạng thái ghế
+    Route::put('/update/{id}', [CheckGheController::class, 'update']);
+
+    // Cập nhật trạng thái ghế hàng loạt (out trang)
+    Route::post('/bulk-update', [CheckGheController::class, 'bulkUpdate']);
+
+    // Xóa toàn bộ check_ghe thuộc lịch chiếu
+    Route::delete('/destroy/{lichChieuId}', [CheckGheController::class, 'destroy']);
+});
 
 
 Route::get('/ma-giam-gia', [MaGiamGiaController::class, 'index']);
@@ -191,5 +206,11 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 
 Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
-Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
+// Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
 Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
+Route::post('/thanhtoan/momo/rollback-ghe', [MomoController::class, 'huyGhe']);
+Route::prefix('vnpay')->group(function () {
+    Route::post('/create', [VnpayController::class, 'create']);   // FE gọi để tạo URL thanh toán
+    Route::get('/return', [VnpayController::class, 'return']);    // redirect sau khi user thanh toán
+    Route::get('/ipn',    [VnpayController::class, 'ipn']);       // IPN server-to-server
+});

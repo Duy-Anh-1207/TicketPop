@@ -8,6 +8,18 @@ const axiosClient = axios.create({
   },
 });
 
+// Thêm interceptor để gửi token
+axiosClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 // Gọi API đặt vé
 export const datVe = async (payload: {
   lich_chieu_id: number;

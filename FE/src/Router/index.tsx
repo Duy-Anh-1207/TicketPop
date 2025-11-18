@@ -10,12 +10,12 @@ import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
 import Booking from "../Page/Booking/Booking";
+import MyAccountPage from "../Page/Profile/MyAccountPage";
+
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
 import VerifyCode from "../component/Auth/VerifyRegister";
-
-
 
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
@@ -73,11 +73,12 @@ import ThongKeDoanhThu from "../component/Admin/ThongKe/ThongKeDoanhThu";
 //Dashbroad
 import Dashbroad from "../component/Admin/Dashboard/Dashboard";
 
-
-
+//Tin tức (CLIENT)
 // ✅ Tin tức (CLIENT)
 import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
+
+
 
 const Routermain = () => {
   const element = useRoutes([
@@ -97,6 +98,9 @@ const Routermain = () => {
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
         { path: "booking/:slug", element: <Booking/> },
+
+        //
+        { path: "thong-tin-tai-khoan", element: <MyAccountPage /> },
         
 
         // ✅ Thêm route tin tức cho CLIENT
@@ -158,6 +162,8 @@ const Routermain = () => {
         { path: "vouchers/them-moi", element: <CreateVoucher /> },
         { path: "vouchers/edit/:id", element: <EditVoucher /> },
         { path: "vouchers/view/:id", element: <ViewVoucher /> },
+
+        
 
         // Tin tức
         { path: "tin-tuc", element: <TinTucList /> },

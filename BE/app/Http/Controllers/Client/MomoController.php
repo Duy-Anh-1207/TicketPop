@@ -67,7 +67,23 @@ class MomoController extends Controller
 
         // Trang giống ảnh: dùng thẻ ATM nội địa
         $requestType = 'payWithATM';
-        $extraData   = base64_encode(json_encode(['tt_id' => $tt->id]));
+        // $extraData   = base64_encode(json_encode(['tt_id' => $tt->id]));
+
+        $IdLichChieu = $datVe->lich_chieu_id;
+        $IdGhe = $datVe->chiTiet->pluck('ghe_id')->toArray();
+
+
+
+
+
+
+
+
+        $extraData = base64_encode(json_encode([
+            'tt_id' => $tt->id,
+            'IdLichChieu' => $IdLichChieu,
+            'IdGhe' => $IdGhe,
+        ]));
 
         $raw = "accessKey={$accessKey}&amount={$amount}&extraData={$extraData}&ipnUrl={$ipnUrl}&orderId={$orderId}&orderInfo={$orderInfo}&partnerCode={$partnerCode}&redirectUrl={$redirectUrl}&requestId={$requestId}&requestType={$requestType}";
         $signature = hash_hmac('sha256', $raw, $secretKey);
@@ -176,5 +192,19 @@ class MomoController extends Controller
             DB::rollBack();
             return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
         }
+    }
+
+
+    public function huyGhe(request $request)
+    {
+        $lichChieuId = $request->input('lich_chieu_id');
+        $gheIds = $request->input('ghe_ids', []);
+        CheckGhe::where('lich_chieu_id', $lichChieuId)
+            ->whereIn('ghe_id', $gheIds)
+            ->update([
+                'trang_thai' => 'trong',
+                'nguoi_dung_id' => null
+            ]);
+            return response()->json(['message' => 'Ghế đã được hủy thành công.']);
     }
 }

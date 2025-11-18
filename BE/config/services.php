@@ -44,5 +44,13 @@ return [
     'ipn_url'      => env('MOMO_IPN_URL','http://127.0.0.1:8000/api/thanhtoan/momo/ipn'),
     'front_result_url' => env('MOMO_FRONT_RESULT_URL','http://localhost:5173/ket-qua-thanh-toan'),
 ],
+'vnpay' => [
+    'tmn_code'         => env('VNPAY_TMN_CODE', ''),
+    'hash_secret'      => env('VNPAY_HASH_SECRET', ''),
+    'payment_url'      => env('VNPAY_PAYMENT_URL', 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html'),
+    'return_url'       => env('VNPAY_RETURN_URL', 'http://localhost:8000/api/vnpay/return'),
+    'ipn_url'          => env('VNPAY_IPN_URL', 'http://localhost:8000/api/vnpay/ipn'),
+    'front_result_url' => env('VNPAY_FRONT_RESULT_URL', 'http://localhost:5173/ket-qua-thanh-toan'),
+],
 
 ];

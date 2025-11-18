@@ -30,7 +30,14 @@ class DatVeController extends Controller
             'do_an.*.so_luong' => 'required_with:do_an|integer|min:1',
         ]);
 
-        $user = Auth::user() ?? NguoiDung::first();
+        $user = Auth::user();
+
+        // Kiểm tra authentication
+        if (!$user) {
+            return response()->json([
+                'message' => 'Vui lòng đăng nhập để đặt vé',
+            ], 401);
+        }
 
         try {
             DB::beginTransaction();
@@ -132,9 +139,16 @@ class DatVeController extends Controller
         }
     }
 
-    public function danhSachDatVe()
+    public function danhSachDatVe(Request $request)
     {
-        $user = Auth::user() ?? NguoiDung::first();
+        $user = Auth::user();
+        
+        if (!$user) {
+            return response()->json([
+                'message' => 'Vui lòng đăng nhập',
+                'data' => []
+            ], 401);
+        }
 
         $thanhToan = ThanhToan::with([
             'datVe.lichChieu:id,gio_chieu,phim_id,phong_id',
