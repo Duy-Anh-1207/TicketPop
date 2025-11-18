@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
+use Illuminate\Support\Facades\Log; // thêm vào đầu file nếu muốn log debug
+use App\Models\DoAn;
 use App\Http\Controllers\Controller;
 use App\Jobs\XoaDonHang;
 use App\Models\CheckGhe;
@@ -30,84 +32,114 @@ class DatVeController extends Controller
             'do_an.*.so_luong' => 'required_with:do_an|integer|min:1',
         ]);
 
-        $user = Auth::user() ?? \App\Models\NguoiDung::first();
+        $user = Auth::user() ?? NguoiDung::first();
 
         try {
             DB::beginTransaction();
 
-            // ====== Xử lý ghế ======
-            $gheList = Ghe::whereIn('id', $request->ghe)
-                ->lockForUpdate()
+            // ====== 1️⃣ Lock và kiểm tra ghế ======
+            $checkGheList = CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
+                ->whereIn('ghe_id', $request->ghe)
+                ->where('trang_thai', 'trong')
+                ->lockForUpdate() // lock row để tránh race condition
                 ->get();
 
-            if ($gheList->count() !== count($request->ghe)) {
+            if ($checkGheList->count() !== count($request->ghe)) {
+                DB::rollBack();
                 return response()->json([
-                    'message' => 'Một số ghế không tồn tại hoặc đã bị khóa.',
+                    'message' => 'Một số ghế đã được đặt hoặc không tồn tại.',
                 ], 400);
             }
 
             $tongTien = 0;
             $giaVeTheoGhe = [];
 
-            foreach ($gheList as $ghe) {
+            foreach ($checkGheList as $checkGhe) {
                 $giaVe = GiaVe::where('lich_chieu_id', $request->lich_chieu_id)
-                    ->where('loai_ghe_id', $ghe->loai_ghe_id)
+                    ->where('loai_ghe_id', $checkGhe->ghe->loai_ghe_id)
                     ->value('gia_ve');
 
                 if (!$giaVe) {
-                    throw new Exception("Không tìm thấy giá vé cho ghế ID {$ghe->id}");
+                    throw new Exception("Không tìm thấy giá vé cho ghế ID {$checkGhe->ghe_id}");
                 }
 
-                $giaVeTheoGhe[$ghe->id] = $giaVe;
+                $giaVeTheoGhe[$checkGhe->ghe_id] = $giaVe;
                 $tongTien += $giaVe;
             }
 
-            // ====== Tạo đơn đặt vé ======
+            // ====== 2️⃣ Tạo đơn đặt vé ======
             $datVe = DatVe::create([
                 'nguoi_dung_id' => $user->id,
                 'lich_chieu_id' => $request->lich_chieu_id,
                 'tong_tien' => $tongTien,
             ]);
 
-            // ====== Chi tiết ghế ======
-            foreach ($gheList as $ghe) {
+            // ====== 3️⃣ Cập nhật chi tiết ghế ======
+            foreach ($checkGheList as $checkGhe) {
                 DatVeChiTiet::create([
                     'dat_ve_id' => $datVe->id,
-                    'ghe_id' => $ghe->id,
-                    'gia_ve' => $giaVeTheoGhe[$ghe->id],
+                    'ghe_id' => $checkGhe->ghe_id,
+                    'gia_ve' => $giaVeTheoGhe[$checkGhe->ghe_id],
                 ]);
 
-                // Cập nhật trạng thái trong check_ghe
-    CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
-        ->where('ghe_id', $ghe->id)
-        ->update([
-            'trang_thai' => 'da_dat',
-            'nguoi_dung_id' => $user->id,
-            'expires_at' => now()->addMinutes(10),
-        ]);
+                // Cập nhật trạng thái ghế
+                $checkGhe->update([
+                    'trang_thai' => 'da_dat',
+                    'nguoi_dung_id' => $user->id,
+                    'expires_at' => now()->addMinutes(10),
+                ]);
             }
 
-            // ====== Xử lý đồ ăn ======
+            // ====== 4️⃣ Xử lý đồ ăn ======
+            $tongTienDoAn = 0;
+            $chiTietDoAn = [];
+
             if ($request->has('do_an') && count($request->do_an) > 0) {
                 foreach ($request->do_an as $item) {
-                    $doAn = \App\Models\DoAn::find($item['do_an_id']);
-                    if (!$doAn) continue;
+                    $doAn = DoAn::lockForUpdate()->find($item['do_an_id']);
+                    if (!$doAn) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => "Đồ ăn với ID {$item['do_an_id']} không tồn tại."
+                        ], 400);
+                    }
 
-                    $giaBan = $doAn->gia_ban ?? 0;
-                    $soLuong = $item['so_luong'];
-                    $tongTien += $giaBan * $soLuong;
+                    $soLuong = (int)$item['so_luong'];
 
+                    if ($soLuong > $doAn->so_luong_ton) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => "Số lượng {$doAn->ten_do_an} không đủ. Hiện chỉ còn {$doAn->so_luong_ton} sản phẩm."
+                        ], 400);
+                    }
+
+                    // Tạm trừ tồn kho
+                    $doAn->decrement('so_luong_ton', $soLuong);
+
+                    $chiTietDoAn[] = [
+                        'doAn' => $doAn,
+                        'so_luong' => $soLuong,
+                        'gia_ban' => $doAn->gia_ban ?? 0,
+                    ];
+
+                    $tongTienDoAn += ($doAn->gia_ban ?? 0) * $soLuong;
+                }
+
+                // Lưu chi tiết đồ ăn
+                foreach ($chiTietDoAn as $item) {
                     DonDoAn::create([
                         'dat_ve_id' => $datVe->id,
-                        'do_an_id' => $doAn->id,
-                        'gia_ban' => $giaBan,
-                        'so_luong' => $soLuong,
+                        'do_an_id' => $item['doAn']->id,
+                        'gia_ban' => $item['gia_ban'],
+                        'so_luong' => $item['so_luong'],
                     ]);
                 }
 
-                $datVe->update(['tong_tien' => $tongTien]);
+                // Cập nhật tổng tiền tạm
+                $datVe->increment('tong_tien', $tongTienDoAn);
             }
 
+            // ====== 5️⃣ Dispatch job hủy vé nếu không thanh toán ======
             XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(10));
 
             DB::commit();
@@ -132,6 +164,7 @@ class DatVeController extends Controller
         }
     }
 
+
     public function danhSachDatVe()
     {
         $user = Auth::user() ?? NguoiDung::first();
@@ -147,6 +180,8 @@ class DatVeController extends Controller
             ->get()
             ->map(function ($item) {
                 return [
+
+                    'id' => $item->id,
                     'ma_don_hang' => $item->ma_giao_dich,
                     'email' => $item->email,
                     'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
@@ -154,6 +189,7 @@ class DatVeController extends Controller
                     'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
                     'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
                 ];
+
             });
 
         return response()->json([

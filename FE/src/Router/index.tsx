@@ -20,7 +20,6 @@ import Register from "../component/Auth/DangKy";
 import VerifyCode from "../component/Auth/VerifyRegister";
 
 
-
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
 import CreatePhim from "../component/Admin/Phim/CreatePhim";
