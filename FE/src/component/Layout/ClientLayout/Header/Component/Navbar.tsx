@@ -35,7 +35,6 @@ const Navbar: React.FC = () => {
             </a>
           </li>
         </ul>
-
         <ul
           style={{
             display: "flex",
@@ -54,6 +53,30 @@ const Navbar: React.FC = () => {
               }}
             >
               Khuyến mãi
+            </a>
+          </li>
+          <li style={{ margin: "0 15px" }}>
+            <a
+              href="/dang-chieu"
+              style={{
+                color: "black",
+                textDecoration: "none",
+                fontSize: "16px",
+              }}
+            >
+              🎬 Phim đang chiếu
+            </a>
+          </li>
+          <li style={{ margin: "0 15px" }}>
+            <a
+              href="/sap-chieu"
+              style={{
+                color: "black",
+                textDecoration: "none",
+                fontSize: "16px",
+              }}
+            >
+                ⏳ Phim Sắp chiếu
             </a>
           </li>
           <li style={{ margin: "0 15px" }}>

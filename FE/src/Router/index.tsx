@@ -10,6 +10,10 @@ import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
 import Booking from "../Page/Booking/Booking";
+
+
+import PhimDangChieu from "../Page/Paging/PhimDangChieu";
+// import PhimSapChieu from "../Page/Paging/PhimSapChieu";
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
@@ -97,6 +101,10 @@ const Routermain = () => {
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
         { path: "booking/:slug", element: <Booking/> },
+        {path: "dang-chieu", element: <PhimDangChieu />},
+        //  {path: "sap-chieu", element: <PhimSapChieu />},
+       
+
         
 
         // ✅ Thêm route tin tức cho CLIENT

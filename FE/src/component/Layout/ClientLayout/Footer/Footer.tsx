@@ -13,8 +13,15 @@ const Footer: React.FC = () => {
         <div>
           <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>THỂ LOẠI PHIM</h4>
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }}>Phim đang chiếu</li>
-            <li style={{ marginBottom: '5px' }}>Phim sắp chiếu</li>
+            <li style={{ marginBottom: '5px' }} ><a href="dang-chieu" style={{ textDecoration: 'none', color: 'black' }}>
+              Phim đang chiếu 
+              </a>
+            </li>
+            <li style={{ marginBottom: '5px' }}>
+              <a href="sap-chieu" style={{ textDecoration: 'none', color: 'black' }}>
+                Phim sắp chiếu 
+                </a>
+                </li>
             <li style={{ marginBottom: '5px' }}>Phim lẻ</li>
             <li style={{ marginBottom: '5px' }}>Phim bộ</li>
           </ul>
