@@ -30,7 +30,7 @@ class DatVeController extends Controller
             'do_an.*.so_luong' => 'required_with:do_an|integer|min:1',
         ]);
 
-        $user = Auth::user() ?? \App\Models\NguoiDung::first();
+        $user = Auth::user() ?? NguoiDung::first();
 
         try {
             DB::beginTransaction();
@@ -78,13 +78,13 @@ class DatVeController extends Controller
                 ]);
 
                 // Cập nhật trạng thái trong check_ghe
-    CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
-        ->where('ghe_id', $ghe->id)
-        ->update([
-            'trang_thai' => 'da_dat',
-            'nguoi_dung_id' => $user->id,
-            'expires_at' => now()->addMinutes(10),
-        ]);
+                CheckGhe::where('lich_chieu_id', $request->lich_chieu_id)
+                    ->where('ghe_id', $ghe->id)
+                    ->update([
+                        'trang_thai' => 'da_dat',
+                        'nguoi_dung_id' => $user->id,
+                        'expires_at' => now()->addMinutes(10),
+                    ]);
             }
 
             // ====== Xử lý đồ ăn ======
