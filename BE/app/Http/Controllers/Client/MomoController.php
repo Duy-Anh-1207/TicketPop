@@ -12,6 +12,10 @@ use App\Models\DatVeChiTiet;
 use App\Models\PhuongThucThanhToan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+// === QR CODE (PHẦN MỚI)
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Storage;
 
 class MomoController extends Controller
 {
@@ -50,6 +54,7 @@ class MomoController extends Controller
             'email'                     => $email,
             'ho_ten'                    => $hoTen, // luôn có giá trị
             'ma_giao_dich'              => $orderId,
+             
         ]);
 
         // ❷ Gọi MoMo (SANDBOX)
@@ -58,7 +63,7 @@ class MomoController extends Controller
         $secretKey   = config('services.momo.secret_key');
         $endpoint    = config('services.momo.endpoint'); // https://test-payment.momo.vn/v2/gateway/api/create
 
-        $orderId     = 'momo_' . $tt->id . '_' . time();
+       $orderId = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
         $requestId   = uniqid();
         $amount      = (string)intval($req->amount);
         $orderInfo   = "Thanh toan dat ve #{$datVe->id}";
@@ -71,14 +76,7 @@ class MomoController extends Controller
 
         $IdLichChieu = $datVe->lich_chieu_id;
         $IdGhe = $datVe->chiTiet->pluck('ghe_id')->toArray();
-
-
-
-
-
-
-
-
+            // $IdGhe = $datVe->datVeChiTiet->pluck('ghe_id')->toArray();
         $extraData = base64_encode(json_encode([
             'tt_id' => $tt->id,
             'IdLichChieu' => $IdLichChieu,
@@ -176,7 +174,32 @@ class MomoController extends Controller
             if (!$datVe) {
                 throw new \Exception("Không tìm thấy dat_ve để cập nhật ghế");
             }
+          
+            $gheIds = $datVe->datVeChiTiet ? $datVe->datVeChiTiet->pluck('ghe_id')->toArray() : [];
+        $qrContent =
+            "Mã vé: {$datVe->id}\n" .
+            "Phim: {$datVe->phim->ten_phim}\n" .
+            "Phòng: {$datVe->phong->ten_phong}\n" .
+            "Ghế: " . implode(', ', $gheIds) . "\n" .
+            "Suất chiếu: {$datVe->gio_bat_dau}\n" .
+            "Mã giao dịch: {$tt->ma_giao_dich}";
 
+        // 5️⃣ Tạo QR code
+        $qr = QrCode::create($qrContent)->setSize(300)->setMargin(10);
+        $writer = new PngWriter();
+        $qrImage = $writer->write($qr);
+
+        $fileName = 'qr_' . $datVe->id . '.png';
+        $filePath = 'qr/' . $fileName;
+
+        // 6️⃣ Lưu QR code vào Storage
+        Storage::disk('public')->put($filePath, $qrImage->getString());
+        if (!Storage::disk('public')->exists($filePath)) {
+            throw new \Exception("Không lưu được QR code vào Storage ($filePath)");
+        }
+
+        // 7️⃣ Update qr_code vào ThanhToan
+        $tt->update(['qr_code' => $filePath]);
             // Update ghế sang da_dat
             CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
                 ->whereIn('ghe_id', $datVe->datVeChiTiet->pluck('ghe_id'))
@@ -195,7 +218,7 @@ class MomoController extends Controller
     }
 
 
-    public function huyGhe(request $request)
+    public function huyGhe(Request $request)
     {
         $lichChieuId = $request->input('lich_chieu_id');
         $gheIds = $request->input('ghe_ids', []);

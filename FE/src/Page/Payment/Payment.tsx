@@ -27,21 +27,27 @@ const Payment = () => {
   };
 
   const handleThanhToanVNPAY = async () => {
-    try {
-      const { data } = await axios.post(
-        "http://127.0.0.1:8000/api/thanhtoan/vnpay",
-        {
-          dat_ve_id: datVe.id,
-          amount: Number(datVe.tong_tien),
-          return_url: window.location.origin + "/ket-qua-thanh-toan",
-        }
-      );
-      const url = data?.payment_url;
-      if (url) window.location.assign(url);
-      else message.error("Không nhận được liên kết thanh toán từ VNPAY");
-    } catch (e: any) {
-      message.error(e?.response?.data?.message || "Không thể thanh toán!");
-    }
+    if (!datVe) {
+    message.error("Không tìm thấy thông tin vé!");
+    return;
+  }
+
+  try {
+    const { data } = await axios.post(
+      "http://127.0.0.1:8000/api/vnpay/create",   // <-- khớp route BE
+      {
+        dat_ve_id: datVe.id,
+        amount: Number(datVe.tong_tien),
+        return_url: window.location.origin + "/ket-qua-thanh-toan",
+      }
+    );
+
+    const url = data?.payment_url;
+    if (url) window.location.assign(url);
+    else message.error("Không nhận được liên kết thanh toán từ VNPAY");
+  } catch (e: any) {
+    message.error(e?.response?.data?.message || "Không thể thanh toán!");
+  }
   };
 
 
@@ -246,6 +252,7 @@ const Payment = () => {
                 type="primary"
                 size="large"
                 block
+                disabled={!datVe}
                 onClick={handleThanhToanVNPAY}
                 className="momo-btn"
                 style={{
