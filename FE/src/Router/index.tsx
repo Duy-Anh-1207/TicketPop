@@ -82,6 +82,7 @@ import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
 import ListDonVe from "../component/Admin/DonVe/ListDonVe";
 import ChiTietDonVe from "../component/Admin/DonVe/ChiTietDonVe";
+import PromotionPage from "../Page/Promotion/PromotionPage";
 
 
 
@@ -112,6 +113,8 @@ const Routermain = () => {
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
+
+        { path: "khuyen-mai", element: <PromotionPage /> },
 
         { path: "booking/:slug", element: <Booking /> },
         { path: "booking/payment", element: <Payment /> },
