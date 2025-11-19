@@ -10,7 +10,7 @@ import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
 import Booking from "../Page/Booking/Booking";
-
+import TimKiemPage from "../Page/TimKiemPage/TimKiemPage";
 
 import PhimDangChieu from "../Page/Paging/PhimDangChieu";
 import PhimSapChieu from "../Page/Paging/PhimSapChieu";
@@ -105,7 +105,7 @@ const Routermain = () => {
         { path: "booking/:slug", element: <Booking /> },
         { path: "dang-chieu", element: <PhimDangChieu /> },
         { path: "sap-chieu", element: <PhimSapChieu /> },
-
+        { path: "/tim-kiem", element: <TimKiemPage /> },
 
 
 
