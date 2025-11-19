@@ -319,28 +319,6 @@ const Booking = () => {
             <span>Ghế đã đặt</span>
           </div>
         </div>
-        {/* --- Chú thích ghế --- */}
-        <div className="seat-legend">
-          <div className="legend-item">
-            <div className="legend-box thuong"></div>
-            <span>Ghế Thường</span>
-          </div>
-
-          <div className="legend-item">
-            <div className="legend-box vip"></div>
-            <span>Ghế VIP</span>
-          </div>
-
-          <div className="legend-item">
-            <div className="legend-box selected"></div>
-            <span>Ghế Đang Chọn</span>
-          </div>
-
-          <div className="legend-item">
-            <div className="legend-box booked"></div>
-            <span>Ghế đã đặt</span>
-          </div>
-        </div>
       </div>
 
       {/* --- Đồ ăn --- */}

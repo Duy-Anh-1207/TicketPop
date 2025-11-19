@@ -140,7 +140,7 @@ class DatVeController extends Controller
             }
 
             // ====== 5️⃣ Dispatch job hủy vé nếu không thanh toán ======
-            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(10));
+            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(1));
 
             DB::commit();
 
@@ -288,4 +288,64 @@ class DatVeController extends Controller
             ], 500);
         }
     }
+
+    public function xoaDatVe($id)
+{
+    try {
+        DB::beginTransaction();
+
+        $datVe = DatVe::with(['chiTiet.ghe', 'donDoAn.doAn', 'thanhToan'])->find($id);
+
+        if (!$datVe) {
+            return response()->json([
+                'message' => 'Không tìm thấy đặt vé này.'
+            ], 404);
+        }
+
+        // Kiểm tra nếu đã thanh toán thì không được xoá
+        if ($datVe->thanhToan()->exists()) {
+            return response()->json([
+                'message' => 'Đặt vé đã thanh toán, không thể xoá.'
+            ], 400);
+        }
+
+        // ===== 1️⃣ Trả lại ghế =====
+        foreach ($datVe->chiTiet as $ct) {
+            if ($ct->ghe) {
+                $ct->ghe->update([
+                    'trang_thai' => 'trong',
+                    'nguoi_dung_id' => null,
+                    'expires_at' => null,
+                ]);
+            }
+        }
+
+        // ===== 2️⃣ Hoàn lại số lượng đồ ăn =====
+        foreach ($datVe->donDoAn as $dd) {
+            if ($dd->doAn) {
+                $dd->doAn->increment('so_luong_ton', $dd->so_luong);
+            }
+        }
+
+        // ===== 3️⃣ Xoá chi tiết ghế và đồ ăn =====
+        $datVe->chiTiet()->delete();
+        $datVe->donDoAn()->delete();
+
+        // ===== 4️⃣ Xoá bản ghi DatVe =====
+        $datVe->delete();
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Đặt vé đã được xoá, ghế và đồ ăn đã được hoàn lại.'
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json([
+            'message' => 'Xoá đặt vé thất bại.',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
 }

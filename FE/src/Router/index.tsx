@@ -78,6 +78,8 @@ import TimKiemPage from "../Page/TimKiemPage/TimKiemPage";
 import PhimDangChieu from "../Page/Paging/PhimDangChieu";
 import PhimSapChieu from "../Page/Paging/PhimSapChieu";
 import MyAccountPage from "../Page/Profile/MyAccountPage";
+import ListDonVe from "../component/Admin/DonVe/ListDonVe";
+import ChiTietDonVe from "../component/Admin/DonVe/ChiTietDonVe";
 
 const Routermain = () => {
   const element = useRoutes([
@@ -176,6 +178,8 @@ const Routermain = () => {
         { path: "thong-ke/doanh-thu", element: <ThongKeDoanhThu /> },
         //dashbroad
         { path: "dashbroad", element: <Dashbroad /> },
+        { path: "ve", element: <ListDonVe /> }, 
+        { path: "ve/:id", element: <ChiTietDonVe /> },
 
 
       ],

@@ -3,73 +3,34 @@
 namespace App\Jobs;
 
 use App\Models\DatVe;
-use App\Models\CheckGhe;
-use App\Models\DoAn;
-use Illuminate\Bus\Queueable;
+use App\Models\ThanhToan;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\DB;
 
 class XoaDonHang implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Queueable;
 
-    protected $datVeId;
-
-    /**
-     * Create a new job instance.
-     *
-     * @param int $datVeId
-     */
-    public function __construct(int $datVeId)
+    protected $id;
+    public function __construct($id)
     {
-        $this->datVeId = $datVeId;
+        $this->id = $id;
     }
 
     /**
      * Execute the job.
      */
-    public function handle()
+    public function handle(): void
     {
-        $datVe = DatVe::with(['datVeChiTiet', 'donDoAn', 'thanhToan'])->find($this->datVeId);
+        $data = ThanhToan::where('dat_ve_id', $this->id)->get();
+        $datVe = DatVe::find($this->id);
 
-        if (!$datVe) {
-            return; // vé không tồn tại
+        if ($data->isEmpty() && !$datVe->job_id) {
+            $res =  Http::delete("http://127.0.0.1:8000/api/dat_ve/$this->id");
+
+            Log::info("Xoa DatVe: " . $res->body());
         }
-
-        // Nếu đã thanh toán thì không xóa
-        if ($datVe->thanhToan && $datVe->thanhToan->trang_thai === 'da_thanh_toan') {
-            return;
-        }
-
-        DB::transaction(function() use ($datVe) {
-            // 1️⃣ Hoàn ghế
-            foreach ($datVe->datVeChiTiet as $ct) {
-                CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
-                    ->where('ghe_id', $ct->ghe_id)
-                    ->update([
-                        'trang_thai' => 'trong',
-                        'nguoi_dung_id' => null,
-                        'expires_at' => null
-                    ]);
-            }
-
-            // 2️⃣ Hoàn đồ ăn về kho
-            foreach ($datVe->donDoAn as $don) {
-                $doAn = DoAn::find($don->do_an_id);
-                if ($doAn) {
-                    $doAn->update([
-                        'so_luong_ton' => $doAn->so_luong_ton + $don->so_luong
-                    ]);
-                }
-            }
-
-            // 3️⃣ Xóa đơn chi tiết và vé
-            $datVe->datVeChiTiet()->delete();
-            $datVe->donDoAn()->delete();
-            $datVe->delete();
-        });
     }
 }
