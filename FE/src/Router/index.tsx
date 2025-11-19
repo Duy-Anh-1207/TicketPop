@@ -10,15 +10,10 @@ import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
 import Booking from "../Page/Booking/Booking";
-import TimKiemPage from "../Page/TimKiemPage/TimKiemPage";
-
-import PhimDangChieu from "../Page/Paging/PhimDangChieu";
-import PhimSapChieu from "../Page/Paging/PhimSapChieu";
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
 import VerifyCode from "../component/Auth/VerifyRegister";
-
 
 // Phim
 import DanhSachPhimTable from "../component/Admin/Phim/ListPhim";
@@ -77,13 +72,12 @@ import ThongKeDoanhThu from "../component/Admin/ThongKe/ThongKeDoanhThu";
 import Dashbroad from "../component/Admin/Dashboard/Dashboard";
 
 //Tin tức (CLIENT)
-// ✅ Tin tức (CLIENT)
 import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
-import ListDonVe from "../component/Admin/DonVe/ListDonVe";
-import ChiTietDonVe from "../component/Admin/DonVe/ChiTietDonVe";
-
-
+import TimKiemPage from "../Page/TimKiemPage/TimKiemPage";
+import PhimDangChieu from "../Page/Paging/PhimDangChieu";
+import PhimSapChieu from "../Page/Paging/PhimSapChieu";
+import MyAccountPage from "../Page/Profile/MyAccountPage";
 
 const Routermain = () => {
   const element = useRoutes([
@@ -103,10 +97,9 @@ const Routermain = () => {
         { index: true, element: <HomePage /> },
         { path: "phim/:slug", element: <MovieDetail /> },
         { path: "booking/:slug", element: <Booking /> },
+        { path: "thong-tin-tai-khoan", element: <MyAccountPage /> },
         { path: "dang-chieu", element: <PhimDangChieu /> },
         { path: "sap-chieu", element: <PhimSapChieu /> },
-        { path: "/tim-kiem", element: <TimKiemPage /> },
-
 
 
         // ✅ Thêm route tin tức cho CLIENT
@@ -115,6 +108,7 @@ const Routermain = () => {
 
         { path: "booking/:slug", element: <Booking /> },
         { path: "booking/payment", element: <Payment /> },
+        { path: "/tim-kiem", element: <TimKiemPage /> },
       ],
     },
 
@@ -169,8 +163,6 @@ const Routermain = () => {
         { path: "vouchers/edit/:id", element: <EditVoucher /> },
         { path: "vouchers/view/:id", element: <ViewVoucher /> },
 
-
-
         // Tin tức
         { path: "tin-tuc", element: <TinTucList /> },
         { path: "tin-tuc/them-moi", element: <CreateTinTuc /> },
@@ -184,8 +176,7 @@ const Routermain = () => {
         { path: "thong-ke/doanh-thu", element: <ThongKeDoanhThu /> },
         //dashbroad
         { path: "dashbroad", element: <Dashbroad /> },
-        { path: "ve", element: <ListDonVe /> },
-        { path: "ve/:id", element: <ChiTietDonVe /> },
+
 
       ],
     },
