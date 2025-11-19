@@ -108,6 +108,32 @@ const PromotionPage: React.FC = () => {
                     </div>
                 </div>
 
+                {isLoading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
+                ) : isError ? (
+                    <div className="text-center py-20 text-red-500 bg-white rounded-lg shadow p-8">
+                        <i className="fa-solid fa-triangle-exclamation text-4xl mb-3"></i>
+                        <p>Không thể tải danh sách khuyến mãi lúc này.</p>
+                    </div>
+                ) : validVouchers.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+                        {validVouchers.map(voucher => (
+                            <VoucherCard key={voucher.id} voucher={voucher} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-24 bg-white rounded-xl shadow-sm border border-gray-100">
+                        <img 
+                            src="https://cdni.iconscout.com/illustration/premium/thumb/empty-cart-2130356-1800917.png" 
+                            alt="Empty" 
+                            className="w-48 mx-auto opacity-50 mb-4"
+                        />
+                        <h3 className="text-xl font-semibold text-gray-600">Hiện chưa có voucher nào khả dụng</h3>
+                        <p className="text-gray-400 mt-2">Vui lòng quay lại sau nhé!</p>
+                    </div>
+                )}
             </div>
         </div>
     );
