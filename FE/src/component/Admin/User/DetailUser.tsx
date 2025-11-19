@@ -52,11 +52,11 @@ export default function DetailUser() {
                     <div className="d-flex align-items-center justify-content-center justify-content-md-start">
                       <span
                         className={`p-1 rounded-circle ${
-                          user.is_active ? "bg-success" : "bg-secondary"
+                          user.trang_thai ? "bg-success" : "bg-secondary"
                         }`}
                       ></span>
                       <h6 className="mb-0 ms-2">
-                        {user.is_active == 1 ? "Hoạt động" : "Khóa"}
+                        {user.trang_thai ? "Hoạt động" : "Khóa"}
                       </h6>
                     </div>
                   </div>

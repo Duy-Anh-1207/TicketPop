@@ -465,7 +465,7 @@ const MyAccountPage = () => {
           </div>
         </div>
       )}
-    </div>
+
       {/* Modal chi tiết đơn hàng */}
       {showDetailModal && (
         <>
@@ -486,6 +486,8 @@ const MyAccountPage = () => {
                         <h5>{det.lich_chieu?.phim?.ten_phim || det.phim || 'Không rõ phim'}</h5>
                         <p>Phòng: {det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ'}</p>
                         <p>Thời gian: {det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu).toLocaleString() : 'Không rõ'}</p>
+
+                        <p>Phương thức thanh toán: <strong>{det.thanh_toan ?? '—'}</strong></p>
 
                         {det.chi_tiet && det.chi_tiet.length > 0 && (
                           <div className="mb-3">
@@ -537,8 +539,9 @@ const MyAccountPage = () => {
           <div className="modal-backdrop show"></div>
         </>
       )}
-      </>
-      );
+    </div>
+    </>
+  );
 };
 
 export default MyAccountPage;

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Navbar: React.FC = () => {
   return (
@@ -44,17 +45,17 @@ const Navbar: React.FC = () => {
         }}
       >
         <li style={{ margin: "0 15px" }}>
-          <a
-            href="#promotion"
-            style={{
-              color: "black",
-              textDecoration: "none",
-              fontSize: "16px",
-            }}
-          >
-            Khuyến mãi
-          </a>
-        </li>
+            <Link
+              to="/khuyen-mai" // ✅ Chuyển hướng đến trang Voucher mới
+              style={{
+                color: "black",
+                textDecoration: "none",
+                fontSize: "16px",
+              }}
+            >
+              Khuyến mãi
+            </Link>
+          </li>
         <li style={{ margin: "0 15px" }}>
           <a
             href="/dang-chieu"

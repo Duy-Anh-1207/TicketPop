@@ -10,6 +10,7 @@ import HomePage from "../Page/Home/HomePage";
 import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
 import Booking from "../Page/Booking/Booking";
+
 // Auth
 import Login from "../component/Auth/DangNhap";
 import Register from "../component/Auth/DangKy";
@@ -80,6 +81,9 @@ import PhimSapChieu from "../Page/Paging/PhimSapChieu";
 import MyAccountPage from "../Page/Profile/MyAccountPage";
 import ListDonVe from "../component/Admin/DonVe/ListDonVe";
 import ChiTietDonVe from "../component/Admin/DonVe/ChiTietDonVe";
+import PromotionPage from "../Page/Promotion/PromotionPage";
+
+
 
 const Routermain = () => {
   const element = useRoutes([
@@ -107,6 +111,12 @@ const Routermain = () => {
         // ✅ Thêm route tin tức cho CLIENT
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
+
+
+        { path: "thong-tin-tai-khoan", element: <MyAccountPage /> },
+
+        { path: "khuyen-mai", element: <PromotionPage /> },
+
 
         { path: "booking/:slug", element: <Booking /> },
         { path: "booking/payment", element: <Payment /> },

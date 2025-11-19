@@ -183,6 +183,7 @@ class DatVeController extends Controller
 
                     'id' => $item->id,
                     'ma_don_hang' => $item->ma_giao_dich,
+                    'dat_ve_id' => $item->datVe?->id,
                     'email' => $item->email,
                     'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
                     'ngay_dat' => $item->created_at->format('d/m/Y'),
@@ -279,7 +280,9 @@ class DatVeController extends Controller
 
             return response()->json([
                 'message' => 'Lấy chi tiết vé thành công!',
-                'data' => $datVe,
+                'data' => array_merge($datVe->toArray(), [
+                    'thanh_toan' => optional(ThanhToan::with('phuongThucThanhToan')->where('dat_ve_id', $datVe->id)->first())->phuongThucThanhToan?->ten ?? null,
+                ]),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

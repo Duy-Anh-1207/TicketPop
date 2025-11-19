@@ -267,7 +267,7 @@ const Booking = () => {
                 <div key={hang} className="seat-row">
                   <div className="seat-list">
                     {hangList[hang]
-                      .sort((a, b) => a.cot - b.cot)
+                      .sort((a: any, b: any) => a.cot - b.cot)
                       .map((ghe: any) => {
                         const isSelected = selectedSeats.some(
                           (s) => s.id === ghe.id
