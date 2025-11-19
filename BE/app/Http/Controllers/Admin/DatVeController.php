@@ -280,7 +280,9 @@ class DatVeController extends Controller
 
             return response()->json([
                 'message' => 'Lấy chi tiết vé thành công!',
-                'data' => $datVe,
+                'data' => array_merge($datVe->toArray(), [
+                    'thanh_toan' => optional(ThanhToan::with('phuongThucThanhToan')->where('dat_ve_id', $datVe->id)->first())->phuongThucThanhToan?->ten ?? null,
+                ]),
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

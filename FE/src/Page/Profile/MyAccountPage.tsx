@@ -487,6 +487,8 @@ const MyAccountPage = () => {
                         <p>Phòng: {det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ'}</p>
                         <p>Thời gian: {det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu).toLocaleString() : 'Không rõ'}</p>
 
+                        <p>Phương thức thanh toán: <strong>{det.thanh_toan ?? '—'}</strong></p>
+
                         {det.chi_tiet && det.chi_tiet.length > 0 && (
                           <div className="mb-3">
                             <h6>Ghế</h6>
