@@ -11,6 +11,7 @@ import AdminLayout from "../component/Layout/AdminLayout/Admin";
 import MovieDetail from "../Page/MovieDetail/MovieDetail";
 import Booking from "../Page/Booking/Booking";
 import TimKiemPage from "../Page/TimKiemPage/TimKiemPage";
+import MyAccountPage from "../Page/Profile/MyAccountPage";
 
 import PhimDangChieu from "../Page/Paging/PhimDangChieu";
 import PhimSapChieu from "../Page/Paging/PhimSapChieu";
@@ -113,6 +114,7 @@ const Routermain = () => {
         { path: "tin-tuc", element: <NewsPage /> },
         { path: "tin-tuc/:id", element: <NewsDetailPage /> },
 
+        { path: "thong-tin-tai-khoan", element: <MyAccountPage /> },
         { path: "booking/:slug", element: <Booking /> },
         { path: "booking/payment", element: <Payment /> },
       ],

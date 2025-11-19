@@ -465,7 +465,7 @@ const MyAccountPage = () => {
           </div>
         </div>
       )}
-    </div>
+
       {/* Modal chi tiết đơn hàng */}
       {showDetailModal && (
         <>
@@ -537,8 +537,9 @@ const MyAccountPage = () => {
           <div className="modal-backdrop show"></div>
         </>
       )}
-      </>
-      );
+    </div>
+    </>
+  );
 };
 
 export default MyAccountPage;
