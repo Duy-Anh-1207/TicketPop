@@ -297,7 +297,7 @@ const Booking = () => {
               ))}
           </div>
         )}
-        {/* --- Chú thích ghế --- */}
+        {/* --- Chú thích ghế ---
         <div className="seat-legend">
           <div className="legend-item">
             <div className="legend-box thuong"></div>
@@ -318,7 +318,7 @@ const Booking = () => {
             <div className="legend-box booked"></div>
             <span>Ghế đã đặt</span>
           </div>
-        </div>
+        </div> */}
         {/* --- Chú thích ghế --- */}
         <div className="seat-legend">
           <div className="legend-item">

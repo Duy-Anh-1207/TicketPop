@@ -146,36 +146,74 @@ class MomoController extends Controller
 
     public function ipn(Request $req)
     {
-        $extra = json_decode(base64_decode($req->extraData ?? ''), true);
-        $ttId  = $extra['tt_id'] ?? null;
+        // Giải mã extraData để lấy tt_id
+    $extra = json_decode(base64_decode($req->extraData ?? ''), true);
+    $ttId  = $extra['tt_id'] ?? null;
 
-        // Nếu không thành công => bỏ qua
-        if (!$ttId || (int)$req->resultCode !== 0) {
-            return response()->json(['message' => 'ignore']);
-        }
+    // Không có tt_id => bỏ qua
+    if (!$ttId) {
+        return response()->json(['message' => 'ignore']);
+    }
 
-        DB::beginTransaction();
-        try {
-            $tt = ThanhToan::find($ttId);
+    $tt = ThanhToan::find($ttId);
 
-            if (!$tt) {
-                throw new \Exception("Không tìm thấy bản ghi thanh toán");
-            }
+    // Không tìm thấy thanh toán
+    if (!$tt) {
+        return response()->json(['message' => 'ignore']);
+    }
 
-            // Cập nhật mã giao dịch thực tế từ MoMo
-            $tt->update([
-                'ma_giao_dich' => $req->transId ?? $req->orderId,
-                'trang_thai'   => 'da_thanh_toan'
+    // Lấy đơn vé tương ứng
+    $datVe = DatVe::with('datVeChiTiet', 'phim', 'phong')->find($tt->dat_ve_id);
+
+    if (!$datVe) {
+        return response()->json(['message' => 'ignore']);
+    }
+
+    // ============================
+    // 1️⃣ THANH TOÁN THẤT BẠI
+    // ============================
+    if ((int)$req->resultCode !== 0) {
+
+        // Trả ghế về trạng thái trống
+        CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
+            ->whereIn('ghe_id', $datVe->datVeChiTiet->pluck('ghe_id'))
+            ->update([
+                'trang_thai' => 'trong',
+                'expires_at' => null,
+                'nguoi_dung_id' => null
             ]);
 
-            // Lấy đơn vé
-            $datVe = DatVe::find($tt->dat_ve_id);
+        // Cập nhật trạng thái thanh toán
+        $tt->update([
+            'trang_thai' => 'that_bai',
+        ]);
 
-            if (!$datVe) {
-                throw new \Exception("Không tìm thấy dat_ve để cập nhật ghế");
-            }
-          
-            $gheIds = $datVe->datVeChiTiet ? $datVe->datVeChiTiet->pluck('ghe_id')->toArray() : [];
+        return response()->json(['message' => 'payment_failed_seats_released']);
+    }
+
+    // ============================
+    // 2️⃣ THANH TOÁN THÀNH CÔNG
+    // ============================
+    DB::beginTransaction();
+    try {
+
+        // Cập nhật trạng thái thanh toán
+        $tt->update([
+            'ma_giao_dich' => $req->transId ?? $req->orderId,
+            'trang_thai'   => 'da_thanh_toan',
+        ]);
+
+        // ---- GHẾ ----
+        CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
+            ->whereIn('ghe_id', $datVe->datVeChiTiet->pluck('ghe_id'))
+            ->update([
+                'trang_thai' => 'da_dat',
+                'expires_at' => null,
+            ]);
+
+        // ====== Tạo QR Code ======
+        $gheIds = $datVe->datVeChiTiet->pluck('ghe_id')->toArray();
+
         $qrContent =
             "Mã vé: {$datVe->id}\n" .
             "Phim: {$datVe->phim->ten_phim}\n" .
@@ -184,7 +222,6 @@ class MomoController extends Controller
             "Suất chiếu: {$datVe->gio_bat_dau}\n" .
             "Mã giao dịch: {$tt->ma_giao_dich}";
 
-        // 5️⃣ Tạo QR code
         $qr = QrCode::create($qrContent)->setSize(300)->setMargin(10);
         $writer = new PngWriter();
         $qrImage = $writer->write($qr);
@@ -192,29 +229,22 @@ class MomoController extends Controller
         $fileName = 'qr_' . $datVe->id . '.png';
         $filePath = 'qr/' . $fileName;
 
-        // 6️⃣ Lưu QR code vào Storage
         Storage::disk('public')->put($filePath, $qrImage->getString());
+
         if (!Storage::disk('public')->exists($filePath)) {
-            throw new \Exception("Không lưu được QR code vào Storage ($filePath)");
+            throw new \Exception("Không thể lưu QR code ($filePath)");
         }
 
-        // 7️⃣ Update qr_code vào ThanhToan
+        // Lưu QR vào thanh toán
         $tt->update(['qr_code' => $filePath]);
-            // Update ghế sang da_dat
-            CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
-                ->whereIn('ghe_id', $datVe->datVeChiTiet->pluck('ghe_id'))
-                ->update([
-                    'trang_thai' => 'da_dat',
-                    'expires_at' => null,
-                ]);
 
+        DB::commit();
+        return response()->json(['message' => 'payment_success']);
 
-            DB::commit();
-            return response()->json(['message' => 'ok']);
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
-        }
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['message' => 'error', 'error' => $e->getMessage()], 500);
+    }
     }
 
 

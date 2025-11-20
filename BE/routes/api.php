@@ -69,6 +69,7 @@ Route::prefix('menu')->group(function () {
 
 Route::get('/lich-chieu', [LichChieuController::class, 'index']);
 Route::post('/lich-chieu', [LichChieuController::class, 'store']);
+Route::post('/lich-chieu/auto-one-day', [LichChieuController::class, 'storeAutoOneDay']);
 Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
 Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
@@ -77,7 +78,9 @@ Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore']);
 Route::get('/deleted', [LichChieuController::class, 'deleted']);
 Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
-
+Route::get('/phim/{id}/phien-ban', [LichChieuController::class, 'getPhienBanTheoPhimId']);
+//gia ve
+Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 // don do an
 Route::prefix('don-do-an')->group(function () {
     Route::get('/', [DonDoAnController::class, 'index']);
@@ -194,7 +197,7 @@ Route::post('/gui-lai-ma', [DangKyController::class, 'guiLaiMa']);
 Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 
 Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
-Route::get('/phim/{id}/phien-ban', [LichChieuController::class, 'getPhienBanTheoPhimId']);
+
 
 Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);
 
@@ -202,8 +205,7 @@ Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);
 //client
 Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 
-//gia ve
-Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
+
 
 Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
 // Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);

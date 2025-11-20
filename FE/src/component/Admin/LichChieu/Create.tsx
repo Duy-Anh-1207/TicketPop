@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { createLichChieu } from "../../../provider/LichChieuProviders";
+// 🆕 import thêm hàm auto
+import { createLichChieu, createLichChieuAutoOneDay } from "../../../provider/LichChieuProviders";
 import { getListPhim } from "../../../provider/PhimProvider";
 import { getListPhongChieu } from "../../../provider/PhongChieuProvider";
 
@@ -11,7 +12,7 @@ type PhongChieu = { id: number; ten_phong: string };
 type PhienBan = { id: number; the_loai: string };
 
 export default function CreateLichChieu() {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
   const [phimList, setPhimList] = useState<Phim[]>([]);
   const [phongList, setPhongList] = useState<PhongChieu[]>([]);
   const [phienBanList, setPhienBanList] = useState<PhienBan[]>([]);
@@ -19,9 +20,8 @@ export default function CreateLichChieu() {
   const [lichChieuList, setLichChieuList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingPhienBan, setLoadingPhienBan] = useState(false);
-  
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: { phim_id: "" },
   });
 
@@ -90,7 +90,9 @@ export default function CreateLichChieu() {
       const start = new Date(value);
       const end = new Date(start.getTime() + (thoiLuongPhim + 15) * 60000);
       const pad = (n: number) => n.toString().padStart(2, "0");
-      updated[index]["gio_ket_thuc"] = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}`;
+      updated[index]["gio_ket_thuc"] =
+        `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}` +
+        `T${pad(end.getHours())}:${pad(end.getMinutes())}`;
     }
 
     // Tự tính giá vé VIP
@@ -107,14 +109,12 @@ export default function CreateLichChieu() {
     updated.splice(index, 1);
     setLichChieuList(updated);
   };
-  
 
-  // 🟢 Gửi dữ liệu
-  const onSubmit = async (data: any) => {
+  // 🟢 Gửi dữ liệu: lưu nhiều lịch thủ công
+  const onSubmit = async () => {
     if (!phimId || lichChieuList.length === 0) {
       Swal.fire("Thiếu dữ liệu", "Hãy chọn phim và thêm ít nhất 1 lịch chiếu.", "warning");
       return;
-      
     }
 
     const allSchedules = lichChieuList.map((item) => ({
@@ -146,11 +146,76 @@ export default function CreateLichChieu() {
 
       Swal.fire("🎉 Thành công", res.message || "Tạo nhiều lịch chiếu thành công!", "success").then(
         () => {
-          navigate("/admin/lich-chieu"); // ✅ Chuyển về danh sách
+          navigate("/admin/lich-chieu");
         }
       );
     } catch (err: any) {
       Swal.fire("Lỗi", err.response?.data?.error || "Không thể tạo lịch chiếu", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🆕 TỰ ĐỘNG TẠO LỊCH CẢ NGÀY DỰA VÀO LỊCH #1
+  const handleAutoOneDay = async () => {
+    if (!phimId) {
+      Swal.fire("Thiếu phim", "Vui lòng chọn phim trước.", "warning");
+      return;
+    }
+
+    if (lichChieuList.length === 0) {
+      Swal.fire("Thiếu dữ liệu", "Hãy thêm ít nhất 1 lịch chiếu để làm mẫu.", "warning");
+      return;
+    }
+
+    const first = lichChieuList[0];
+
+    if (!first.phong_id || !first.gio_chieu || !first.gia_ve_thuong) {
+      Swal.fire(
+        "Thiếu thông tin",
+        "Lịch chiếu #1 phải có phòng chiếu, giờ chiếu và giá vé thường.",
+        "warning"
+      );
+      return;
+    }
+
+    // Tách ngày & giờ từ datetime-local (YYYY-MM-DDTHH:mm)
+    const start = new Date(first.gio_chieu);
+    const pad = (n: number) => n.toString().padStart(2, "0");
+
+    const ngay_chieu = `${start.getFullYear()}-${pad(start.getMonth() + 1)}-${pad(start.getDate())}`;
+    const gio_bat_dau = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+
+    const payload = {
+      phim_id: Number(phimId),
+      phong_id: Number(first.phong_id),
+      phien_ban_id: first.phien_ban_id ? Number(first.phien_ban_id) : null,
+      ngay_chieu,
+      gio_bat_dau,
+      gia_ve_thuong: Number(first.gia_ve_thuong),
+      // Nếu backend nhận thêm thì mở các dòng dưới
+      // gio_ket_thuc_toi_da: "03:00",
+      // khoang_nghi: 0,
+      // gia_ve_vip: Number(first.gia_ve_vip),
+    };
+
+    setLoading(true);
+    try {
+      const res = await createLichChieuAutoOneDay(payload);
+
+      Swal.fire(
+        "🎉 Thành công",
+        res.message || "Đã tự động tạo lịch chiếu cho 1 ngày!",
+        "success"
+      ).then(() => {
+        navigate("/admin/lich-chieu");
+      });
+    } catch (err: any) {
+      Swal.fire(
+        "Lỗi",
+        err.response?.data?.error || "Không thể tự động tạo lịch chiếu",
+        "error"
+      );
     } finally {
       setLoading(false);
     }
@@ -231,7 +296,12 @@ export default function CreateLichChieu() {
 
                   <div className="col-md-3">
                     <label>⏰ Giờ kết thúc (tự động)</label>
-                    <input type="datetime-local" className="form-control" value={item.gio_ket_thuc || ""} disabled />
+                    <input
+                      type="datetime-local"
+                      className="form-control"
+                      value={item.gio_ket_thuc || ""}
+                      disabled
+                    />
                   </div>
 
                   <div className="col-md-3">
@@ -265,9 +335,24 @@ export default function CreateLichChieu() {
 
             {/* Nút thêm và lưu */}
             <div className="text-end">
-              <button type="button" className="btn btn-outline-success me-2" onClick={addForm}>
+              <button
+                type="button"
+                className="btn btn-outline-success me-2"
+                onClick={addForm}
+              >
                 ➕ Thêm lịch chiếu
               </button>
+
+              {/* 🆕 Nút tự động thêm lịch cho 1 ngày */}
+              <button
+                type="button"
+                className="btn btn-warning me-2"
+                onClick={handleAutoOneDay}
+                disabled={loading}
+              >
+                ⚙️ Thêm tự động cả ngày
+              </button>
+
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? "⏳ Đang lưu..." : "💾 Lưu tất cả"}
               </button>
