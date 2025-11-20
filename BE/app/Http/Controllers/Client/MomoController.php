@@ -12,10 +12,17 @@ use App\Models\DatVeChiTiet;
 use App\Models\PhuongThucThanhToan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+
 // === QR CODE (PHẦN MỚI)
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Storage;
+=======
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Support\Facades\Storage;
+
+
 
 class MomoController extends Controller
 {
@@ -63,7 +70,9 @@ class MomoController extends Controller
         $secretKey   = config('services.momo.secret_key');
         $endpoint    = config('services.momo.endpoint'); // https://test-payment.momo.vn/v2/gateway/api/create
 
-       $orderId = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+
+        $orderId = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
+
         $requestId   = uniqid();
         $amount      = (string)intval($req->amount);
         $orderInfo   = "Thanh toan dat ve #{$datVe->id}";
@@ -155,6 +164,23 @@ class MomoController extends Controller
         return response()->json(['message' => 'ignore']);
     }
 
+
+    $tt = ThanhToan::find($ttId);
+
+    // Không tìm thấy thanh toán
+    if (!$tt) {
+        return response()->json(['message' => 'ignore']);
+    }
+
+    // Lấy đơn vé tương ứng
+    $datVe = DatVe::with('datVeChiTiet', 'phim', 'phong')->find($tt->dat_ve_id);
+
+    if (!$datVe) {
+        return response()->json(['message' => 'ignore']);
+    }
+
+
+
     $tt = ThanhToan::find($ttId);
 
     // Không tìm thấy thanh toán
@@ -214,6 +240,7 @@ class MomoController extends Controller
         // ====== Tạo QR Code ======
         $gheIds = $datVe->datVeChiTiet->pluck('ghe_id')->toArray();
 
+
         $qrContent =
             "Mã vé: {$datVe->id}\n" .
             "Phim: {$datVe->phim->ten_phim}\n" .
@@ -231,6 +258,26 @@ class MomoController extends Controller
 
         Storage::disk('public')->put($filePath, $qrImage->getString());
 
+
+
+        $qrContent =
+            "Mã vé: {$datVe->id}\n" .
+            "Phim: {$datVe->phim->ten_phim}\n" .
+            "Phòng: {$datVe->phong->ten_phong}\n" .
+            "Ghế: " . implode(', ', $gheIds) . "\n" .
+            "Suất chiếu: {$datVe->gio_bat_dau}\n" .
+            "Mã giao dịch: {$tt->ma_giao_dich}";
+
+        $qr = QrCode::create($qrContent)->setSize(300)->setMargin(10);
+        $writer = new PngWriter();
+        $qrImage = $writer->write($qr);
+
+        $fileName = 'qr_' . $datVe->id . '.png';
+        $filePath = 'qr/' . $fileName;
+
+        Storage::disk('public')->put($filePath, $qrImage->getString());
+
+
         if (!Storage::disk('public')->exists($filePath)) {
             throw new \Exception("Không thể lưu QR code ($filePath)");
         }
@@ -239,7 +286,11 @@ class MomoController extends Controller
         $tt->update(['qr_code' => $filePath]);
 
         DB::commit();
+
         return response()->json(['message' => 'payment_success']);
+=======
+return response()->json(['message' => 'payment_success']);
+
 
     } catch (\Exception $e) {
         DB::rollBack();

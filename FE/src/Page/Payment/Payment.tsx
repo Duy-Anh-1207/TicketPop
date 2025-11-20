@@ -127,12 +127,12 @@ const Payment = () => {
               <span className="label">SĐT:</span>
               <span className="value">{soDienThoai}</span>
             </div>
-            {datVe.nguoi_dung && (
+            {/* {datVe.nguoi_dung && (
               <div className="info-item">
                 <span className="label">Tài khoản:</span>
                 <span className="value highlight">Thành viên</span>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 

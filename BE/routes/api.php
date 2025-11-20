@@ -96,6 +96,7 @@ Route::middleware('auth:sanctum')->post('/dat-ve', [DatVeController::class, 'dat
 Route::middleware('auth:sanctum')->get('/dat-ve', [DatVeController::class, 'danhSachDatVe']);
 Route::middleware('auth:sanctum')->get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
 Route::middleware('auth:sanctum')->get('/dat-ve/{id}/in-ve', [DatVeController::class, 'inVe']);
+Route::middleware('auth:sanctum')->delete('/dat-ve/{id}', [DatVeController::class, 'xoaDatVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
 
