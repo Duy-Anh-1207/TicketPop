@@ -297,7 +297,7 @@ const Booking = () => {
               ))}
           </div>
         )}
-        {/* --- Chú thích ghế --- */}
+        {/* --- Chú thích ghế ---
         <div className="seat-legend">
           <div className="legend-item">
             <div className="legend-box thuong"></div>
