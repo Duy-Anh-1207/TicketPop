@@ -103,7 +103,7 @@ const Payment = () => {
     <div className="payment-container">
       <div className="payment-grid">
         <div className="left-column">
-          <div className="movie-poster-wrapper">
+          {/* <div className="movie-poster-wrapper">
             <img
               src={
                 datVe.lich_chieu?.phim?.anh_poster || "/placeholder-movie.jpg"
@@ -111,7 +111,7 @@ const Payment = () => {
               alt={datVe.lich_chieu?.phim?.ten_phim}
               className="movie-poster"
             />
-          </div>
+          </div> */}
 
           <div className="customer-info">
             <h3>Thông tin khách hàng</h3>

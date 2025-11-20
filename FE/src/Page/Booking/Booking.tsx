@@ -64,11 +64,13 @@ const Booking = () => {
 
   // --- Lấy danh sách ghế ---
   // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---x
+  // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---x
   useEffect(() => {
     if (!lichChieuId) return;
 
     const fetchGhe = async () => {
       setLoadingGhe(true);
+
 
       try {
         const res = await axios.get(
@@ -76,6 +78,7 @@ const Booking = () => {
         );
 
         const gheFormatted = res.data.data;
+        // const gheFormatted = res.data.data;
 
         setGheList(gheFormatted);
       } catch (error) {
@@ -186,7 +189,6 @@ const Booking = () => {
       const createdVe = res?.dat_ve ?? res?.data ?? null;
 
       if (res?.message && createdVe?.id) {
-        message.success(res.message);
 
         navigate("/booking/payment", {
           state: { datVeId: createdVe.id, tongTien: totalPrice },
@@ -317,6 +319,28 @@ const Booking = () => {
             <span>Ghế đã đặt</span>
           </div>
         </div>
+        {/* --- Chú thích ghế --- */}
+        <div className="seat-legend">
+          <div className="legend-item">
+            <div className="legend-box thuong"></div>
+            <span>Ghế Thường</span>
+          </div>
+
+          <div className="legend-item">
+            <div className="legend-box vip"></div>
+            <span>Ghế VIP</span>
+          </div>
+
+          <div className="legend-item">
+            <div className="legend-box selected"></div>
+            <span>Ghế Đang Chọn</span>
+          </div>
+
+          <div className="legend-item">
+            <div className="legend-box booked"></div>
+            <span>Ghế đã đặt</span>
+          </div>
+        </div>
       </div>
 
       {/* --- Đồ ăn --- */}
@@ -332,11 +356,22 @@ const Booking = () => {
                 0;
               return (
                 <div key={food.id} className="food-item">
-                  <div className="food-image-placeholder">
-                    <span role="img" aria-label="food">
-                      🍿
-                    </span>
+                  <div className="food-image">
+                    {food.image ? (
+                      <img
+                        src={
+                          food.image.startsWith("http")
+                            ? food.image
+                            : `${import.meta.env.VITE_API_BASE_URL}${food.image}`
+                        }
+                        alt={food.ten_do_an}
+                        className="food-img"
+                      />
+                    ) : (
+                      <span className="food-icon" role="img" aria-label="food">🍿</span>
+                    )}
                   </div>
+
                   <div className="food-info">
                     <p className="food-name">{food.ten_do_an}</p>
                     <p className="food-price">
