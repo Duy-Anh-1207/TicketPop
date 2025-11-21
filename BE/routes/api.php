@@ -135,7 +135,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResource('ghe', GheController::class);
 Route::put('ghe/{id}/toggle-status', [GheController::class, 'toggleStatus']);
 
-
 Route::prefix('check-ghe')->group(function () {
 
     // Lấy toàn bộ check_ghe theo ID ghế

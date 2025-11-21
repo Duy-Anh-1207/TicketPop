@@ -248,7 +248,7 @@ class DatVeController extends Controller
         }
     }
 
-    public function chiTietVe($maGiaoDich)
+    public function chiTietVe($id)
     {
         try {
             $datVe = DatVe::with([
@@ -258,10 +258,11 @@ class DatVeController extends Controller
                 'lichChieu.phong:id,ten_phong',
                 'nguoiDung:id,ten,email,so_dien_thoai',
                 'donDoAn.doAn:id,ten_do_an,image'
-            ])->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
-                $q->where('ma_giao_dich', $maGiaoDich);
-            })
-                ->first();
+            ])->where('id', $id)->first();
+                // ->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+                //     $q->where('ma_giao_dich', $maGiaoDich);
+                // })
+                // ->first();
 
             if (!$datVe) {
                 return response()->json([
@@ -351,6 +352,39 @@ class DatVeController extends Controller
             return response()->json([
                 'message' => 'Xoá đặt vé thất bại.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function capNhatTrangThai($id)
+    {
+        try {
+            $thanhToan = ThanhToan::find($id);
+
+            if (!$thanhToan) {
+                return response()->json([
+                    'message' => 'Không tìm thấy đơn thanh toán này.'
+                ], 404);
+            }
+
+            // Kiểm tra trạng thái hiện tại
+            if ($thanhToan->da_quet) {
+                return response()->json([
+                    'message' => 'Đơn này đã được quét/đã in vé.'
+                ], 400);
+            }
+
+            // Cập nhật trạng thái
+            $thanhToan->da_quet = 1; // 1 = đã in/quét
+            $thanhToan->save();
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thành công.',
+                'data' => $thanhToan
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thất bại.',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
