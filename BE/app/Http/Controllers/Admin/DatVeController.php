@@ -190,7 +190,6 @@ class DatVeController extends Controller
                     'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
                     'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
                 ];
-
             });
 
         return response()->json([
@@ -201,7 +200,7 @@ class DatVeController extends Controller
 
 
 
-    public function inVe($id)
+    public function inVe($maGiaoDich)
     {
         try {
             $datVe = DatVe::with([
@@ -210,11 +209,14 @@ class DatVeController extends Controller
                 'lichChieu.phim:id,ten_phim,thoi_luong,anh_poster',
                 'lichChieu.phong:id,ten_phong',
                 'chiTiet.ghe:id,so_ghe,loai_ghe_id',
-            ])->find($id);
+            ])->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+                $q->where('ma_giao_dich', $maGiaoDich);
+            })
+                ->first();
 
             if (!$datVe) {
                 return response()->json([
-                    'message' => 'Không tìm thấy vé.'
+                    'message' => 'Không tìm thấy vé với mã giao dịch này.'
                 ], 404);
             }
             return response()->json([
@@ -225,7 +227,6 @@ class DatVeController extends Controller
                     'so_dien_thoai' => $datVe->nguoiDung->so_dien_thoai ?? '',
                     'phim' => $datVe->lichChieu->phim->ten_phim ?? '',
                     'thoi_luong' => $datVe->lichChieu->phim->thoi_luong ?? '',
-                    // 'rap' => $datVe->lichChieu->phong->rap->ten_rap ?? '',
                     'phong' => $datVe->lichChieu->phong->ten_phong ?? '',
                     'gio_chieu' => $datVe->lichChieu->gio_chieu->format('H:i d/m/Y'),
                     'gio_ket_thuc' => $datVe->lichChieu->gio_ket_thuc->format('H:i d/m/Y'),
@@ -247,7 +248,7 @@ class DatVeController extends Controller
         }
     }
 
-    public function chiTietVe($id)
+    public function chiTietVe($maGiaoDich)
     {
         try {
             $datVe = DatVe::with([
@@ -257,11 +258,14 @@ class DatVeController extends Controller
                 'lichChieu.phong:id,ten_phong',
                 'nguoiDung:id,ten,email,so_dien_thoai',
                 'donDoAn.doAn:id,ten_do_an,image'
-            ])->find($id);
+            ])->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+                $q->where('ma_giao_dich', $maGiaoDich);
+            })
+                ->first();
 
             if (!$datVe) {
                 return response()->json([
-                    'message' => 'Không tìm thấy vé này!',
+                    'message' => 'Không tìm thấy vé với mã giao dịch này!',
                 ], 404);
             }
 
@@ -293,62 +297,61 @@ class DatVeController extends Controller
     }
 
     public function xoaDatVe($id)
-{
-    try {
-        DB::beginTransaction();
+    {
+        try {
+            DB::beginTransaction();
 
-        $datVe = DatVe::with(['chiTiet.ghe', 'donDoAn.doAn', 'thanhToan'])->find($id);
+            $datVe = DatVe::with(['chiTiet.ghe', 'donDoAn.doAn', 'thanhToan'])->find($id);
 
-        if (!$datVe) {
-            return response()->json([
-                'message' => 'Không tìm thấy đặt vé này.'
-            ], 404);
-        }
-
-        // Kiểm tra nếu đã thanh toán thì không được xoá
-        if ($datVe->thanhToan()->exists()) {
-            return response()->json([
-                'message' => 'Đặt vé đã thanh toán, không thể xoá.'
-            ], 400);
-        }
-
-        // ===== 1️⃣ Trả lại ghế =====
-        foreach ($datVe->chiTiet as $ct) {
-            if ($ct->ghe) {
-                $ct->ghe->update([
-                    'trang_thai' => 'trong',
-                    'nguoi_dung_id' => null,
-                    'expires_at' => null,
-                ]);
+            if (!$datVe) {
+                return response()->json([
+                    'message' => 'Không tìm thấy đặt vé này.'
+                ], 404);
             }
-        }
 
-        // ===== 2️⃣ Hoàn lại số lượng đồ ăn =====
-        foreach ($datVe->donDoAn as $dd) {
-            if ($dd->doAn) {
-                $dd->doAn->increment('so_luong_ton', $dd->so_luong);
+            // Kiểm tra nếu đã thanh toán thì không được xoá
+            if ($datVe->thanhToan()->exists()) {
+                return response()->json([
+                    'message' => 'Đặt vé đã thanh toán, không thể xoá.'
+                ], 400);
             }
+
+            // ===== 1️⃣ Trả lại ghế =====
+            foreach ($datVe->chiTiet as $ct) {
+                if ($ct->ghe) {
+                    $ct->ghe->update([
+                        'trang_thai' => 'trong',
+                        'nguoi_dung_id' => null,
+                        'expires_at' => null,
+                    ]);
+                }
+            }
+
+            // ===== 2️⃣ Hoàn lại số lượng đồ ăn =====
+            foreach ($datVe->donDoAn as $dd) {
+                if ($dd->doAn) {
+                    $dd->doAn->increment('so_luong_ton', $dd->so_luong);
+                }
+            }
+
+            // ===== 3️⃣ Xoá chi tiết ghế và đồ ăn =====
+            $datVe->chiTiet()->delete();
+            $datVe->donDoAn()->delete();
+
+            // ===== 4️⃣ Xoá bản ghi DatVe =====
+            $datVe->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Đặt vé đã được xoá, ghế và đồ ăn đã được hoàn lại.'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Xoá đặt vé thất bại.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // ===== 3️⃣ Xoá chi tiết ghế và đồ ăn =====
-        $datVe->chiTiet()->delete();
-        $datVe->donDoAn()->delete();
-
-        // ===== 4️⃣ Xoá bản ghi DatVe =====
-        $datVe->delete();
-
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Đặt vé đã được xoá, ghế và đồ ăn đã được hoàn lại.'
-        ]);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        return response()->json([
-            'message' => 'Xoá đặt vé thất bại.',
-            'error' => $e->getMessage()
-        ], 500);
     }
-}
-
 }
