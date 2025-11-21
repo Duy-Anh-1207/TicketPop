@@ -133,6 +133,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 // GHẾ ĐỂ ADMIN QUẢN LÝ
 Route::apiResource('ghe', GheController::class);
+Route::put('ghe/{id}/toggle-status', [GheController::class, 'toggleStatus']);
+
 
 Route::prefix('check-ghe')->group(function () {
 

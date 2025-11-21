@@ -17,10 +17,6 @@ use Illuminate\Support\Str;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Support\Facades\Storage;
-=======
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\Writer\PngWriter;
-use Illuminate\Support\Facades\Storage;
 
 
 
@@ -288,9 +284,6 @@ class MomoController extends Controller
         DB::commit();
 
         return response()->json(['message' => 'payment_success']);
-=======
-return response()->json(['message' => 'payment_success']);
-
 
     } catch (\Exception $e) {
         DB::rollBack();
