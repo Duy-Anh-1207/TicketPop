@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Support\Facades\Log; // thêm vào đầu file nếu muốn log debug
+use Illuminate\Support\Facades\Log;
 use App\Models\DoAn;
 use App\Http\Controllers\Controller;
 use App\Jobs\XoaDonHang;

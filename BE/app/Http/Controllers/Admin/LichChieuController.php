@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Exception;
+
 class LichChieuController extends Controller
 {
     // Lấy danh sách lịch chiếu
@@ -167,166 +168,166 @@ class LichChieuController extends Controller
         }
     }
     // ✅ Thêm lịch chiếu tự động cho 1 ngày trong 1 phòng
-public function storeAutoOneDay(Request $request)
-{
-    $request->validate([
-        'phim_id' => 'required|integer|exists:phim,id',
-        'phong_id' => [
-            'required',
-            'integer',
-            Rule::exists('phong_chieu', 'id')->where('trang_thai', 1),
-        ],
-        'phien_ban_id' => 'nullable',
+    public function storeAutoOneDay(Request $request)
+    {
+        $request->validate([
+            'phim_id' => 'required|integer|exists:phim,id',
+            'phong_id' => [
+                'required',
+                'integer',
+                Rule::exists('phong_chieu', 'id')->where('trang_thai', 1),
+            ],
+            'phien_ban_id' => 'nullable',
 
-        'ngay_chieu' => 'required|date_format:Y-m-d',   // ví dụ: 2025-11-21
-        'gio_bat_dau' => 'required|date_format:H:i',    // ví dụ: 08:00
+            'ngay_chieu' => 'required|date_format:Y-m-d',   // ví dụ: 2025-11-21
+            'gio_bat_dau' => 'required|date_format:H:i',    // ví dụ: 08:00
 
-        'gia_ve_thuong' => 'required|numeric|min:0',
-        'gia_ve_vip' => 'nullable|numeric|min:0',
+            'gia_ve_thuong' => 'required|numeric|min:0',
+            'gia_ve_vip' => 'nullable|numeric|min:0',
 
-        // tùy chọn: giờ kết thúc tối đa, mặc định 03:00 sáng hôm sau
-        'gio_ket_thuc_toi_da' => 'nullable|date_format:H:i',
-        // tùy chọn: phút nghỉ thêm giữa 2 suất, mặc định 0
-        'khoang_nghi' => 'nullable|integer|min:0',
-    ]);
+            // tùy chọn: giờ kết thúc tối đa, mặc định 03:00 sáng hôm sau
+            'gio_ket_thuc_toi_da' => 'nullable|date_format:H:i',
+            // tùy chọn: phút nghỉ thêm giữa 2 suất, mặc định 0
+            'khoang_nghi' => 'nullable|integer|min:0',
+        ]);
 
-    DB::beginTransaction();
+        DB::beginTransaction();
 
-    try {
-        $phim = Phim::findOrFail($request->phim_id);
+        try {
+            $phim = Phim::findOrFail($request->phim_id);
 
-        if (!$phim->thoi_luong) {
-            throw new Exception('Phim chưa cấu hình thời lượng, không thể tạo lịch tự động.');
-        }
-
-        $phongId   = $request->phong_id;
-        $phienBanId = $request->phien_ban_id ?: null;
-
-        // Nếu không truyền phien_ban_id thì lấy giống logic store()
-        if (!$phienBanId) {
-            $phienBanIds = $phim->phien_ban_id;
-
-            if (is_string($phienBanIds)) {
-                $decoded = json_decode($phienBanIds, true);
-                $phienBanIds = is_array($decoded) ? $decoded : explode(',', $phienBanIds);
+            if (!$phim->thoi_luong) {
+                throw new Exception('Phim chưa cấu hình thời lượng, không thể tạo lịch tự động.');
             }
 
-            $phienBanId = is_array($phienBanIds) && count($phienBanIds) > 0 ? $phienBanIds[0] : null;
-        }
+            $phongId   = $request->phong_id;
+            $phienBanId = $request->phien_ban_id ?: null;
 
-        $ngayChieu = $request->ngay_chieu;          // Y-m-d
-        $gioBatDau = $request->gio_bat_dau;        // H:i
+            // Nếu không truyền phien_ban_id thì lấy giống logic store()
+            if (!$phienBanId) {
+                $phienBanIds = $phim->phien_ban_id;
 
-        $baseStart = Carbon::createFromFormat('Y-m-d H:i', $ngayChieu . ' ' . $gioBatDau, 'Asia/Ho_Chi_Minh');
+                if (is_string($phienBanIds)) {
+                    $decoded = json_decode($phienBanIds, true);
+                    $phienBanIds = is_array($decoded) ? $decoded : explode(',', $phienBanIds);
+                }
 
-        // không cho tạo lịch tự động bắt đầu trong quá khứ
-        if ($baseStart->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
-            throw new Exception('Giờ bắt đầu đang nằm trong quá khứ, vui lòng chọn lại.');
-        }
-
-        // Giới hạn tối đa: mặc định 03:00 sáng hôm sau
-        $gioKetThucToiDa = $request->gio_ket_thuc_toi_da ?: '03:00';
-        $limitEnd = Carbon::createFromFormat('Y-m-d H:i', $ngayChieu . ' ' . $gioKetThucToiDa, 'Asia/Ho_Chi_Minh')
-            ->addDay(); // 👉 03:00 ngày hôm sau
-
-        $khoangNghi = $request->khoang_nghi ?? 0;
-
-        $giaVeThuong = $request->gia_ve_thuong;
-        $giaVeVip    = $request->gia_ve_vip ?: $giaVeThuong * 1.3;
-
-        $created = [];
-
-        // Thời điểm bắt đầu suất đầu tiên
-        $currentStart = $baseStart;
-
-        while (true) {
-            $gioChieu   = $currentStart->copy();
-            $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15); // +15p dọn phòng
-
-            // nếu suất này kết thúc sau giới hạn thì dừng
-            if ($gioKetThuc->gt($limitEnd)) {
-                break;
+                $phienBanId = is_array($phienBanIds) && count($phienBanIds) > 0 ? $phienBanIds[0] : null;
             }
 
-            // 🚫 Check trùng với lịch đã có trong DB (cùng phòng)
-            $trungLich = LichChieu::where('phong_id', $phongId)
-                ->where(function ($query) use ($gioChieu, $gioKetThuc) {
-                    $query->where('gio_chieu', '<', $gioKetThuc)
-                        ->where('gio_ket_thuc', '>', $gioChieu);
-                })
-                ->exists();
+            $ngayChieu = $request->ngay_chieu;          // Y-m-d
+            $gioBatDau = $request->gio_bat_dau;        // H:i
 
-            if ($trungLich) {
-                throw new Exception(
-                    "Phòng ID {$phongId} đã có lịch chiếu trùng trong khoảng " .
-                    $gioChieu->format('d/m/Y H:i') . " - " . $gioKetThuc->format('d/m/Y H:i') .
-                    ". Không thể tạo lịch tự động ngoài khoảng 8h Sáng đến 3h sáng hôm sau."
-                );
+            $baseStart = Carbon::createFromFormat('Y-m-d H:i', $ngayChieu . ' ' . $gioBatDau, 'Asia/Ho_Chi_Minh');
+
+            // không cho tạo lịch tự động bắt đầu trong quá khứ
+            if ($baseStart->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
+                throw new Exception('Giờ bắt đầu đang nằm trong quá khứ, vui lòng chọn lại.');
             }
 
-            // ✅ Tạo lịch chiếu
-            $lichChieu = LichChieu::create([
-                'phim_id'      => $phim->id,
-                'phong_id'     => $phongId,
-                'phien_ban_id' => $phienBanId,
-                'gio_chieu'    => $gioChieu,
-                'gio_ket_thuc' => $gioKetThuc,
-            ]);
+            // Giới hạn tối đa: mặc định 03:00 sáng hôm sau
+            $gioKetThucToiDa = $request->gio_ket_thuc_toi_da ?: '03:00';
+            $limitEnd = Carbon::createFromFormat('Y-m-d H:i', $ngayChieu . ' ' . $gioKetThucToiDa, 'Asia/Ho_Chi_Minh')
+                ->addDay(); // 👉 03:00 ngày hôm sau
 
-            // ✅ Tạo giá vé (giống store)
-            GiaVe::create([
-                'lich_chieu_id' => $lichChieu->id,
-                'loai_ghe_id'   => 1,
-                'gia_ve'        => $giaVeThuong,
-            ]);
-            GiaVe::create([
-                'lich_chieu_id' => $lichChieu->id,
-                'loai_ghe_id'   => 2,
-                'gia_ve'        => $giaVeVip,
-            ]);
+            $khoangNghi = $request->khoang_nghi ?? 0;
 
-            // ✅ Tạo check_ghe cho tất cả ghế của phòng này
-            $gheList = Ghe::where('phong_id', $phongId)->get(['id']);
-            if ($gheList->isNotEmpty()) {
-                $checkGheData = $gheList->map(function ($ghe) use ($lichChieu) {
-                    return [
-                        'lich_chieu_id' => $lichChieu->id,
-                        'nguoi_dung_id' => null,
-                        'ghe_id'        => $ghe->id,
-                        'trang_thai'    => 'trong',
-                        'created_at'    => now(),
-                        'updated_at'    => now(),
-                    ];
-                })->toArray();
+            $giaVeThuong = $request->gia_ve_thuong;
+            $giaVeVip    = $request->gia_ve_vip ?: $giaVeThuong * 1.3;
 
-                DB::table('check_ghe')->insert($checkGheData);
+            $created = [];
+
+            // Thời điểm bắt đầu suất đầu tiên
+            $currentStart = $baseStart;
+
+            while (true) {
+                $gioChieu   = $currentStart->copy();
+                $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15); // +15p dọn phòng
+
+                // nếu suất này kết thúc sau giới hạn thì dừng
+                if ($gioKetThuc->gt($limitEnd)) {
+                    break;
+                }
+
+                // 🚫 Check trùng với lịch đã có trong DB (cùng phòng)
+                $trungLich = LichChieu::where('phong_id', $phongId)
+                    ->where(function ($query) use ($gioChieu, $gioKetThuc) {
+                        $query->where('gio_chieu', '<', $gioKetThuc)
+                            ->where('gio_ket_thuc', '>', $gioChieu);
+                    })
+                    ->exists();
+
+                if ($trungLich) {
+                    throw new Exception(
+                        "Phòng ID {$phongId} đã có lịch chiếu trùng trong khoảng " .
+                            $gioChieu->format('d/m/Y H:i') . " - " . $gioKetThuc->format('d/m/Y H:i') .
+                            ". Không thể tạo lịch tự động ngoài khoảng 8h Sáng đến 3h sáng hôm sau."
+                    );
+                }
+
+                // ✅ Tạo lịch chiếu
+                $lichChieu = LichChieu::create([
+                    'phim_id'      => $phim->id,
+                    'phong_id'     => $phongId,
+                    'phien_ban_id' => $phienBanId,
+                    'gio_chieu'    => $gioChieu,
+                    'gio_ket_thuc' => $gioKetThuc,
+                ]);
+
+                // ✅ Tạo giá vé (giống store)
+                GiaVe::create([
+                    'lich_chieu_id' => $lichChieu->id,
+                    'loai_ghe_id'   => 1,
+                    'gia_ve'        => $giaVeThuong,
+                ]);
+                GiaVe::create([
+                    'lich_chieu_id' => $lichChieu->id,
+                    'loai_ghe_id'   => 2,
+                    'gia_ve'        => $giaVeVip,
+                ]);
+
+                // ✅ Tạo check_ghe cho tất cả ghế của phòng này
+                $gheList = Ghe::where('phong_id', $phongId)->get(['id']);
+                if ($gheList->isNotEmpty()) {
+                    $checkGheData = $gheList->map(function ($ghe) use ($lichChieu) {
+                        return [
+                            'lich_chieu_id' => $lichChieu->id,
+                            'nguoi_dung_id' => null,
+                            'ghe_id'        => $ghe->id,
+                            'trang_thai'    => 'trong',
+                            'created_at'    => now(),
+                            'updated_at'    => now(),
+                        ];
+                    })->toArray();
+
+                    DB::table('check_ghe')->insert($checkGheData);
+                }
+
+                $created[] = $lichChieu;
+
+                // 👉 Cập nhật giờ bắt đầu cho suất tiếp theo
+                $currentStart = $gioKetThuc->copy()->addMinutes($khoangNghi);
             }
 
-            $created[] = $lichChieu;
+            if (empty($created)) {
+                throw new Exception('Không tạo được suất chiếu nào trong khoảng thời gian yêu cầu.');
+            }
 
-            // 👉 Cập nhật giờ bắt đầu cho suất tiếp theo
-            $currentStart = $gioKetThuc->copy()->addMinutes($khoangNghi);
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Tạo lịch chiếu tự động cho 1 ngày thành công',
+                'so_suat' => count($created),
+                'data'    => $created,
+            ], 201);
+        } catch (Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 422);
         }
-
-        if (empty($created)) {
-            throw new Exception('Không tạo được suất chiếu nào trong khoảng thời gian yêu cầu.');
-        }
-
-        DB::commit();
-
-        return response()->json([
-            'message' => 'Tạo lịch chiếu tự động cho 1 ngày thành công',
-            'so_suat' => count($created),
-            'data'    => $created,
-        ], 201);
-    } catch (Exception $e) {
-        DB::rollBack();
-
-        return response()->json([
-            'error' => $e->getMessage(),
-        ], 422);
     }
-}
 
     // Lấy chi tiết lịch chiếu
     public function show($id)
@@ -600,5 +601,5 @@ public function storeAutoOneDay(Request $request)
                 'error' => $e->getMessage(),
             ], 500);
         }
-    }   
+    }
 }

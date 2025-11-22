@@ -214,7 +214,7 @@ Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
 Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
 Route::post('/thanhtoan/momo/rollback-ghe', [MomoController::class, 'huyGhe']);
 Route::prefix('vnpay')->group(function () {
-    Route::post('/create', [VnpayController::class, 'create']);   // FE gọi để tạo URL thanh toán
-    Route::get('/return', [VnpayController::class, 'return']);    // redirect sau khi user thanh toán
-    Route::get('/ipn',    [VnpayController::class, 'ipn']);       // IPN server-to-server
+    Route::post('/create', [VnpayController::class, 'create']);  
+    Route::get('/return', [VnpayController::class, 'return']);   
+    Route::get('/ipn',    [VnpayController::class, 'ipn']);     
 });
