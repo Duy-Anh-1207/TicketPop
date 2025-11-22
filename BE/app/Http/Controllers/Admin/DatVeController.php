@@ -167,15 +167,13 @@ class DatVeController extends Controller
 
     public function danhSachDatVe()
     {
-        $user = Auth::user() ?? NguoiDung::first();
-
         $thanhToan = ThanhToan::with([
             'datVe.lichChieu:id,gio_chieu,phim_id,phong_id',
             'datVe.lichChieu.phim:id,ten_phim',
             'datVe.lichChieu.phong:id,ten_phong',
             'phuongThucThanhToan:id,ten',
         ])
-            ->where('nguoi_dung_id', $user->id)
+
             ->orderByDesc('created_at')
             ->get()
             ->map(function ($item) {
@@ -259,10 +257,10 @@ class DatVeController extends Controller
                 'nguoiDung:id,ten,email,so_dien_thoai',
                 'donDoAn.doAn:id,ten_do_an,image'
             ])->where('id', $id)->first();
-                // ->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
-                //     $q->where('ma_giao_dich', $maGiaoDich);
-                // })
-                // ->first();
+            // ->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+            //     $q->where('ma_giao_dich', $maGiaoDich);
+            // })
+            // ->first();
 
             if (!$datVe) {
                 return response()->json([
