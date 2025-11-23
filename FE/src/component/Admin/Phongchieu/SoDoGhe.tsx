@@ -38,11 +38,10 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
     return acc;
   }, {} as Record<string, any[]>);
 
-  // Click đổi loại ghế
+  // Click đổi loại ghế (thường ↔ VIP)
   const handleToggleLoaiGhe = async (ghe: any) => {
     const newLoai = ghe.loai_ghe_id === 1 ? 2 : 1;
 
-    // Cập nhật UI tạm thời
     setData((prev) =>
       prev.map((item) =>
         item.id === ghe.id ? { ...item, loai_ghe_id: newLoai } : item
@@ -54,14 +53,14 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
       await axios.put(`http://127.0.0.1:8000/api/ghe/${ghe.id}`, {
         loai_ghe_id: newLoai,
       });
-      message.success(`Ghế ${ghe.so_ghe} đã đổi loại thành ${newLoai === 2 ? "VIP" : "Thường"}`);
-    } catch (error: any) {
-      console.error("Lỗi khi cập nhật ghế:", error);
-      message.error(
-        error.response?.data?.message || "Cập nhật ghế thất bại!"
+      message.success(
+        `Ghế ${ghe.so_ghe} đã đổi loại thành ${newLoai === 2 ? "VIP" : "Thường"
+        }`
       );
+    } catch (error: any) {
+      message.error("Cập nhật ghế thất bại!");
 
-      // Revert lại UI nếu lỗi
+      // rollback
       setData((prev) =>
         prev.map((item) =>
           item.id === ghe.id ? { ...item, loai_ghe_id: ghe.loai_ghe_id } : item
@@ -71,6 +70,50 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
       setUpdating(false);
     }
   };
+
+  // ALT + Click → chuyển ghế thành hỏng
+  const handleToggleBroken = async (ghe: any) => {
+    // UI update ngay lập tức
+    const newStatus = ghe.trang_thai === 0 ? 1 : 0; // 0 = HOẠT ĐỘNG, 1 = HỎNG
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === ghe.id ? { ...item, trang_thai: newStatus } : item
+      )
+    );
+
+    try {
+      setUpdating(true);
+
+      // Gọi API toggle trạng thái mới
+      const { data } = await axios.put(
+        `http://127.0.0.1:8000/api/ghe/${ghe.id}/toggle-status`
+      );
+
+      message.success(data.message || `Ghế ${ghe.so_ghe} đã cập nhật trạng thái`);
+
+      // Cập nhật lại trạng thái từ server để đồng bộ
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === ghe.id ? { ...item, trang_thai: data.data.trang_thai } : item
+        )
+      );
+    } catch (error: any) {
+      message.error(
+        error.response?.data?.message || "Lỗi cập nhật trạng thái ghế!"
+      );
+
+      // rollback về trạng thái cũ
+      setData((prev) =>
+        prev.map((item) =>
+          item.id === ghe.id ? { ...item, trang_thai: ghe.trang_thai } : item
+        )
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+
 
   return (
     <Modal
@@ -85,6 +128,12 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
         <p>Đang tải...</p>
       ) : (
         <div style={{ textAlign: "center" }}>
+          {updating && (
+            <p style={{ color: "red", marginBottom: 10 }}>
+              Đang cập nhật ghế...
+            </p>
+          )}
+
           {/* Sơ đồ ghế */}
           {Object.keys(hangList).map((hang) => (
             <div key={hang} style={{ marginBottom: 10 }}>
@@ -106,31 +155,83 @@ const SoDoGhe: React.FC<SoDoGheProps> = ({ open, onClose, id }) => {
                         width: 40,
                         height: 40,
                         lineHeight: "40px",
-                        border: ghe.loai_ghe_id === 2 ? "2px solid blue" : "1px solid #555",
+                        border:
+                          ghe.trang_thai === 0
+                            ? "1px solid gray"               // Hỏng
+                            : ghe.loai_ghe_id === 2
+                              ? "2px solid blue"             // VIP
+                              : "1px solid #555",            // Thường
                         borderRadius: 6,
-                        background: "#fff",
-                        color: "#000",
+                        background: ghe.trang_thai === 0 ? "gray" : "#fff",
+                        color: ghe.trang_thai === 0 ? "#fff" : "#000",
                         fontWeight: "bold",
                         cursor: updating ? "not-allowed" : "pointer",
                         opacity: updating ? 0.6 : 1,
                       }}
-                      onClick={() => !updating && handleToggleLoaiGhe(ghe)}
+                      onClick={(e) => {
+                        if (updating) return;
+
+                        if (e.altKey) {
+                          handleToggleBroken(ghe); // ALT = đổi hỏng / hoạt động
+                        } else {
+                          handleToggleLoaiGhe(ghe); // click thường = đổi loại ghế
+                        }
+                      }}
                     >
                       {ghe.so_ghe}
                     </div>
+
                   ))}
+
               </div>
             </div>
           ))}
+
           {/* Chú thích */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, marginBottom: 15 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: 20,
+              marginBottom: 15,
+            }}
+          >
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 20, height: 20, border: "1px solid #555", borderRadius: 4, background: "#fff" }}></div>
+              <div
+                style={{
+                  width: 20,
+                  height: 20,
+                  border: "1px solid #555",
+                  borderRadius: 4,
+                  background: "#fff",
+                }}
+              ></div>
               <span>Ghế thường</span>
             </div>
+
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <div style={{ width: 20, height: 20, border: "2px solid blue", borderRadius: 4, background: "#fff", }}></div>
+              <div
+                style={{
+                  width: 20,
+                  height: 20,
+                  border: "2px solid blue",
+                  borderRadius: 4,
+                  background: "#fff",
+                }}
+              ></div>
               <span>Ghế VIP</span>
+            </div>
+
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <div
+                style={{
+                  width: 20,
+                  height: 20,
+                  background: "gray",
+                  borderRadius: 4,
+                }}
+              ></div>
+              <span>Ghế hỏng (ALT + click)</span>
             </div>
           </div>
         </div>

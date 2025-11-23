@@ -14,6 +14,9 @@ interface SelectedSeat {
   so_ghe: string;
   loai_ghe_id: number;
   gia: number;
+  hang?: string | number;
+  cot?: number;
+  trang_thai?: string;
 }
 
 interface FoodQuantity {
@@ -63,14 +66,11 @@ const Booking = () => {
   }, [lichChieuId]);
 
   // --- Lấy danh sách ghế ---
-  // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---x
-  // --- Lấy danh sách ghế theo lịch chiếu (có trạng thái da_dat/trong) ---x
   useEffect(() => {
     if (!lichChieuId) return;
 
     const fetchGhe = async () => {
       setLoadingGhe(true);
-
 
       try {
         const res = await axios.get(
@@ -78,8 +78,6 @@ const Booking = () => {
         );
 
         const gheFormatted = res.data.data;
-        // const gheFormatted = res.data.data;
-
         setGheList(gheFormatted);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách ghế:", error);
@@ -92,7 +90,58 @@ const Booking = () => {
     fetchGhe();
   }, [lichChieuId]);
 
-  // --- Chọn ghế (chỉ ghế trống mới chọn được) ---
+  // Gom ghế theo hàng
+  const hangList = gheList.reduce((acc, ghe) => {
+    acc[ghe.hang] = acc[ghe.hang] || [];
+    acc[ghe.hang].push(ghe);
+    return acc;
+  }, {} as Record<string, any[]>);
+
+  // ===== Kiểm tra rule: không để 1 ghế trống giữa 2 ghế occupied (da_dat hoặc selected) =====
+  const canSelectWithoutCreatingIsolated = (gheToToggle: any) => {
+    const isAlreadySelected = selectedSeats.some((s) => s.id === gheToToggle.id);
+    // Nếu đang bỏ chọn thì luôn cho phép
+    if (isAlreadySelected) return true;
+
+    // Mô phỏng bộ selected sau khi chọn gheToToggle
+    const newSelectedIds = new Set(selectedSeats.map((s) => s.id));
+    newSelectedIds.add(gheToToggle.id);
+
+    // Duyệt từng hàng, kiểm tra pattern Occupied - Empty - Occupied
+    for (const hangKey of Object.keys(hangList)) {
+      const row = [...hangList[hangKey]].sort((a: any, b: any) => a.cot - b.cot);
+
+      // Tạo set các ghế occupied (da_dat hoặc selected trong simulation)
+      const occupied = new Set<number>();
+      row.forEach((seat: any) => {
+        if (seat.trang_thai === "da_dat") occupied.add(seat.id);
+      });
+      newSelectedIds.forEach((id) => occupied.add(id));
+
+      // Kiểm tra mọi vị trí trung gian nếu thỏa điều kiện: left occupied && right occupied && middle NOT occupied
+      for (let i = 1; i < row.length - 1; i++) {
+        const left = row[i - 1];
+        const mid = row[i];
+        const right = row[i + 1];
+
+        // mid must be an actual seat (not a gap). If mid is da_dat => it's occupied already and cannot be "empty"
+        const midOccupied = occupied.has(mid.id);
+        const leftOccupied = occupied.has(left.id);
+        const rightOccupied = occupied.has(right.id);
+
+        if (leftOccupied && rightOccupied && !midOccupied) {
+          // BUT: nếu mid là ghế không tồn tại (không xảy ra vì row list là ghế liên tiếp),
+          // hoặc mid đang là ghế bị block (ví dụ không bán) thì có thể khác, 
+          // ở đây ta coi mọi ghế trong row là khả dụng trừ khi trang_thai === 'da_dat'.
+          return false; // tạo ra ghế trống đơn lẻ => không cho chọn
+        }
+      }
+    }
+
+    return true; // không tạo pattern banned => cho chọn
+  };
+
+  // --- Chọn ghế ---
   const toggleSeat = (ghe: any) => {
     if (ghe.trang_thai === "da_dat") {
       message.warning(`Ghế ${ghe.so_ghe} đã được đặt!`);
@@ -100,12 +149,22 @@ const Booking = () => {
     }
 
     const isSelected = selectedSeats.some((s) => s.id === ghe.id);
+
+    // Nếu chọn (không phải bỏ chọn) thì kiểm tra rule cấm để trống 1 ghế giữa 2 occupied
+    if (!isSelected) {
+      if (!canSelectWithoutCreatingIsolated(ghe)) {
+        message.warning("Không thể chọn: sẽ tạo 1 ghế trống nằm giữa 2 ghế đã/đang đặt!");
+        return;
+      }
+    }
+
     if (isSelected) {
       setSelectedSeats(selectedSeats.filter((s) => s.id !== ghe.id));
     } else {
       const giaVe = giaVeList.find((gv) => gv.loai_ghe_id === ghe.loai_ghe_id);
       const gia = giaVe?.gia_ve ?? 0;
-      if (gia === 0) message.warning("Không tìm thấy giá vé cho loại ghế này!");
+      if (gia === 0)
+        message.warning("Không tìm thấy giá vé cho loại ghế này!");
       setSelectedSeats([...selectedSeats, { ...ghe, gia }]);
     }
   };
@@ -137,14 +196,7 @@ const Booking = () => {
   );
   const totalPrice = totalSeatPrice + totalFoodPrice;
 
-  // --- Gom ghế theo hàng ---
-  const hangList = gheList.reduce((acc, ghe) => {
-    acc[ghe.hang] = acc[ghe.hang] || [];
-    acc[ghe.hang].push(ghe);
-    return acc;
-  }, {} as Record<string, any[]>);
-
-  // --- Loading ---
+  // Loading
   if (isLoading || loadingGiaVe)
     return (
       <div className="booking-center">
@@ -166,7 +218,7 @@ const Booking = () => {
       </div>
     );
 
-  // --- Xử lý đặt vé ---
+  // --- Đặt vé ---
   const handleBooking = async () => {
     if (selectedSeats.length === 0) {
       message.warning("Vui lòng chọn ít nhất 1 ghế!");
@@ -184,12 +236,9 @@ const Booking = () => {
       };
 
       const res = await datVe(payload);
-      console.log("Đặt vé response:", res);
-
       const createdVe = res?.dat_ve ?? res?.data ?? null;
 
       if (res?.message && createdVe?.id) {
-
         navigate("/booking/payment", {
           state: { datVeId: createdVe.id, tongTien: totalPrice },
         });
@@ -208,7 +257,7 @@ const Booking = () => {
 
   return (
     <div className="booking-container">
-      {/* --- Thông tin phim --- */}
+      {/* Thông tin phim */}
       <div className="booking-content">
         {lichChieu.phim?.anh_poster && (
           <img
@@ -254,7 +303,7 @@ const Booking = () => {
         </div>
       </div>
 
-      {/* --- Ghế ngồi --- */}
+      {/* Ghế */}
       <div className="seat-container">
         <div className="screen"></div>
         {loadingGhe ? (
@@ -297,31 +346,9 @@ const Booking = () => {
               ))}
           </div>
         )}
-        {/* --- Chú thích ghế --- */}
-        <div className="seat-legend">
-          <div className="legend-item">
-            <div className="legend-box thuong"></div>
-            <span>Ghế Thường</span>
-          </div>
-
-          <div className="legend-item">
-            <div className="legend-box vip"></div>
-            <span>Ghế VIP</span>
-          </div>
-
-          <div className="legend-item">
-            <div className="legend-box selected"></div>
-            <span>Ghế Đang Chọn</span>
-          </div>
-
-          <div className="legend-item">
-            <div className="legend-box booked"></div>
-            <span>Ghế đã đặt</span>
-          </div>
-        </div>
       </div>
 
-      {/* --- Đồ ăn --- */}
+      {/* Đồ ăn */}
       <div className="food-container">
         <h3 className="food-title">Chọn đồ ăn</h3>
         {loadingFood ? (
@@ -346,7 +373,7 @@ const Booking = () => {
                         className="food-img"
                       />
                     ) : (
-                      <span className="food-icon" role="img" aria-label="food">🍿</span>
+                      <span className="food-icon">🍿</span>
                     )}
                   </div>
 
@@ -378,7 +405,7 @@ const Booking = () => {
         )}
       </div>
 
-      {/* --- Tóm tắt đặt vé --- */}
+      {/* Tóm tắt */}
       <div className="booking-summary">
         <div className="summary-content">
           <h3>Thông tin đặt vé</h3>

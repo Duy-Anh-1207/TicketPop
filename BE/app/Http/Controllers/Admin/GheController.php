@@ -64,6 +64,41 @@ class GheController extends Controller
         ]);
     }
 
+    /**
+     * Toggle trạng thái ghế (0 = Hoạt động, 1 = Hỏng)
+     */
+    public function toggleStatus($id)
+    {
+        $ghe = Ghe::with('phongChieu')->findOrFail($id);
+
+        // Kiểm tra trạng thái phòng chiếu
+        if ($ghe->phongChieu->trang_thai !== 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Phòng chiếu không cho phép thay đổi ghế!'
+            ], 403);
+        }
+
+        // Chỉ cho phép toggle giữa 0 và 1
+        if (!in_array($ghe->trang_thai, [0, 1])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ghế đang ở trạng thái không hợp lệ để toggle!'
+            ], 400);
+        }
+
+        // Đổi trạng thái
+        $ghe->trang_thai = $ghe->trang_thai === 1 ? 0 : 1;
+        $ghe->save();
+
+        return response()->json([
+            'success' => true,
+            'data' => $ghe,
+            'message' => 'Ghế ' . $ghe->so_ghe . ' đã chuyển sang trạng thái ' . ($ghe->trang_thai === 1 ? 'HỎNG' : 'HOẠT ĐỘNG')
+        ]);
+    }
+
+
 
     /**
      * Remove the specified resource from storage.

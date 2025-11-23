@@ -104,7 +104,6 @@ class CheckGheController extends Controller
         ]);
     }
 
-
     //CẬP NHẬT KHI OUT TRANG
     public function bulkUpdate(Request $request)
     {
@@ -136,7 +135,6 @@ class CheckGheController extends Controller
             ], 422);
         }
     }
-
 
     //ID LỊCH CHIẾU
     public function destroy(string $id)

@@ -13,14 +13,6 @@ use Illuminate\Support\Str;
 
 class VnpayController extends Controller
 {
-    /**
-     * Tạo URL thanh toán VNPay
-     * Body FE gửi:
-     *  - dat_ve_id
-     *  - amount
-     *  - return_url (optional, override config)
-     *  - ma_giam_gia_id (optional)
-     */
     public function create(Request $req)
     {
         $req->validate([
@@ -33,44 +25,43 @@ class VnpayController extends Controller
         $datVe = DatVe::with(['nguoiDung:id,ten,email'])->findOrFail($req->dat_ve_id);
         $user  = $datVe->nguoiDung;
 
+        // Lấy thông tin khách giống MoMo
         $email = $user->email ?? null;
-        $hoTen = $user->ten ?? null;
+        $hoTen = $user->ten   ?? null;
 
         if (!$hoTen || trim($hoTen) === '') {
             $hoTen = $email ? Str::before($email, '@') : 'Khách';
         }
 
-        // Lấy id phương thức thanh toán VNPAY (bạn nhớ có bản ghi nhà cung cấp = 'VNPAY')
+        // Lấy id phương thức thanh toán VNPAY
         $vnpId = PhuongThucThanhToan::where('nha_cung_cap', 'VNPAY')->value('id') ?? 2;
 
-        // Mã tham chiếu nội bộ
+        // Mã nội bộ tạm
         $localOrderCode = 'vnp_' . $datVe->id . '_' . now()->format('YmdHis') . '_' . Str::upper(Str::random(5));
 
-        // Lưu bản ghi thanh_toan
+        // Tạo bản ghi thanh_toan (giống MoMo)
         $tt = ThanhToan::create([
             'dat_ve_id'                 => $datVe->id,
             'nguoi_dung_id'             => $datVe->nguoi_dung_id,
             'phuong_thuc_thanh_toan_id' => $vnpId,
             'ma_giam_gia_id'            => $datVe->ma_giam_gia_id ?? null,
-            'tong_tien_goc'             => (int) $req->amount,
+            'tong_tien_goc'             => (int)$req->amount,
             'email'                     => $email,
             'ho_ten'                    => $hoTen,
-            'ma_giao_dich'              => $localOrderCode, // tạm, sẽ update sau khi IPN
+            'ma_giao_dich'              => $localOrderCode,
         ]);
 
-        // ================== CHUẨN BỊ DỮ LIỆU GỬI VNPAY ==================
+        // ============ CẤU HÌNH VNPAY ============
         $vnp_Url        = config('services.vnpay.payment_url');
-        $vnp_TmnCode    = config('services.vnpay.tmn_code');
-        $vnp_HashSecret = config('services.vnpay.hash_secret');
-        $vnp_ReturnUrl  = $req->return_url ?: config('services.vnpay.return_url');
-        $vnp_IpnUrl     = config('services.vnpay.ipn_url');
+        $vnp_TmnCode    = trim(config('services.vnpay.tmn_code'));
+        $vnp_HashSecret = trim(config('services.vnpay.hash_secret'));
+        $vnp_ReturnUrl  = config('services.vnpay.return_url');
 
-        // vnp_TxnRef (8-32 ký tự) – dùng id thanh_toan để lần lại
-        $vnp_TxnRef    = 'VNP' . $tt->id;
-        // VNPay yêu cầu amount * 100 (VND -> số nhỏ nhất)
-        $vnp_Amount    = (int)$req->amount * 100;
+        // Dùng id thanh_toan làm vnp_TxnRef (đơn giản cho IPN)
+        $vnp_TxnRef    = (string)$tt->id;
+        $vnp_Amount    = (int)$req->amount * 100; // VNPay yêu cầu *100
         $vnp_Locale    = 'vn';
-        $vnp_OrderInfo = "Thanh toan dat ve #{$datVe->id}";
+        $vnp_OrderInfo = "Thanh toan dat ve {$datVe->id}";
         $vnp_OrderType = 'other';
         $vnp_IpAddr    = $req->ip();
 
@@ -88,16 +79,70 @@ class VnpayController extends Controller
             "vnp_ReturnUrl"  => $vnp_ReturnUrl,
             "vnp_TxnRef"     => $vnp_TxnRef,
         ];
+        // Nếu muốn luôn dùng NCB test:
+        // $inputData['vnp_BankCode'] = 'NCB';
 
-        // Nếu bạn muốn truyền thêm ipn url qua tham số (tùy cấu hình cổng):
-        // $inputData['vnp_IpnUrl'] = $vnp_IpnUrl;
-
-        // Nếu muốn ép dùng 1 bank/1 method thì thêm:
-        // $inputData['vnp_BankCode'] = 'VNBANK'; // hoặc 'INTCARD' etc.
-
-        // Build query, sort theo key
+        // ====== KÝ CHỮ KÝ GIỐNG DEMO PHP CỦA VNPAY ======
         ksort($inputData);
+
         $query    = "";
+        $hashdata = "";
+        $i        = 0;
+
+        foreach ($inputData as $key => $value) {
+            if ($i == 1) {
+                $hashdata .= '&' . $key . "=" . $value;   // KHÔNG urlencode ở hashdata
+            } else {
+                $hashdata .= $key . "=" . $value;
+                $i = 1;
+            }
+
+            // query thì urlencode
+            $query .= urlencode($key) . "=" . urlencode($value) . '&';
+        }
+
+        $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+        $paymentUrl    = $vnp_Url . "?" . $query . "vnp_SecureHash=" . $vnpSecureHash;
+
+        // Lưu lại TxnRef để IPN/return đối chiếu
+        $tt->update(['ma_giao_dich' => $vnp_TxnRef]);
+
+        return response()->json([
+            'payment_url' => $paymentUrl,
+            'orderId'     => $vnp_TxnRef,
+        ]);
+    }
+
+    public function return(Request $req)
+    {
+        // Người dùng quay về FE – hiển thị “thành công/thất bại” (giống MoMo)
+        $success = $req->vnp_ResponseCode == '00';
+        $url     = config('services.vnpay.front_result_url', 'http://localhost:5173/ket-qua-thanh-toan');
+
+        return redirect()->to($url . '?status=' . ($success ? 'success' : 'fail'));
+    }
+
+    public function ipn(Request $req)
+    {
+        $vnp_HashSecret = trim(config('services.vnpay.hash_secret'));
+        $dataAll        = $req->all();
+
+        // Lấy hash VNPay gửi
+        $receivedHash = $dataAll['vnp_SecureHash'] ?? '';
+
+        // Lọc chỉ lấy các param bắt đầu bằng vnp_
+        $inputData = [];
+        foreach ($dataAll as $key => $value) {
+            if (substr($key, 0, 4) === 'vnp_') {
+                $inputData[$key] = $value;
+            }
+        }
+
+        unset($inputData['vnp_SecureHash'], $inputData['vnp_SecureHashType']);
+
+        ksort($inputData);
+
+        // Build lại chuỗi hashdata giống create()
         $hashdata = "";
         $i        = 0;
         foreach ($inputData as $key => $value) {
@@ -107,106 +152,62 @@ class VnpayController extends Controller
                 $hashdata .= $key . "=" . $value;
                 $i = 1;
             }
-            $query .= urlencode($key) . "=" . urlencode($value) . '&';
         }
 
-        $vnp_Url = $vnp_Url . "?" . $query;
-        if ($vnp_HashSecret) {
-            $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
-            $vnp_Url      .= 'vnp_SecureHash=' . $vnpSecureHash;
-        }
+        $secureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
 
-        // có thể lưu luôn vnp_TxnRef để đối chiếu
-        $tt->update([
-            'ma_giao_dich' => $vnp_TxnRef,
-        ]);
-
-        return response()->json([
-            'payment_url' => $vnp_Url,
-            'orderId'     => $vnp_TxnRef,
-        ]);
-    }
-
-    /**
-     * User thanh toán xong, VNPay redirect về URL này.
-     * Ở đây chỉ lo redirect sang FE + trạng thái, không xử lý DB (để IPN xử lý).
-     */
-    public function return(Request $req)
-    {
-        // VNPay trả về vnp_ResponseCode = '00' nếu thành công
-        $status = ($req->vnp_ResponseCode == '00') ? 'success' : 'fail';
-
-        $url = config('services.vnpay.front_result_url', 'http://localhost:5173/ket-qua-thanh-toan');
-        $message = $status === 'success'
-            ? 'Thanh toán VNPay thành công'
-            : 'Thanh toán VNPay thất bại (mã: ' . ($req->vnp_ResponseCode ?? 'N/A') . ')';
-
-        return redirect()->to($url . '?status=' . $status . '&message=' . urlencode($message));
-    }
-
-    /**
-     * IPN từ VNPay gọi (server-to-server) – xử lý chính xác trạng thái thanh toán.
-     * Bạn cấu hình URL này trong portal VNPay hoặc dùng vnp_IpnUrl nếu cổng hỗ trợ.
-     */
-    public function ipn(Request $req)
-    {
-        $inputData = $req->all();
-        $vnp_HashSecret = config('services.vnpay.hash_secret');
-
-        $vnp_SecureHash = $inputData['vnp_SecureHash'] ?? '';
-        unset($inputData['vnp_SecureHash'], $inputData['vnp_SecureHashType']);
-
-        // sort và build chuỗi hashdata
-        ksort($inputData);
-        $hashData = urldecode(http_build_query($inputData, '', '&'));
-
-        $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
-
-        if ($secureHash !== $vnp_SecureHash) {
+        if ($secureHash !== $receivedHash) {
             return response()->json([
                 "RspCode" => "97",
-                "Message" => "Chu ky khong hop le"
+                "Message" => "Sai chữ ký",
             ]);
         }
 
-        $vnp_TxnRef           = $inputData['vnp_TxnRef'] ?? null; // VNP + thanh_toan_id
-        $vnp_ResponseCode     = $inputData['vnp_ResponseCode'] ?? null;
-        $vnp_TransactionStatus= $inputData['vnp_TransactionStatus'] ?? null;
-        $vnp_TransactionNo    = $inputData['vnp_TransactionNo'] ?? null;
+        $vnp_TxnRef            = $inputData['vnp_TxnRef']            ?? null;
+        $vnp_ResponseCode      = $inputData['vnp_ResponseCode']      ?? null;
+        $vnp_TransactionStatus = $inputData['vnp_TransactionStatus'] ?? null;
+        $vnp_Amount            = (int)($inputData['vnp_Amount']      ?? 0);
+        $vnp_TransactionNo     = $inputData['vnp_TransactionNo']     ?? null;
 
         if (!$vnp_TxnRef) {
             return response()->json([
                 "RspCode" => "01",
-                "Message" => "Missing order"
+                "Message" => "Thiếu mã đơn hàng",
             ]);
         }
 
-        // Tìm thanh toán theo ma_giao_dich (đã lưu vnp_TxnRef)
-        $tt = ThanhToan::where('ma_giao_dich', $vnp_TxnRef)->first();
+        // Vì vnp_TxnRef = id trong bảng thanh_toan
+        $tt = ThanhToan::find((int)$vnp_TxnRef);
 
         if (!$tt) {
             return response()->json([
-                "RspCode" => "02",
-                "Message" => "Order not found"
+                "RspCode" => "01",
+                "Message" => "Không tìm thấy đơn hàng",
             ]);
         }
 
-        // Nếu đã xử lý rồi, trả OK luôn tránh xử lý lại
+        // Kiểm tra số tiền (VNPay gửi *100)
+        if ($vnp_Amount !== (int)$tt->tong_tien_goc * 100) {
+            return response()->json([
+                "RspCode" => "04",
+                "Message" => "Sai số tiền",
+            ]);
+        }
+
         if ($tt->trang_thai === 'da_thanh_toan') {
             return response()->json([
                 "RspCode" => "00",
-                "Message" => "Order already confirmed"
+                "Message" => "Đơn hàng đã được xác nhận",
             ]);
         }
 
-        // Kiểm tra thành công
-        if ($vnp_ResponseCode == '00' && $vnp_TransactionStatus == '00') {
+        // Thành công
+        if ($vnp_ResponseCode === '00' && $vnp_TransactionStatus === '00') {
             DB::beginTransaction();
             try {
-                // Cập nhật thanh toán
                 $tt->update([
-                    'ma_giao_dich' => $vnp_TransactionNo ?: $tt->ma_giao_dich,
                     'trang_thai'   => 'da_thanh_toan',
+                    'ma_giao_dich' => $vnp_TransactionNo ?: $tt->ma_giao_dich,
                 ]);
 
                 $datVe = DatVe::with('datVeChiTiet')->find($tt->dat_ve_id);
@@ -215,7 +216,6 @@ class VnpayController extends Controller
                     throw new \Exception("Không tìm thấy dat_ve để cập nhật ghế");
                 }
 
-                // Cập nhật trạng thái ghế giống MoMo
                 CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
                     ->whereIn('ghe_id', $datVe->datVeChiTiet->pluck('ghe_id'))
                     ->update([
@@ -227,25 +227,24 @@ class VnpayController extends Controller
 
                 return response()->json([
                     "RspCode" => "00",
-                    "Message" => "Confirm Success"
+                    "Message" => "Xác nhận thành công",
                 ]);
             } catch (\Exception $e) {
                 DB::rollBack();
+
                 return response()->json([
                     "RspCode" => "99",
-                    "Message" => "Loi he thong: " . $e->getMessage()
+                    "Message" => "Lỗi hệ thống",
                 ]);
             }
-        } else {
-            // Thanh toán thất bại
-            $tt->update([
-                'trang_thai' => 'that_bai',
-            ]);
-
-            return response()->json([
-                "RspCode" => "00",
-                "Message" => "Payment Failed"
-            ]);
         }
+
+        // Thất bại
+        $tt->update(['trang_thai' => 'that_bai']);
+
+        return response()->json([
+            "RspCode" => "00",
+            "Message" => "Thanh toán thất bại",
+        ]);
     }
 }

@@ -27,6 +27,10 @@ class DatVe extends Model
 
     public function donDoAn()
     {
-        return $this->hasMany(\App\Models\DonDoAn::class, 'dat_ve_id');
+        return $this->hasMany(DonDoAn::class, 'dat_ve_id');
+    }
+    public function thanhToan()
+    {
+        return $this->hasOne(ThanhToan::class, 'dat_ve_id');
     }
 }
