@@ -259,10 +259,10 @@ class DatVeController extends Controller
                 'nguoiDung:id,ten,email,so_dien_thoai',
                 'donDoAn.doAn:id,ten_do_an,image'
             ])->where('id', $id)->first();
-                // ->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
-                //     $q->where('ma_giao_dich', $maGiaoDich);
-                // })
-                // ->first();
+            // ->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+            //     $q->where('ma_giao_dich', $maGiaoDich);
+            // })
+            // ->first();
 
             if (!$datVe) {
                 return response()->json([
@@ -352,6 +352,55 @@ class DatVeController extends Controller
             return response()->json([
                 'message' => 'Xoá đặt vé thất bại.',
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function ChiTietDonVe($maGiaoDich)
+    {
+        try {
+            $datVe = DatVe::with([
+                'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
+                'lichChieu:id,phim_id,phong_id,gio_chieu,gio_ket_thuc',
+                'lichChieu.phim:id,ten_phim,anh_poster,thoi_luong',
+                'lichChieu.phong:id,ten_phong',
+                'nguoiDung:id,ten,email,so_dien_thoai',
+                'donDoAn.doAn:id,ten_do_an,image'
+            ])
+            ->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+                $q->where('ma_giao_dich', $maGiaoDich);
+            })
+            ->first();
+
+            if (!$datVe) {
+                return response()->json([
+                    'message' => 'Không tìm thấy vé với mã giao dịch này!',
+                ], 404);
+            }
+
+            // Đổi tên để frontend dễ dùng hơn
+            $datVe->do_an = $datVe->donDoAn->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'ten_do_an' => $item->doAn?->ten_do_an ?? 'Đồ ăn',
+                    'anh_do_an' => $item->doAn?->image,
+                    'gia_ban' => $item->gia_ban,
+                    'quantity' => $item->so_luong,
+                ];
+            });
+
+            unset($datVe->donDoAn);
+
+            return response()->json([
+                'message' => 'Lấy chi tiết vé thành công!',
+                'data' => array_merge($datVe->toArray(), [
+                    'thanh_toan' => optional(ThanhToan::with('phuongThucThanhToan')->where('dat_ve_id', $datVe->id)->first())->phuongThucThanhToan?->ten ?? null,
+                ]),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Lỗi khi lấy chi tiết vé!',
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
