@@ -66,7 +66,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="thongke-container">
-      <h1 className="title">Dashboard Tổng Quan</h1>
+      <h1 className="title">Tổng Quan</h1>
 
       {/* 4 ô thống kê */}
       <div className="thongke-grid">
