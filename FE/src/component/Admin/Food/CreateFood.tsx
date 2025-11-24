@@ -7,7 +7,6 @@ export default function FoodCreate() {
   const createFood = useCreateFood();
   const navigate = useNavigate();
 
-  // state form
   const [tenDoAn, setTenDoAn] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [moTa, setMoTa] = useState("");
@@ -28,8 +27,6 @@ export default function FoodCreate() {
       Swal.fire("⚠️ Lỗi!", "Các giá trị số không được để trống.", "warning");
       return;
     }
-
-    // tạo FormData
     const formData = new FormData();
     formData.append("ten_do_an", tenDoAn);
     formData.append("mo_ta", moTa);
@@ -41,28 +38,28 @@ export default function FoodCreate() {
     createFood.mutate(formData, {
       onSuccess: () => {
         Swal.fire("✅ Thành công!", "Đã thêm món ăn mới.", "success");
-        navigate("/food");
+        navigate("/admin/foods");
       },
     });
   };
 
   return (
     <div className="container p-4">
-      <h4 className="mb-4 text-center">➕ Thêm món ăn mới</h4>
-
-      <div className="card shadow-sm p-3">
+      <h4 className="mb-4 text-center fw-bold">➕ Thêm món ăn mới</h4>
+      <div className="card shadow-sm p-4 mx-auto bg-white" style={{ maxWidth: "800px", borderRadius: "12px" }}>
         <div className="mb-3">
-          <label className="form-label">Tên món ăn</label>
+          <label className="form-label fw-semibold">Tên món ăn</label>
           <input
             type="text"
             className="form-control"
             value={tenDoAn}
             onChange={(e) => setTenDoAn(e.target.value)}
+            placeholder="Ví dụ: Bắp rang bơ..."
           />
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Ảnh</label>
+          <label className="form-label fw-semibold">Ảnh</label>
           <input
             type="file"
             className="form-control"
@@ -72,57 +69,65 @@ export default function FoodCreate() {
         </div>
 
         <div className="mb-3">
-          <label className="form-label">Mô tả</label>
+          <label className="form-label fw-semibold">Mô tả</label>
           <textarea
             className="form-control"
             value={moTa}
             onChange={(e) => setMoTa(e.target.value)}
+            rows={3}
+            placeholder="Nhập mô tả ngắn..."
           />
         </div>
 
-        <div className="row g-2 mb-3">
+        <div className="row g-3 mb-4">
           <div className="col-md-4">
-            <label className="form-label">Giá nhập</label>
+            <label className="form-label fw-semibold">Giá nhập (VNĐ)</label>
             <input
               type="number"
               className="form-control"
               value={giaNhap}
-              onChange={(e) => setGiaNhap(Number(e.target.value))}
+              onChange={(e) => setGiaNhap(e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder="0"
+              min={0}
             />
           </div>
           <div className="col-md-4">
-            <label className="form-label">Giá bán</label>
+            <label className="form-label fw-semibold">Giá bán (VNĐ)</label>
             <input
               type="number"
               className="form-control"
               value={giaBan}
-              onChange={(e) => setGiaBan(Number(e.target.value))}
+              onChange={(e) => setGiaBan(e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder="0"
+              min={0}
             />
           </div>
           <div className="col-md-4">
-            <label className="form-label">Số lượng tồn</label>
+            <label className="form-label fw-semibold">Số lượng tồn</label>
             <input
               type="number"
               className="form-control"
               value={soLuongTon}
-              onChange={(e) => setSoLuongTon(Number(e.target.value))}
+              onChange={(e) => setSoLuongTon(e.target.value === "" ? "" : Number(e.target.value))}
+              placeholder="0"
+              min={0}
             />
           </div>
         </div>
 
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 justify-content-end">
+          <button
+            className="btn btn-secondary"
+            onClick={() => navigate("/admin/foods")}
+          >
+            Hủy
+          </button>
           <button
             className="btn btn-success"
             onClick={handleSubmit}
             disabled={createFood.isPending}
           >
             {createFood.isPending ? "Đang thêm..." : "Thêm mới"}
-          </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate("/foods")}
-          >
-            Hủy
           </button>
         </div>
       </div>
