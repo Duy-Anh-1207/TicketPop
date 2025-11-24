@@ -33,16 +33,27 @@ export const getChiTietVe = async (id: number | string) => {
   return data;
 };
 
-// 3. In vé (GET /dat-ve/{id}/in-ve)
-export const getInVe = async (id: number | string) => {
-  const { data } = await axiosClient.get(`/dat-ve/${id}/in-ve`);
+// In vé theo mã giao dịch
+export const getInVe = async (maGiaoDich: string) => {
+  const { data } = await axiosClient.get(`/dat-ve/ma-giao-dich/${maGiaoDich}/in-ve`);
   return data;
 };
+
 
 // GET /dat-ve/ma-giao-dich/{maGiaoDich}
 export const getChiTietVeTheoMaGD = async (maGiaoDich: string) => {
   const { data } = await axiosClient.get(`/dat-ve/ma-giao-dich/${maGiaoDich}`);
   return data; // BE trả về { message, data }
+};
+
+// Cập nhật trạng thái đã in vé
+// Cập nhật trạng thái đã in vé theo mã giao dịch
+export const capNhatTrangThaiTheoMaGD = async (maGiaoDich: string) => {
+  // Gửi dữ liệu { da_quet: 1 } để BE không báo lỗi required
+  const { data } = await axiosClient.put(`/dat-ve/ma-giao-dich/${maGiaoDich}/cap-nhat-trang-thai`, {
+    da_quet: 1,
+  });
+  return data;
 };
 
 

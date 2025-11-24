@@ -97,6 +97,7 @@ Route::middleware('auth:sanctum')->get('/dat-ve', [DatVeController::class, 'danh
 Route::middleware('auth:sanctum')->get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
 Route::middleware('auth:sanctum')->get('/dat-ve/ma-giao-dich/{maGiaoDich}', [DatVeController::class, 'ChiTietDonVe']);
 Route::middleware('auth:sanctum')->get('/dat-ve/ma-giao-dich/{maGiaoDich}/in-ve', [DatVeController::class, 'inVeTheoMaGD']);
+Route::middleware('auth:sanctum')->put('/dat-ve/ma-giao-dich/{maGiaoDich}/cap-nhat-trang-thai', [DatVeController::class, 'capNhatTrangThaiTheoMaGD']);
 Route::middleware('auth:sanctum')->delete('/dat-ve/{id}', [DatVeController::class, 'xoaDatVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);

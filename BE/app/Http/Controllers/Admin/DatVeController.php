@@ -429,6 +429,7 @@ class DatVeController extends Controller
                 'ma_don_hang' => $maGiaoDich,
                 'dat_ve_id' => $datVe->id,
                 'tong_tien' => $datVe->tong_tien,
+                'da_quet' => $thanhtoan->da_quet,
                 'phim' => [
                     'ten_phim' => $datVe->lichChieu->phim->ten_phim,
                     'poster' => $datVe->lichChieu->phim->anh_poster,
@@ -452,4 +453,105 @@ class DatVeController extends Controller
             return response()->json(['message' => 'Lỗi khi lấy chi tiết vé!', 'error' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * In vé theo mã giao dịch (ma_giao_dich)
+     */
+    public function inVeTheoMaGD($maGiaoDich)
+    {
+        try {
+            $datVe = DatVe::with([
+                'nguoiDung:id,ten,email,so_dien_thoai',
+                'lichChieu:id,phim_id,phong_id,gio_chieu,gio_ket_thuc',
+                'lichChieu.phim:id,ten_phim,thoi_luong,anh_poster',
+                'lichChieu.phong:id,ten_phong',
+                'chiTiet.ghe:id,so_ghe,loai_ghe_id',
+                'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
+                'donDoAn.doAn:id,ten_do_an,gia_ban,image'
+            ])->whereHas('thanhToan', function ($q) use ($maGiaoDich) {
+                $q->where('ma_giao_dich', $maGiaoDich);
+            })->firstOrFail();
+
+            $danhSachGhe = $datVe->chiTiet->map(fn($ct) => [
+                'so_ghe' => $ct->ghe->so_ghe,
+                'loai_ghe' => $ct->ghe->loaiGhe->ten_loai_ghe ?? '',
+                'gia_ve' => $ct->gia_ve,
+            ]);
+
+            $doAn = $datVe->donDoAn->map(fn($d) => [
+                'ten_do_an' => $d->doAn?->ten_do_an ?? '',
+                'so_luong' => $d->so_luong,
+                'gia_ban' => $d->gia_ban
+            ]);
+
+            $thanhToan = $datVe->thanhToan()->with('phuongThucThanhToan')->first();
+
+            $result = [
+                'ma_giao_dich' => $maGiaoDich,
+                'dat_ve_id' => $datVe->id,
+                'khach_hang' => [
+                    'ten' => $datVe->nguoiDung->ten,
+                    'email' => $datVe->nguoiDung->email,
+                    'so_dien_thoai' => $datVe->nguoiDung->so_dien_thoai,
+                ],
+                'phim' => [
+                    'ten_phim' => $datVe->lichChieu->phim->ten_phim,
+                    'poster' => $datVe->lichChieu->phim->anh_poster,
+                    'thoi_luong' => $datVe->lichChieu->phim->thoi_luong
+                ],
+                'phong' => $datVe->lichChieu->phong->ten_phong,
+                'gio_chieu' => $datVe->lichChieu->gio_chieu->format('H:i d/m/Y'),
+                'gio_ket_thuc' => $datVe->lichChieu->gio_ket_thuc->format('H:i d/m/Y'),
+                'danh_sach_ghe' => $danhSachGhe,
+                'do_an' => $doAn,
+                'thanh_toan' => $thanhToan?->phuongThucThanhToan?->ten ?? null,
+                'tong_tien' => $datVe->tong_tien
+            ];
+
+            return response()->json(['message' => 'Thông tin vé chi tiết', 'data' => $result], 200);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json(['message' => 'Không tìm thấy vé với mã giao dịch này!'], 404);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Lỗi khi lấy vé', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function capNhatTrangThaiTheoMaGD(Request $request, $maGiaoDich)
+{
+    $request->validate([
+        'da_quet' => 'required|boolean'
+    ]);
+
+    try {
+        // Tìm thanh toán theo mã giao dịch
+        $thanhToan = ThanhToan::where('ma_giao_dich', $maGiaoDich)->first();
+
+        if (!$thanhToan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thanh toán với mã giao dịch này'
+            ], 404);
+        }
+
+        // Cập nhật trạng thái
+        $thanhToan->da_quet = $request->da_quet;
+        $thanhToan->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật trạng thái thành công',
+            'data' => [
+                'ma_giao_dich' => $thanhToan->ma_giao_dich,
+                'da_quet' => $thanhToan->da_quet,
+                'dat_ve_id' => $thanhToan->dat_ve_id
+            ]
+        ], 200);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Lỗi khi cập nhật trạng thái',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
 }

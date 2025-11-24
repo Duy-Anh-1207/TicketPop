@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import {
   getDanhSachDatVe,
   getChiTietVe,
-  getInVe,
-  getChiTietVeTheoMaGD
+  getChiTietVeTheoMaGD,
+  getInVe
 } from "../provider/DonVeProvider";
 
 // ======================== Danh sách đơn vé ========================
@@ -43,13 +43,11 @@ export const useChiTietDonVeTheoMaGD = (maGiaoDich?: string) => {
 
 
 // ======================== In vé ========================
-export const useInVe = (id?: number | string) => {
+export const useInVe = (maGiaoDich?: string) => {
   return useQuery({
-    queryKey: ["in-ve", id],
-    queryFn: async () => {
-      const res = await getInVe(id!);
-      return res.data;
-    },
-    enabled: !!id,
+    queryKey: ["in-ve", maGiaoDich],
+    queryFn: () => getInVe(maGiaoDich!),
+    enabled: !!maGiaoDich,
   });
 };
+
