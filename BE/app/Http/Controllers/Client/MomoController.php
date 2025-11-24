@@ -304,4 +304,30 @@ class MomoController extends Controller
             ]);
             return response()->json(['message' => 'Ghế đã được hủy thành công.']);
     }
+    public function capNhatTrangThai(Request $request, $id)
+    {
+        
+        $request->validate([
+            'da_quet' => 'required|boolean'
+        ]);
+
+        
+        $thanhToan = ThanhToan::find($id);
+        if (!$thanhToan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thanh toán'
+            ], 404);
+        }
+
+        
+        $thanhToan->da_quet = $request->da_quet;
+        $thanhToan->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật trạng thái thành công',
+            'data' => $thanhToan
+        ]);
+    }
 }

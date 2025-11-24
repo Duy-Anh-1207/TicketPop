@@ -353,37 +353,5 @@ class DatVeController extends Controller
             ], 500);
         }
     }
-    public function capNhatTrangThai($id)
-    {
-        try {
-            $thanhToan = ThanhToan::find($id);
-
-            if (!$thanhToan) {
-                return response()->json([
-                    'message' => 'Không tìm thấy đơn thanh toán này.'
-                ], 404);
-            }
-
-            // Kiểm tra trạng thái hiện tại
-            if ($thanhToan->da_quet) {
-                return response()->json([
-                    'message' => 'Đơn này đã được quét/đã in vé.'
-                ], 400);
-            }
-
-            // Cập nhật trạng thái
-            $thanhToan->da_quet = 1; // 1 = đã in/quét
-            $thanhToan->save();
-
-            return response()->json([
-                'message' => 'Cập nhật trạng thái thành công.',
-                'data' => $thanhToan
-            ], 200);
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Cập nhật trạng thái thất bại.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-    }
+   
 }
