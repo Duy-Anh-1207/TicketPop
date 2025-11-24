@@ -11,7 +11,7 @@ const axiosClient = axios.create({
 // Lấy danh sách lịch chiếu
 export const getListLichChieu = async () => {
   const { data } = await axiosClient.get("/lich-chieu");
-  return data.data; // ✅ Chỉ lấy mảng "data" bên trong JSON
+  return data.data;
 };
 
 // Lấy chi tiết lịch chiếu theo ID

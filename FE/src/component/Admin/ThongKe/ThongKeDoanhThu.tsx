@@ -1,23 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import "./ThongKe.css";
 import {
   LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, BarChart, Bar
 } from "recharts";
+import "./ThongKe.css";
 
-const API_URL = "http://localhost:8000/api/thong-ke";
+const API_URL = "http://localhost:8000/api";
 
-const fetchData = async () => {
+// FETCH PHIM 
+const fetchMovies = async () => {
+  const res = await axios.get(`${API_URL}/phim`);
+  if (Array.isArray(res.data.data)) return res.data.data;
+  if (Array.isArray(res.data)) return res.data;
+  return [];
+};
+
+//FETCH THỐNG KÊ
+const fetchThongKe = async (params: any) => {
   const [tyLePT, doanhThuPhim, doanhThuDoAn, theoThang] = await Promise.all([
-    axios.get(`${API_URL}/ty-le-phuong-thuc-thanh-toan`),
-    axios.get(`${API_URL}/doanh-thu-phim`),
-    axios.get(`${API_URL}/doanh-thu-do-an`),
-    axios.get(`${API_URL}/doanh-thu-theo-thang`),
+    axios.get(`${API_URL}/thong-ke/ty-le-phuong-thuc-thanh-toan`, { params }),
+    axios.get(`${API_URL}/thong-ke/doanh-thu-phim`, { params }),
+    axios.get(`${API_URL}/thong-ke/doanh-thu-do-an`, { params }),
+    axios.get(`${API_URL}/thong-ke/doanh-thu-theo-thang`, { params }),
   ]);
-
-  
 
   return {
     tyLePhuongThuc: tyLePT.data.data || [],
@@ -30,68 +37,136 @@ const fetchData = async () => {
 const COLORS = ["#1E88E5", "#43A047", "#FB8C00", "#E53935"];
 
 const ThongKeDoanhThu: React.FC = () => {
-  const { data, isLoading} = useQuery({
-    queryKey: ["ThongKeDoanhThu"],
-    queryFn: fetchData,
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState("");
+  const [params, setParams] = useState<any>({});
+  const [error, setError] = useState("");
+
+  // Fetch phim
+  const { data: movies } = useQuery({
+    queryKey: ["movies"],
+    queryFn: fetchMovies,
   });
- if (isLoading)
-    return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
+
+  // Fetch thống kê
+  const { data, isLoading } = useQuery({
+    queryKey: ["thongKeDoanhThu", params],
+    queryFn: () => fetchThongKe(params),
+  });
+
+  // HANDLE FILTER
+  const handleFilter = () => {
+    setError("");
+
+    // Validate ngày
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      setError("⚠ Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc!");
+      return;
+    }
+
+    const newParams: any = {};
+
+    // Gửi ngày nếu có
+    if (fromDate) newParams.from_date = fromDate;
+    if (toDate) newParams.to_date = toDate;
+
+    // Gửi phim nếu có
+    if (selectedMovie) newParams.phim_id = selectedMovie;
+
+    setParams(newParams);
+  };
 
   return (
     <div className="thongke-container">
       <h2>Thống kê doanh thu</h2>
 
-      <div className="thongke-grid">
-        <div className="thongke-card">
-          <p>Doanh thu đồ ăn</p>
-          <h2>{data?.doanhThuDoAn.toLocaleString()} đ</h2>
-        </div>
-      </div>
-
-      <div className="thongke-chart-row">
-        <div className="thongke-chart">
-          <h3>Doanh thu theo phim</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={data?.doanhThuPhim || []}>
-              <XAxis dataKey="ten_phim" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="doanh_thu" fill="#1E88E5" />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* FILTER BOX */}
+      <div className="filter-box">
+        <div className="filter-item">
+          <label>Từ ngày:</label>
+          <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
         </div>
 
-        <div className="thongke-chart">
-          <h3>Tỷ lệ phương thức thanh toán</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={data?.tyLePhuongThuc || []}
-                dataKey="so_luong"
-                nameKey="ten_phuong_thuc"
-                label
-              >
-                {data?.tyLePhuongThuc?.map((_, i) => (
-                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+        <div className="filter-item">
+          <label>Đến ngày:</label>
+          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
         </div>
+
+        <div className="filter-item">
+          <label>Chọn phim:</label>
+          <select value={selectedMovie} onChange={(e) => setSelectedMovie(e.target.value)}>
+            <option value="">Tất cả phim</option>
+            {movies?.map((m: any) => (
+              <option key={m.id} value={m.id}>{m.ten_phim}</option>
+            ))}
+          </select>
+        </div>
+
+        <button className="btn-filter" onClick={handleFilter}>Lọc</button>
       </div>
 
-      <div className="thongke-chart">
-        <h3>Doanh thu theo tháng</h3>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data?.doanhThuTheoThang || []}>
-            <XAxis dataKey="thang" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="tong_doanh_thu" stroke="#FB8C00" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {error && <p className="filter-error">{error}</p>}
+      {isLoading && <div className="text-center">Đang tải dữ liệu...</div>}
+
+      {data && (
+        <>
+          {/* DOANH THU ĐỒ ĂN */}
+          <div className="thongke-grid">
+            <div className="thongke-card">
+              <p>Doanh thu đồ ăn</p>
+              <h2>{data?.doanhThuDoAn.toLocaleString()} đ</h2>
+            </div>
+          </div>
+
+          {/* BIỂU ĐỒ */}
+          <div className="thongke-chart-row">
+            <div className="thongke-chart">
+              <h3>Doanh thu theo phim</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={data?.doanhThuPhim || []}>
+                  <XAxis dataKey="ten_phim" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="doanh_thu" fill="#1E88E5" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="thongke-chart">
+              <h3>Phương thức thanh toán</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie
+                    data={data?.tyLePhuongThuc || []}
+                    dataKey="so_luong"
+                    nameKey="ten"
+                    label
+                  >
+                    {data?.tyLePhuongThuc?.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* DOANH THU THEO THÁNG */}
+          <div className="thongke-chart">
+            <h3>Doanh thu theo tháng</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={data?.doanhThuTheoThang || []}>
+                <XAxis dataKey="thang" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="tong_doanh_thu" stroke="#FB8C00" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
     </div>
   );
 };

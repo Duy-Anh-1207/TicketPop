@@ -42,7 +42,7 @@ export default function CreateTinTuc() {
     }
   }, [tinTucDetail, id]);
 
- const handleChange = (
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
@@ -79,10 +79,10 @@ export default function CreateTinTuc() {
     try {
       if (id) {
         const payload: {
-            tieu_de: string;
-            noi_dung: string;
-            type: 'tin_tuc' | 'uu_dai' | 'su_kien';
-            hinh_anh?: File;
+          tieu_de: string;
+          noi_dung: string;
+          type: 'tin_tuc' | 'uu_dai' | 'su_kien';
+          hinh_anh?: File;
         } = {
           tieu_de: formData.tieu_de,
           noi_dung: formData.noi_dung,
@@ -151,6 +151,21 @@ export default function CreateTinTuc() {
                 required
               />
             </div>
+
+            {/* Mô tả / Nội dung */}
+            <div className="mb-3">
+              <label className="form-label fw-bold">Mô tả / Nội dung</label>
+              <textarea
+                name="noi_dung"
+                className="form-control"
+                placeholder="Nhập mô tả nội dung..."
+                rows={5}
+                value={formData.noi_dung}
+                onChange={handleChange}
+                required
+              ></textarea>
+            </div>
+
 
             {/* Hình ảnh */}
             <div className="mb-3">

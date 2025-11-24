@@ -18,7 +18,11 @@ export default function FoodList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Lọc theo tên
+  // ✅ Hàm format tiền tệ chuẩn Việt Nam
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
+  };
+
   const filteredFoods = useMemo(() => {
     if (!allFoods) return [];
     return allFoods.filter((food: Food) =>
@@ -26,7 +30,6 @@ export default function FoodList() {
     );
   }, [allFoods, searchTerm]);
 
-  // Phân trang
   const paginatedFoods = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
     const end = start + ITEMS_PER_PAGE;
@@ -37,7 +40,6 @@ export default function FoodList() {
 
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách...</p>;
 
-  // Quyền thao tác
   const canEdit = canAccess(MENU_ID, 2);
   const canDeletePerm = canAccess(MENU_ID, 3);
   const canCreate = canAccess(MENU_ID, 1);
@@ -55,25 +57,58 @@ export default function FoodList() {
     });
   };
 
+  // 🆕 NÂNG CẤP: Popup sửa đầy đủ thông tin
   const handleEdit = (food: Food) => {
     Swal.fire({
-      title: "✏️ Sửa tên món ăn",
-      input: "text",
-      inputLabel: "Tên món ăn",
-      inputValue: food.ten_do_an,
+      title: `✏️ Cập nhật: ${food.ten_do_an}`,
+      html: `
+        <div class="text-start">
+          <div class="mb-3">
+            <label class="form-label fw-bold">Tên món ăn</label>
+            <input id="swal-input1" class="form-control" value="${food.ten_do_an}">
+          </div>
+          <div class="row g-2">
+            <div class="col-6 mb-3">
+              <label class="form-label fw-bold">Giá nhập</label>
+              <input id="swal-input2" type="number" class="form-control" value="${Number(food.gia_nhap)}">
+            </div>
+            <div class="col-6 mb-3">
+              <label class="form-label fw-bold">Giá bán</label>
+              <input id="swal-input3" type="number" class="form-control" value="${Number(food.gia_ban)}">
+            </div>
+            <div class="col-12 mb-3">
+              <label class="form-label fw-bold">Số lượng tồn</label>
+              <input id="swal-input4" type="number" class="form-control" value="${food.so_luong_ton}">
+            </div>
+          </div>
+        </div>
+      `,
       showCancelButton: true,
-      confirmButtonText: "Cập nhật",
+      confirmButtonText: "Lưu thay đổi",
       cancelButtonText: "Hủy",
-      preConfirm: (value) => {
-        if (!value || !value.trim()) {
-          Swal.showValidationMessage("Tên món ăn không được để trống");
+      focusConfirm: false,
+      preConfirm: () => {
+        const ten_do_an = (document.getElementById('swal-input1') as HTMLInputElement).value;
+        const gia_nhap = (document.getElementById('swal-input2') as HTMLInputElement).value;
+        const gia_ban = (document.getElementById('swal-input3') as HTMLInputElement).value;
+        const so_luong_ton = (document.getElementById('swal-input4') as HTMLInputElement).value;
+
+        if (!ten_do_an || !gia_nhap || !gia_ban || !so_luong_ton) {
+          Swal.showValidationMessage('Vui lòng điền đầy đủ thông tin');
+          return false;
         }
-        return value;
-      },
+
+        return { 
+          ten_do_an, 
+          gia_nhap: Number(gia_nhap), 
+          gia_ban: Number(gia_ban), 
+          so_luong_ton: Number(so_luong_ton) 
+        };
+      }
     }).then((result) => {
-      if (result.isConfirmed) {
+      if (result.isConfirmed && result.value) {
         updateFood.mutate(
-          { id: food.id, values: { ten_do_an: result.value } },
+          { id: food.id, values: result.value },
           { onSuccess: () => Swal.fire("✅ Đã cập nhật!", "", "success") }
         );
       }
@@ -83,7 +118,7 @@ export default function FoodList() {
   return (
     <div className="container p-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4 className="mb-0">🍽️ Quản lý món ăn</h4>
+        <h4 className="mb-0 fw-bold">🍽️ Quản lý món ăn</h4>
         {canCreate && (
           <button
             className="btn btn-success"
@@ -94,7 +129,8 @@ export default function FoodList() {
         )}
       </div>
 
-      <div className="mb-3">
+      {/* ✅ Thanh tìm kiếm gọn gàng (50% chiều rộng) */}
+      <div className="mb-3 w-50">
         <input
           type="text"
           className="form-control"
@@ -108,7 +144,7 @@ export default function FoodList() {
       </div>
 
       <div className="table-responsive">
-        <table className="table table-bordered table-striped text-center align-middle">
+        <table className="table table-bordered table-striped text-center align-middle shadow-sm bg-white rounded">
           <thead className="table-light">
             <tr>
               <th>STT</th>
@@ -130,7 +166,7 @@ export default function FoodList() {
                 return (
                   <tr key={food.id}>
                     <td>{index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}</td>
-                    <td className="fw-semibold">{food.ten_do_an}</td>
+                    <td className="fw-semibold text-start">{food.ten_do_an}</td>
                     <td>
                       {imageUrl ? (
                         <img
@@ -138,8 +174,8 @@ export default function FoodList() {
                           alt={food.ten_do_an}
                           className="img-thumbnail"
                           style={{
-                            width: 80,
-                            height: 80,
+                            width: 60,
+                            height: 60,
                             objectFit: "cover",
                             borderRadius: "6px",
                           }}
@@ -148,9 +184,14 @@ export default function FoodList() {
                         "—"
                       )}
                     </td>
-                    <td className="text-end">{Number(food.gia_nhap).toLocaleString()} ₫</td>
-                    <td className="text-end">{Number(food.gia_ban).toLocaleString()} ₫</td>
-                    <td>{food.so_luong_ton}</td>
+                    {/* ✅ Sử dụng hàm formatCurrency */}
+                    <td className="text-end fw-bold text-secondary">{formatCurrency(Number(food.gia_nhap))}</td>
+                    <td className="text-end fw-bold text-success">{formatCurrency(Number(food.gia_ban))}</td>
+                    <td>
+                      <span className={`badge ${food.so_luong_ton > 10 ? 'bg-info' : 'bg-warning'}`}>
+                        {food.so_luong_ton}
+                      </span>
+                    </td>
                     <td className="d-flex justify-content-center gap-2">
                       {canEdit && (
                         <button
@@ -183,6 +224,7 @@ export default function FoodList() {
         </table>
       </div>
 
+      {/* Pagination giữ nguyên */}
       {totalPages > 1 && (
         <nav>
           <ul className="pagination justify-content-center">
@@ -200,9 +242,7 @@ export default function FoodList() {
                 {currentPage} / {totalPages}
               </span>
             </li>
-            <li
-              className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
-            >
+            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
               <button
                 className="page-link"
                 onClick={() => setCurrentPage((p) => p + 1)}

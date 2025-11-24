@@ -39,6 +39,15 @@ export const getInVe = async (id: number | string) => {
   return data;
 };
 
+// GET /dat-ve/ma-giao-dich/{maGiaoDich}
+export const getChiTietVeTheoMaGD = async (maGiaoDich: string) => {
+  const { data } = await axiosClient.get(`/dat-ve/ma-giao-dich/${maGiaoDich}`);
+  return data; // BE trả về { message, data }
+};
+
+
+
+
 // ======================= Xử lý lỗi =======================
 axiosClient.interceptors.response.use(
   (response) => response,

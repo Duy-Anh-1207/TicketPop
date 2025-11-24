@@ -94,8 +94,9 @@ Route::prefix('don-do-an')->group(function () {
 // dat ve
 Route::middleware('auth:sanctum')->post('/dat-ve', [DatVeController::class, 'datVe']);
 Route::middleware('auth:sanctum')->get('/dat-ve', [DatVeController::class, 'danhSachDatVe']);
-Route::middleware('auth:sanctum')->get('/dat-ve/{ma_giao_dich}', [DatVeController::class, 'chiTietVe']);
-Route::middleware('auth:sanctum')->get('/dat-ve/{ma_giao_dich}/in-ve', [DatVeController::class, 'inVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/{id}', [DatVeController::class, 'chiTietVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/ma-giao-dich/{maGiaoDich}', [DatVeController::class, 'ChiTietDonVe']);
+Route::middleware('auth:sanctum')->get('/dat-ve/ma-giao-dich/{maGiaoDich}/in-ve', [DatVeController::class, 'inVeTheoMaGD']);
 Route::middleware('auth:sanctum')->delete('/dat-ve/{id}', [DatVeController::class, 'xoaDatVe']);
 
 Route::get('/banners', [BannerController::class, 'index']);
@@ -210,11 +211,12 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 
 
 Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
+Route::put('/thanh-toan/{id}/cap-nhat-trang-thai', [MomoController::class, 'capNhatTrangThai']);
 // Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
 Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
 Route::post('/thanhtoan/momo/rollback-ghe', [MomoController::class, 'huyGhe']);
 Route::prefix('vnpay')->group(function () {
-    Route::post('/create', [VnpayController::class, 'create']);   // FE gọi để tạo URL thanh toán
-    Route::get('/return', [VnpayController::class, 'return']);    // redirect sau khi user thanh toán
-    Route::get('/ipn',    [VnpayController::class, 'ipn']);       // IPN server-to-server
+    Route::post('/create', [VnpayController::class, 'create']);  
+    Route::get('/return', [VnpayController::class, 'return']);   
+    Route::get('/ipn',    [VnpayController::class, 'ipn']);     
 });

@@ -13,7 +13,7 @@
     margin-bottom: 25px;
     text-transform: uppercase;
     color: #222;
-    text-align: center; // canh giữa tiêu đề
+    text-align: center; 
   }
 
   .days-container {
@@ -45,6 +45,24 @@
         background: #ff4444;
         color: #fff;
         border-color: #ff4444;
+
+        &:hover {
+          background: #ff4444;
+          color: #fff;
+        }
+      }
+
+      &.disabled {
+        background: #f0f0f0;
+        color: #999;
+        border-color: #ddd;
+        cursor: not-allowed;
+
+        &:hover {
+          background: #f0f0f0 !important;
+          color: #999 !important;
+          border-color: #ddd !important;
+        }
       }
     }
   }

@@ -471,67 +471,140 @@ const MyAccountPage = () => {
         <>
           <div className="modal d-block" tabIndex={-1} role="dialog">
             <div className="modal-dialog modal-lg" role="document">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title">Chi tiết đơn {selectedBookingId}</h5>
+              <div className="modal-content border-0 shadow-lg">
+                <div className="modal-header border-bottom-0 pb-0">
+                  <div></div>
                   <button type="button" className="btn-close" onClick={() => setShowDetailModal(false)} aria-label="Close"></button>
                 </div>
-                <div className="modal-body">
+                <div className="modal-body pt-0">
                   {(() => {
                     const det = selectedBookingDetails || (selectedBookingId ? bookingDetails.get(selectedBookingId as string) : null);
-                    if (!det) return <p>Đang tải chi tiết...</p>;
+                    if (!det) return <p className="text-center">Đang tải chi tiết...</p>;
+
+                    const posterUrl = det.lich_chieu?.phim?.anh_poster 
+                      ? (det.lich_chieu.phim.anh_poster.startsWith('http') 
+                          ? det.lich_chieu.phim.anh_poster 
+                          : `http://127.0.0.1:8000/storage/${det.lich_chieu.phim.anh_poster}`)
+                      : '/placeholder-movie.png';
+                    
+                    const movieName = det.lich_chieu?.phim?.ten_phim || det.phim || 'Không rõ phim';
+                    const roomName = det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ';
+                    const showTime = det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu) : null;
 
                     return (
                       <div>
-                        <h5>{det.lich_chieu?.phim?.ten_phim || det.phim || 'Không rõ phim'}</h5>
-                        <p>Phòng: {det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ'}</p>
-                        <p>Thời gian: {det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu).toLocaleString() : 'Không rõ'}</p>
+                        {/* Movie Header Section */}
+                        <div className="row mb-4">
+                          <div className="col-md-4 text-center">
+                            <img 
+                              src={posterUrl} 
+                              alt={movieName}
+                              className="img-fluid rounded shadow-sm"
+                              style={{ maxHeight: '280px', objectFit: 'cover' }}
+                              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.png'; }}
+                            />
+                          </div>
+                          <div className="col-md-8">
+                            <h4 className="text-primary fw-bold mb-3">{movieName}</h4>
+                            
+                            {/* Showtime Info */}
+                            <div className="mb-3 p-3 bg-light rounded">
+                              <div className="row">
+                                <div className="col-md-6">
+                                  <p className="text-muted mb-1"><i className="fa-solid fa-door-open"></i> Phòng chiếu</p>
+                                  <p className="fw-bold text-dark">{roomName}</p>
+                                </div>
+                                <div className="col-md-6">
+                                  <p className="text-muted mb-1"><i className="fa-solid fa-clock"></i> Thời gian</p>
+                                  <p className="fw-bold text-dark">
+                                    {showTime ? showTime.toLocaleString('vi-VN', { 
+                                      year: 'numeric', 
+                                      month: '2-digit', 
+                                      day: '2-digit',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    }) : 'Không rõ'}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
 
-                        <p>Phương thức thanh toán: <strong>{det.thanh_toan ?? '—'}</strong></p>
+                            {/* Payment Method */}
+                            <div className="mb-3">
+                              <p className="text-muted mb-1"><i className="fa-solid fa-credit-card"></i> Phương thức thanh toán</p>
+                              <p className="fw-bold text-success">{det.thanh_toan ?? '—'}</p>
+                            </div>
+                          </div>
+                        </div>
 
+                        <hr />
+
+                        {/* Seats Section */}
                         {det.chi_tiet && det.chi_tiet.length > 0 && (
-                          <div className="mb-3">
-                            <h6>Ghế</h6>
+                          <div className="mb-4">
+                            <h6 className="text-primary fw-bold mb-3">
+                              <i className="fa-solid fa-chair me-2"></i>Ghế đã đặt ({det.chi_tiet.length})
+                            </h6>
                             <div className="d-flex flex-wrap gap-2">
                               {det.chi_tiet.map((ct: any, i: number) => (
-                                <div key={i} className="p-2 border rounded">
-                                  <div>Ghế: <strong>{ct.ghe?.so_ghe}</strong></div>
-                                  <div>Loại: {ct.ghe?.loai_ghe?.ten_loai_ghe || '—'}</div>
-                                  <div>Giá vé: {ct.gia ? ct.gia + ' đ' : '—'}</div>
+                                <div 
+                                  key={i} 
+                                  className="badge bg-success text-white p-2"
+                                  style={{ fontSize: '0.95rem', padding: '0.5rem 0.75rem !important' }}
+                                >
+                                  <div className="fw-bold">{ct.ghe?.so_ghe}</div>
+                                  <div style={{ fontSize: '0.8rem' }}>{ct.ghe?.loai_ghe?.ten_loai_ghe || 'Ghế'}</div>
                                 </div>
                               ))}
                             </div>
                           </div>
                         )}
 
+                        {/* Food Section */}
                         {det.do_an && det.do_an.length > 0 && (
-                          <div>
-                            <h6>Đồ ăn</h6>
-                            <ul className="list-unstyled">
+                          <div className="mb-4">
+                            <h6 className="text-primary fw-bold mb-3">
+                              <i className="fa-solid fa-utensils me-2"></i>Đồ ăn kèm ({det.do_an.length})
+                            </h6>
+                            <div className="row g-2">
                               {det.do_an.map((f: any, i: number) => (
-                                <li key={i} className="d-flex justify-content-between border-bottom py-2">
-                                  <div>
-                                    <strong>{f.ten_do_an}</strong>
-                                    <div className="text-muted">Số lượng: {f.so_luong}</div>
+                                <div key={i} className="col-md-6">
+                                  <div className="card border-0 bg-light">
+                                    <div className="card-body p-3">
+                                      <div className="d-flex justify-content-between align-items-start">
+                                        <div className="flex-grow-1">
+                                          <h6 className="card-title mb-1 fw-bold text-dark">{f.ten_do_an}</h6>
+                                          <small className="text-muted">x{f.so_luong}</small>
+                                        </div>
+                                        <span className="badge bg-warning text-dark fw-bold">
+                                          {((f.gia_ban || 0) * (f.so_luong || 1)).toLocaleString('vi-VN')}₫
+                                        </span>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div>{f.gia_ban} đ</div>
-                                </li>
+                                </div>
                               ))}
-                            </ul>
+                            </div>
                           </div>
                         )}
 
                         <hr />
-                        <div className="d-flex justify-content-between">
-                          <div>Tổng tiền:</div>
-                          <div><strong className="text-danger">{det.tong_tien || det.tong || '—'}</strong></div>
+
+                        {/* Total Price */}
+                        <div className="d-flex justify-content-between align-items-center p-3 bg-primary bg-opacity-10 rounded">
+                          <h6 className="mb-0 fw-bold text-dark">Tổng tiền:</h6>
+                          <h5 className="mb-0 fw-bold text-danger">
+                            {((det.tong_tien || det.tong || 0)).toLocaleString('vi-VN')}₫
+                          </h5>
                         </div>
                       </div>
                     );
                   })()}
                 </div>
-                <div className="modal-footer">
-                  <button type="button" className="btn btn-secondary" onClick={() => setShowDetailModal(false)}>Đóng</button>
+                <div className="modal-footer border-top-0 pt-0">
+                  <button type="button" className="btn btn-primary" onClick={() => setShowDetailModal(false)}>
+                    <i className="fa-solid fa-check me-2"></i>Đóng
+                  </button>
                 </div>
               </div>
             </div>

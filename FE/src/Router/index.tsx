@@ -187,9 +187,9 @@ const Routermain = () => {
         { path: "thong-ke/ve", element: <ThongKeVe /> },
         { path: "thong-ke/doanh-thu", element: <ThongKeDoanhThu /> },
         //dashbroad
-        { path: "dashbroad", element: <Dashbroad /> },
+        { path: "dashboard", element: <Dashbroad /> },
         { path: "ve", element: <ListDonVe /> }, 
-        { path: "ve/:id", element: <ChiTietDonVe /> },
+        { path: "ve/:maGiaoDich", element: <ChiTietDonVe /> },
 
 
       ],

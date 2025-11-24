@@ -21,53 +21,95 @@ const LichChieu = () => {
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() + i);
-    return {
-      label: date.toLocaleDateString("vi-VN", {
-        weekday: "short",
-        day: "2-digit",
-        month: "2-digit",
-      }),
-      value: date.toISOString().split("T")[0],
-    };
+    const value = date.toISOString().split("T")[0];
+    const label = date.toLocaleDateString("vi-VN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    });
+    return { label, value };
   });
+
+  const [datesWithShowtime, setDatesWithShowtime] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    if (!phimId) return;
+
+    const checkShowtimes = async () => {
+      const results = await Promise.all(
+        days.map((day) =>
+          getLichChieuTheoPhim(phimId, day.value)
+            .then((res) => (res.data && res.data.length > 0 ? day.value : null))
+            .catch(() => null)
+        )
+      );
+
+      const validDates = new Set(results.filter(Boolean) as string[]);
+      setDatesWithShowtime(validDates);
+
+      if (!selectedDate && validDates.size > 0) {
+        const firstValid = days.find((d) => validDates.has(d.value));
+        if (firstValid) setSelectedDate(firstValid.value);
+      }
+    };
+
+    checkShowtimes();
+  }, [phimId]);
 
   useEffect(() => {
     const fetchLichChieu = async () => {
       if (!selectedDate || !phimId) return;
+      if (!datesWithShowtime.has(selectedDate)) {
+        setLichChieu([]);
+        return;
+      }
+
       try {
         setLoading(true);
         const res = await getLichChieuTheoPhim(phimId, selectedDate);
         setLichChieu(res.data || []);
       } catch (error) {
         console.error("Lỗi khi lấy lịch chiếu:", error);
+        setLichChieu([]);
       } finally {
         setLoading(false);
       }
     };
+
     fetchLichChieu();
-  }, [selectedDate, phimId]);
+  }, [selectedDate, phimId, datesWithShowtime]);
+
+  const handleSelectDate = (dateValue: string) => {
+    if (datesWithShowtime.has(dateValue)) {
+      setSelectedDate(dateValue);
+    }
+  };
 
   const handleSelectShowtime = (lc: LichChieuItem) => {
-    console.log("Chọn lịch chiếu:", lc);
     navigate(`/booking/${slug}`, { state: { lichChieuId: lc.id } });
   };
 
-  
   return (
     <div id="lich-chieu" className="lichchieu-wrapper">
-      
       <h3 className="title">Lịch chiếu</h3>
 
       <div className="days-container">
-        {days.map((day) => (
-          <button
-            key={day.value}
-            className={`day-btn ${selectedDate === day.value ? "active" : ""}`}
-            onClick={() => setSelectedDate(day.value)}
-          >
-            {day.label}
-          </button>
-        ))}
+        {days.map((day) => {
+          const hasShowtime = datesWithShowtime.has(day.value);
+          const isSelected = selectedDate === day.value;
+
+          return (
+            <button
+              key={day.value}
+              className={`day-btn ${isSelected ? "active" : ""} ${
+                !hasShowtime ? "disabled" : ""
+              }`}
+              onClick={() => handleSelectDate(day.value)}
+              disabled={!hasShowtime}
+            >
+              {day.label}
+            </button>
+          );
+        })}
       </div>
 
       <div className="schedule-box">
