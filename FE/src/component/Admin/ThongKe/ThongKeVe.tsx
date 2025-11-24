@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
@@ -13,16 +13,12 @@ const API_URL = "http://localhost:8000/api";
 const fetchMovies = async () => {
   const res = await axios.get(`${API_URL}/phim`);
 
-  // Nếu trả về dạng { data: [...] }
   if (Array.isArray(res.data.data)) return res.data.data;
-
-  // Nếu trả về dạng [...]
   if (Array.isArray(res.data)) return res.data;
-
   return [];
 };
 
-// FETCH THỐNG KÊ 
+// FETCH THỐNG KÊ
 const fetchThongKe = async (params: any) => {
   const [gio, top, loai, homNay] = await Promise.all([
     axios.get(`${API_URL}/thong-ke/gio-mua-nhieu-nhat`, { params }),
@@ -48,7 +44,7 @@ const ThongKeVe: React.FC = () => {
   const [params, setParams] = useState<any>({});
   const [error, setError] = useState("");
 
-  // Fetch danh sách phim
+  // Fetch phim
   const { data: movies } = useQuery({
     queryKey: ["movies"],
     queryFn: fetchMovies,
@@ -60,25 +56,23 @@ const ThongKeVe: React.FC = () => {
     queryFn: () => fetchThongKe(params),
   });
 
-  // HANDLE FILTER 
+  // HANDLE FILTER
   const handleFilter = () => {
     setError("");
 
-    if (!fromDate || !toDate) {
-      setError("⚠️ Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc!");
+    // Nếu chọn cả 2 thì phải check
+    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
+      setError("⚠ Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc!");
       return;
     }
 
-    if (new Date(fromDate) > new Date(toDate)) {
-      setError("⚠️ Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc!");
-      return;
-    }
+    const newParams: any = {};
 
-    const newParams: any = {
-      ngay_bat_dau: fromDate,
-      ngay_ket_thuc: toDate,
-    };
+    // Chỉ gửi ngày nếu người dùng chọn
+    if (fromDate) newParams.from_date = fromDate;
+    if (toDate) newParams.to_date = toDate;
 
+    // Chọn phim
     if (selectedMovie) newParams.phim_id = selectedMovie;
 
     setParams(newParams);
@@ -114,9 +108,7 @@ const ThongKeVe: React.FC = () => {
 
       {error && <p className="filter-error">{error}</p>}
 
-
-      {isLoading && <div className="text-center mt-4">Đang tải dữ liệu...</div>}
-
+      {isLoading && <div className="text-center">Đang tải dữ liệu...</div>}
 
       {data && (
         <>

@@ -8,19 +8,31 @@ use Illuminate\Support\Facades\DB;
 
 class ThongKeController extends Controller
 {
-    // ==================== I. THỐNG KÊ VÉ ====================
+    //HÀM TIỆN ÍCH 
+    private function rangeDate($from, $to)
+    {
 
-    // Các giờ được mua nhiều nhất
+        if (!$from || !$to) return null;
+        return [
+            $from . " 00:00:00",
+            $to . " 23:59:59"
+        ];
+        
+    }
+
+    // I. THỐNG KÊ VÉ 
+
+    // Giờ mua nhiều nhất
     public function gioMuaNhieuNhat(Request $request)
     {
         $phimId = $request->query('phim_id');
-        $ngay = $request->query('ngay'); // dạng YYYY-MM-DD
+        $range = $this->rangeDate($request->from_date, $request->to_date);
 
         $query = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
-            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
             ->select(
                 DB::raw('HOUR(thanh_toan.created_at) as gio'),
                 DB::raw('COUNT(thanh_toan.id) as so_luong')
@@ -30,24 +42,21 @@ class ThongKeController extends Controller
             ->limit(5)
             ->get();
 
-        return response()->json([
-            'status' => true,
-            'data' => $query
-        ]);
+        return response()->json(['status' => true, 'data' => $query]);
     }
 
     // Top phim bán chạy
     public function topPhimBanChay(Request $request)
     {
         $phimId = $request->query('phim_id');
-        $ngay = $request->query('ngay');
+        $range = $this->rangeDate($request->from_date, $request->to_date);
 
         $query = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
             ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
-            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
             ->select(
                 'phim.ten_phim',
                 'phim.anh_poster',
@@ -62,11 +71,11 @@ class ThongKeController extends Controller
         return response()->json(['status' => true, 'data' => $query]);
     }
 
-    // Phân bố theo loại vé (thường, VIP)
+    // Phân bố loại vé
     public function phanBoLoaiVe(Request $request)
     {
         $phimId = $request->query('phim_id');
-        $ngay = $request->query('ngay');
+        $range = $this->rangeDate($request->from_date, $request->to_date);
 
         $query = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
@@ -75,7 +84,7 @@ class ThongKeController extends Controller
             ->join('loai_ghe', 'ghe.loai_ghe_id', '=', 'loai_ghe.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
-            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
             ->select(
                 'loai_ghe.ten_loai_ghe as ten_loai',
                 DB::raw('COUNT(loai_ghe.id) as so_luong')
@@ -86,7 +95,7 @@ class ThongKeController extends Controller
         return response()->json(['status' => true, 'data' => $query]);
     }
 
-    // Số lượng vé bán ra theo giờ trong hôm nay
+    // Vé theo giờ hôm nay
     public function veTheoGioHomNay(Request $request)
     {
         $phimId = $request->query('phim_id');
@@ -101,56 +110,46 @@ class ThongKeController extends Controller
                 DB::raw('COUNT(thanh_toan.id) as so_luong')
             )
             ->groupBy(DB::raw('HOUR(thanh_toan.created_at)'))
-            ->orderBy('gio', 'asc')
+            ->orderBy('gio')
             ->get();
 
         return response()->json(['status' => true, 'data' => $query]);
     }
 
-    // ==================== II. THỐNG KÊ DOANH THU ====================
+    // II. THỐNG KÊ DOANH THU 
 
-    // Tỷ lệ phương thức thanh toán
     public function tyLePhuongThucThanhToan(Request $request)
     {
-        try {
-            $phimId = $request->query('phim_id');
-            $ngay = $request->query('ngay');
+        $phimId = $request->query('phim_id');
+        $range = $this->rangeDate($request->from_date, $request->to_date);
 
-            $query = DB::table('thanh_toan')
-                ->leftJoin('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
-                ->leftJoin('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
-                ->leftJoin('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
-                ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
-                ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
-                ->select(
-                    DB::raw('COALESCE(phuong_thuc_thanh_toan.ten, "Khác") as ten'),
-                    DB::raw('COUNT(thanh_toan.id) as so_luong')
-                )
-                ->groupBy('ten')
-                ->get();
+        $query = DB::table('thanh_toan')
+            ->leftJoin('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
+            ->leftJoin('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->leftJoin('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
+            ->select(
+                DB::raw('COALESCE(phuong_thuc_thanh_toan.ten, "Khác") as ten'),
+                DB::raw('COUNT(thanh_toan.id) as so_luong')
+            )
+            ->groupBy('ten')
+            ->get();
 
-            return response()->json(['status' => true, 'data' => $query]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json(['status' => true, 'data' => $query]);
     }
-
-
-    // Doanh thu phim
+    //doanh thu phim
     public function doanhThuPhim(Request $request)
     {
         $phimId = $request->query('phim_id');
-        $ngay = $request->query('ngay');
+        $range = $this->rangeDate($request->from_date, $request->to_date);
 
         $query = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
             ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
-            ->when($ngay, fn($q) => $q->whereDate('thanh_toan.created_at', $ngay))
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
             ->select(
                 'phim.ten_phim',
                 DB::raw('SUM(thanh_toan.tong_tien_goc) as doanh_thu')
@@ -161,43 +160,36 @@ class ThongKeController extends Controller
 
         return response()->json(['status' => true, 'data' => $query]);
     }
-
-    // Doanh thu đồ ăn
+    //doanh thu đồ ăn
     public function doanhThuDoAn(Request $request)
-{
-    try {
-        $tong = DB::table('don_do_an')
+    {
+        $range = $this->rangeDate($request->from_date, $request->to_date);
+
+        $query = DB::table('don_do_an')
+            ->when($range, fn($q) => $q->whereBetween('created_at', $range))
             ->select(DB::raw('SUM(so_luong * gia_ban) as doanh_thu'))
-            ->value('doanh_thu');
+            ->first();
 
-
-            
         return response()->json([
             'status' => true,
-            'doanh_thu_do_an' => (int) $tong
+            'doanh_thu_do_an' => (int)$query->doanh_thu
         ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => false,
-            'message' => $e->getMessage()
-        ], 500);
     }
-}
-
-
-
-    // Doanh thu theo tháng
-    public function doanhThuTheoThang()
+    //doanh thu theo tháng
+    public function doanhThuTheoThang(Request $request)
     {
-        $data = DB::table('thanh_toan')
+        $range = $this->rangeDate($request->from_date, $request->to_date);
+
+        $query = DB::table('thanh_toan')
+            ->when($range, fn($q) => $q->whereBetween('created_at', $range))
             ->select(
                 DB::raw('DATE_FORMAT(created_at, "%Y-%m") as thang'),
                 DB::raw('SUM(tong_tien_goc) as tong_doanh_thu')
             )
             ->groupBy(DB::raw('DATE_FORMAT(created_at, "%Y-%m")'))
-            ->orderBy('thang', 'asc')
+            ->orderBy('thang')
             ->get();
 
-        return response()->json(['status' => true, 'data' => $data]);
+        return response()->json(['status' => true, 'data' => $query]);
     }
 }
