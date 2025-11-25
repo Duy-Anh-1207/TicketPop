@@ -28,28 +28,27 @@ const Payment = () => {
 
   const handleThanhToanVNPAY = async () => {
     if (!datVe) {
-    message.error("Không tìm thấy thông tin vé!");
-    return;
-  }
+      message.error("Không tìm thấy thông tin vé!");
+      return;
+    }
 
-  try {
-    const { data } = await axios.post(
-      "http://127.0.0.1:8000/api/vnpay/create",   // <-- khớp route BE
-      {
-        dat_ve_id: datVe.id,
-        amount: Number(datVe.tong_tien),
-        return_url: window.location.origin + "/ket-qua-thanh-toan",
-      }
-    );
+    try {
+      const { data } = await axios.post(
+        "http://127.0.0.1:8000/api/vnpay/create", // <-- khớp route BE
+        {
+          dat_ve_id: datVe.id,
+          amount: Number(datVe.tong_tien),
+          return_url: window.location.origin + "/ket-qua-thanh-toan",
+        }
+      );
 
-    const url = data?.payment_url;
-    if (url) window.location.assign(url);
-    else message.error("Không nhận được liên kết thanh toán từ VNPAY");
-  } catch (e: any) {
-    message.error(e?.response?.data?.message || "Không thể thanh toán!");
-  }
+      const url = data?.payment_url;
+      if (url) window.location.assign(url);
+      else message.error("Không nhận được liên kết thanh toán từ VNPAY");
+    } catch (e: any) {
+      message.error(e?.response?.data?.message || "Không thể thanh toán!");
+    }
   };
-
 
   const datVeId = location.state?.datVeId;
   const [loading, setLoading] = useState(false);
@@ -218,7 +217,23 @@ const Payment = () => {
                 </span>
               </h3>
             </div>
+            <div className="voucher-section">
+              <div className="voucher-input-wrapper">
+                <input
+                  type="text"
+                  placeholder="Nhập mã voucher"
+                  className="voucher-input"
+                />
+                <Button
+                  type="default"
+                  size="large"
+                  className="voucher-apply-btn"
+                >
+                  Áp dụng
+                </Button>
+              </div>
 
+            </div>
             <div className="payment-methods">
               <h4>Phương thức thanh toán</h4>
               <Button
@@ -242,7 +257,6 @@ const Payment = () => {
                   alt="MoMo"
                   style={{ width: 28, height: 28, borderRadius: "50%" }}
                 />
-
                 Thanh toán qua MoMo
               </Button>
             </div>
