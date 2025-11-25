@@ -22,8 +22,8 @@ axiosClient.interceptors.request.use((config) => {
 // ======================= API ĐẶT VÉ =======================
 
 // 1. Danh sách vé đã đặt (GET /dat-ve)
-export const getDanhSachDatVe = async () => {
-  const { data } = await axiosClient.get("/dat-ve");
+export const getDanhSachDatVe = async (params?: any) => {
+  const { data } = await axiosClient.get("/dat-ve", { params });
   return data;
 };
 
