@@ -194,36 +194,46 @@ class DatVeController extends Controller
         }
     }
 
-    /**
-     * Danh sách vé đã thanh toán (dựa trên bảng thanh_toan)
-     */
-    public function danhSachDatVe()
+    public function danhSachDatVe(Request $request)
     {
-        $thanhToan = ThanhToan::with([
+        $query = ThanhToan::with([
+            'datVe.lichChieu:id,gio_chieu,phim_id,phong_id',
             'datVe.lichChieu.phim:id,ten_phim',
             'datVe.lichChieu.phong:id,ten_phong',
-            'phuongThucThanhToan:id,ten'
-        ])->orderByDesc('created_at')->get();
+            'phuongThucThanhToan:id,ten',
+        ]);
 
-        $data = $thanhToan->map(function ($item) {
-            return [
-                'id' => $item->id,
-                'ma_don_hang' => $item->ma_giao_dich,
-                'dat_ve_id' => $item->datVe?->id,
-                'email' => $item->email,
-                'phim' => $item->datVe->lichChieu->phim->ten_phim ?? null,
-                'ngay_dat' => $item->created_at->format('d/m/Y'),
-                'thanh_toan' => $item->phuongThucThanhToan->ten ?? 'Không rõ',
-                'tong_tien' => number_format($item->tong_tien_goc ?? 0, 0, ',', '.') . ' đ',
-            ];
-        });
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
 
-        return response()->json(['message' => 'Danh sách vé đã thanh toán', 'data' => $data], 200);
+        if ($request->filled('phim_id')) {
+            $query->whereHas('datVe.lichChieu', function ($q) use ($request) {
+                $q->where('phim_id', $request->phim_id);
+            });
+        }
+
+        $thanhToan = $query->orderByDesc('created_at')
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'ma_don_hang' => $item->ma_giao_dich,
+                    'dat_ve_id' => $item->datVe?->id,
+                    'email' => $item->email,
+                    'phim' => $item->datVe?->lichChieu?->phim?->ten_phim ?? 'Không xác định',
+                    'ngay_dat' => $item->created_at->format('d/m/Y H:i'),
+                    'thanh_toan' => $item->phuongThucThanhToan?->ten ?? 'Không rõ',
+                    'tong_tien' => number_format($item->tong_tien_goc, 0, ',', '.') . ' đ',
+                ];
+            });
+
+        return response()->json([
+            'message' => 'Danh sách vé đã thanh toán',
+            'data' => $thanhToan
+        ]);
     }
 
-    /**
-     * In vé theo mã giao dịch (ma_giao_dich)
-     */
     public function inVe($maGiaoDich)
     {
         try {
