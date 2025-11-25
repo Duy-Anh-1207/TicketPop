@@ -6,7 +6,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recha
 
 const API_URL = "http://localhost:8000/api/";
 
-// 🧩 Gọi API mới theo route /dashbroad
+interface RevenueItem {
+  label: string;
+  revenue: string | number;
+}
+
 const fetchDashboard = async () => {
   const [doanhThu, veBan, khachHang, doAn, topPhim] = await Promise.all([
     axios.get(`${API_URL}dashbroad/doanh-thu?type=month`),
@@ -17,7 +21,7 @@ const fetchDashboard = async () => {
   ]);
 
   return {
-    doanhThu: doanhThu.data.data || [],
+    doanhThu: (doanhThu.data.data || []) as RevenueItem[],
     tongVeBan: veBan.data.tong_ve_ban ?? 0,
     khachHangMoi: khachHang.data.khach_hang_moi ?? 0,
     doAnBanRa: doAn.data.tong_do_an_ban_ra ?? 0,
@@ -35,30 +39,34 @@ const Dashboard: React.FC = () => {
     return <div className="text-center mt-4">Đang tải dữ liệu...</div>;
 
   const tongDoanhThu =
-    data?.doanhThu?.reduce((sum, x) => sum + (x.revenue || 0), 0) ?? 0;
+    data?.doanhThu?.reduce((sum: number, x: any) => sum + (Number(x.revenue) || 0), 0) ?? 0;
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  };
 
   const stats = [
     {
       label: "DOANH THU",
-      value: `${tongDoanhThu.toLocaleString()} đ`,
+      value: formatCurrency(tongDoanhThu),
       color: "green",
       icon: "💰",
     },
     {
       label: "ĐƠN VÉ",
-      value: (data?.tongVeBan ?? 0).toLocaleString(),
+      value: (data?.tongVeBan ?? 0).toLocaleString('vi-VN'),
       color: "blue",
       icon: "🎟️",
     },
     {
       label: "KHÁCH HÀNG MỚI",
-      value: (data?.khachHangMoi ?? 0).toLocaleString(),
+      value: (data?.khachHangMoi ?? 0).toLocaleString('vi-VN'),
       color: "purple",
       icon: "👥",
     },
     {
       label: "ĐỒ ĂN BÁN RA",
-      value: (data?.doAnBanRa ?? 0).toLocaleString(),
+      value: (data?.doAnBanRa ?? 0).toLocaleString('vi-VN'),
       color: "orange",
       icon: "🍿",
     },
@@ -68,7 +76,6 @@ const Dashboard: React.FC = () => {
     <div className="thongke-container">
       <h1 className="title">Tổng Quan</h1>
 
-      {/* 4 ô thống kê */}
       <div className="thongke-grid">
         {stats.map((item, i) => (
           <div key={i} className={`card card-${item.color}`}>
@@ -84,8 +91,6 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className="compare-text">So với tháng trước</div>
-
-      {/* Biểu đồ doanh thu */}
       <div className="chart-card">
         <h2 className="chart-title">📊 Doanh thu theo thời gian</h2>
         <ResponsiveContainer width="100%" height={300}>
@@ -116,13 +121,13 @@ const Dashboard: React.FC = () => {
                 <p>
                   Doanh thu:{" "}
                   <span className="highlight green">
-                    {(phim.tong_doanh_thu ?? 0).toLocaleString()} đ
+                    {Number(phim.tong_doanh_thu ?? 0).toLocaleString('vi-VN')} đ
                   </span>
                 </p>
                 <p>
                   Số vé:{" "}
                   <span className="highlight">
-                    {(phim.tong_ve ?? 0).toLocaleString()}
+                    {(phim.tong_ve ?? 0).toLocaleString('vi-VN')}
                   </span>
                 </p>
               </div>
