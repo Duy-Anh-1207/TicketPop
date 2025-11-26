@@ -118,7 +118,6 @@ class DatVeController extends Controller
                 'tong_tien' => $tongTien,
             ]);
 
-            // Lưu chi tiết ghế và cập nhật check_ghe -> dang_dat (tạm giữ)
             foreach ($checkGheList as $checkGhe) {
                 DatVeChiTiet::create([
                     'dat_ve_id' => $datVe->id,
@@ -127,7 +126,7 @@ class DatVeController extends Controller
                 ]);
 
                 $checkGhe->update([
-                    'trang_thai' => 'dang_dat', // tam giữ
+                    'trang_thai' => 'da_dat', // tam giữ
                     'nguoi_dung_id' => (string)$user->id,
                     'expires_at' => now()->addMinutes(10),
                 ]);
