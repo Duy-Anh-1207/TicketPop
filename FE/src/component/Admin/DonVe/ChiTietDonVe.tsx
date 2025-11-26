@@ -129,15 +129,17 @@ const ChiTietDonVeRap = () => {
 
       {/* Vé rạp ẩn để in PDF */}
       <div style={{ display: "none" }}>
-        <VeRap
-          maDonHang={payload.ma_don_hang}
-          khachHang={payload.khach_hang}
-          phim={payload.phim}
-          phong={payload.phong}
-          gioChieu={`${payload.gio_chieu} - ${payload.gio_ket_thuc}`}
-          danhSachGhe={danhSachGhe} // gộp chung
-          tongTien={payload.tong_tien}
-        />
+        {danhSachGhe.map((ghe: any, index: number) => (
+          <VeRap
+            key={index}
+            maDonHang={payload.ma_don_hang}
+            khachHang={payload.khach_hang}
+            phim={payload.phim}
+            phong={payload.phong}
+            gioChieu={`${payload.gio_chieu} - ${payload.gio_ket_thuc}`}
+            ghe={ghe}    // 🔥 mỗi vé = 1 ghế
+          />
+        ))}
       </div>
     </div>
   );

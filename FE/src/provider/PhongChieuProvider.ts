@@ -56,6 +56,12 @@ export const deletePhongChieu = async (id: number | string) => {
   return data;
 };
 
+export const changeStatusPhongChieu = async (id: number | string) => {
+  const { data } = await axiosClient.put(`/room/${id}/change-status`);
+  return data;
+};
+
+
 // ==========================
 // XỬ LÝ LỖI CHUNG
 // ==========================

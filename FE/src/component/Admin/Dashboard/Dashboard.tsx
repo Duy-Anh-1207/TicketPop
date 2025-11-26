@@ -107,34 +107,46 @@ const Dashboard: React.FC = () => {
       <div className="topphim-section">
         <h2 className="section-title">🎬 Top 5 Phim Có Doanh Thu Cao Nhất</h2>
         <div className="topphim-grid">
-          {data?.topPhim?.slice(0, 5).map((phim: any, i: number) => (
-            <div key={i} className="phim-card">
-              <div className="phim-header">
-                #{i + 1} {phim.ten_phim}
+          {data?.topPhim?.slice(0, 5).map((phim: any, i: number) => {
+
+            const imageUrl = phim.anh_poster
+              ? phim.anh_poster.startsWith("http")
+                ? phim.anh_poster
+                : `${import.meta.env.VITE_API_BASE_URL}/storage/${phim.anh_poster}`
+              : null;
+
+            return (
+              <div key={i} className="phim-card">
+                <div className="phim-header">
+                  #{i + 1} {phim.ten_phim}
+                </div>
+
+                <img
+                  src={imageUrl || "https://via.placeholder.com/150x200"}
+                  alt={phim.ten_phim}
+                  className="phim-img"
+                />
+
+                <div className="phim-body">
+                  <p>
+                    Doanh thu:{" "}
+                    <span className="highlight green">
+                      {Number(phim.tong_doanh_thu ?? 0).toLocaleString("vi-VN")} đ
+                    </span>
+                  </p>
+                  <p>
+                    Số vé:{" "}
+                    <span className="highlight">
+                      {(phim.tong_ve ?? 0).toLocaleString("vi-VN")}
+                    </span>
+                  </p>
+                </div>
               </div>
-              <img
-                src={phim.anh_poster || "https://via.placeholder.com/150x200"}
-                alt={phim.ten_phim}
-                className="phim-img"
-              />
-              <div className="phim-body">
-                <p>
-                  Doanh thu:{" "}
-                  <span className="highlight green">
-                    {Number(phim.tong_doanh_thu ?? 0).toLocaleString('vi-VN')} đ
-                  </span>
-                </p>
-                <p>
-                  Số vé:{" "}
-                  <span className="highlight">
-                    {(phim.tong_ve ?? 0).toLocaleString('vi-VN')}
-                  </span>
-                </p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
+
 
       <p className="footer">
         ©2025 TicketsPop. Hand crafted & made by TicketsPop.

@@ -4,6 +4,7 @@ import {
     createPhongChieu,
     updatePhongChieu,
     deletePhongChieu,
+    changeStatusPhongChieu,
 } from "../provider/PhongChieuProvider";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -108,3 +109,31 @@ export const useDeletePhongChieu = () => {
         },
     });
 };
+
+// 🔹 Chuyển trạng thái phòng chiếu (Active ↔ Inactive)
+export const useChangeStatusPhongChieu = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: number | string) => changeStatusPhongChieu(id),
+        onSuccess: (data) => {
+            Swal.fire(
+                "🔄 Thành công!",
+                `Trạng thái phòng đã đổi sang: ${
+                    data?.data?.trang_thai_moi == 1 ? "Hoạt động" : "Ngừng hoạt động"
+                }`,
+                "success"
+            );
+            queryClient.invalidateQueries({ queryKey: ["room"] });
+        },
+        onError: (error: unknown) => {
+            const err = error as { response?: { data?: { message?: string } } };
+            Swal.fire(
+                "❌ Lỗi!",
+                err.response?.data?.message || "Không thể đổi trạng thái phòng!",
+                "error"
+            );
+        },
+    });
+};
+

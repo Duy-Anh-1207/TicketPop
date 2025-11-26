@@ -45,6 +45,9 @@ Route::post('/room', [RoomController::class, 'store']);
 Route::get('/room/{id}', [RoomController::class, 'show']);
 Route::put('/room/{id}', [RoomController::class, 'update']);
 Route::delete('/room/{id}', [RoomController::class, 'destroy']);
+Route::put('/room/{id}/change-status', [RoomController::class, 'changeStatus']);
+
+
 
 Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
