@@ -29,7 +29,7 @@ class VnpayController extends Controller
 
         // Lấy id phương thức thanh toán VNPAY
         $vnpId = PhuongThucThanhToan::where('nha_cung_cap', 'VNPAY')->value('id') ?? 2;
-
+        $maGiaoDich = str_pad(random_int(0, 99999999), 8, '0', STR_PAD_LEFT);
         // Tạo bản ghi thanh_toan
         $tt = ThanhToan::create([
             'dat_ve_id'                 => $datVe->id,
@@ -38,8 +38,9 @@ class VnpayController extends Controller
             'tong_tien_goc'             => (int)$req->amount,
             'email'                     => $email,
             'ho_ten'                    => $hoTen,
-            'ma_giao_dich'              => 'temp_' . Str::upper(Str::random(10)),
-        ]);
+           
+            'ma_giao_dich' => $maGiaoDich,
+        ]); 
 
         // ============ CẤU HÌNH VNPAY ============
         $vnp_Url        = config('services.vnpay.payment_url');
@@ -88,7 +89,7 @@ class VnpayController extends Controller
         $paymentUrl = $vnp_Url . "?" . $query . "vnp_SecureHash=" . $vnpSecureHash;
 
         // Cập nhật lại mã giao dịch nội bộ = id thanh_toan
-        $tt->update(['ma_giao_dich' => $tt->id]);
+        // $tt->update(['ma_giao_dich' => $tt->id]);
 
         return response()->json([
             'payment_url' => $paymentUrl,
