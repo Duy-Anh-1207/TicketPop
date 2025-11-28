@@ -51,7 +51,8 @@ class CheckGheController extends Controller
                 'hang' => $item->ghe->hang,
                 'cot' => $item->ghe->cot,
                 'loai_ghe_id' => $item->ghe->loai_ghe_id,
-                'trang_thai' => $item->trang_thai
+                'trang_thai' => $item->trang_thai,
+                'trang_thai_ghe' => $item->ghe->trang_thai,
             ];
         })->filter()->values();
 
