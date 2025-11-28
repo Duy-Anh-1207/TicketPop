@@ -1,19 +1,22 @@
 import {
   useDeletePhongChieu,
-  useUpdatePhongChieu,
+  // useUpdatePhongChieu,
   useListPhongChieuTH0,
+  useChangeStatusPhongChieu,
 } from "../../../hook/PhongChieuHook";
 import Swal from "sweetalert2";
 import type { PhongChieu } from "../../../types/phongchieu";
 import { useState, useMemo } from "react";
 import SoDoGhe from "./SoDoGhe";
 
-const ITEMS_PER_PAGE = 5; 
+const ITEMS_PER_PAGE = 5;
 
 export default function PhongChieuChuaXuatBanList() {
   const { data: phongchieus, isLoading } = useListPhongChieuTH0();
   const deletePhongChieu = useDeletePhongChieu();
-  const updatePhongChieu = useUpdatePhongChieu();
+  // const updatePhongChieu = useUpdatePhongChieu();
+  const changeStatusPhongChieu = useChangeStatusPhongChieu();
+
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -23,7 +26,7 @@ export default function PhongChieuChuaXuatBanList() {
   const [currentPage, setCurrentPage] = useState(1);
 
   const filteredPhongChieus = useMemo(() => {
-    if (!phongchieus) return []; 
+    if (!phongchieus) return [];
     return phongchieus.filter((pc: PhongChieu) =>
       pc.ten_phong.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -53,30 +56,45 @@ export default function PhongChieuChuaXuatBanList() {
       if (result.isConfirmed) deletePhongChieu.mutate(id);
     });
   };
-  const handleUpdate = (id: number, currentName: string) => {
+  // const handleUpdate = (id: number, currentName: string) => {
+  //   Swal.fire({
+  //     title: "Cập nhật tên phòng chiếu",
+  //     input: "text",
+  //     inputValue: currentName,
+  //     inputPlaceholder: "Nhập tên mới...",
+  //     showCancelButton: true,
+  //     confirmButtonText: "Lưu",
+  //     cancelButtonText: "Hủy",
+  //     preConfirm: (value) => {
+  //       if (!value.trim()) {
+  //         Swal.showValidationMessage("Tên phòng chiếu không được để trống!");
+  //       }
+  //       return value;
+  //     },
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       updatePhongChieu.mutate({
+  //         id,
+  //         values: { ten_phong: result.value },
+  //       });
+  //     }
+  //   });
+  // };
+
+  const handleChangeStatus = (id: number) => {
     Swal.fire({
-      title: "Cập nhật tên phòng chiếu",
-      input: "text",
-      inputValue: currentName,
-      inputPlaceholder: "Nhập tên mới...",
+      title: "Xuất bản phòng chiếu?",
+      text: "Phòng sẽ được chuyển sang trạng thái hoạt động.",
+      icon: "question",
       showCancelButton: true,
-      confirmButtonText: "Lưu",
+      confirmButtonText: "Xuất bản",
       cancelButtonText: "Hủy",
-      preConfirm: (value) => {
-        if (!value.trim()) {
-          Swal.showValidationMessage("Tên phòng chiếu không được để trống!");
-        }
-        return value;
-      },
     }).then((result) => {
-      if (result.isConfirmed) {
-        updatePhongChieu.mutate({
-          id,
-          values: { ten_phong: result.value },
-        });
-      }
+      if (result.isConfirmed) changeStatusPhongChieu.mutate(id);
     });
   };
+
+
   const viewSoDoGhe = (id: number) => {
     setSelectedId(id);
     setOpen(true);
@@ -86,7 +104,7 @@ export default function PhongChieuChuaXuatBanList() {
     <div className="container p-4">
       <h4 className="mb-4 text-center">🎥 Phòng chiếu chưa xuất bản</h4>
       <div className="mb-3">
-        <input 
+        <input
           type="text"
           className="form-control"
           placeholder="Tìm theo tên phòng..."
@@ -138,14 +156,13 @@ export default function PhongChieuChuaXuatBanList() {
                         Xem bản đồ ghế
                       </button>
                       <button
-                        className="btn btn-outline-primary btn-sm"
-                        onClick={() => handleUpdate(pc.id, pc.ten_phong)}
-                        disabled={updatePhongChieu.isPending}
+                        className="btn btn-outline-success btn-sm"
+                        onClick={() => handleChangeStatus(pc.id)}
+                        disabled={changeStatusPhongChieu.isPending}
                       >
-                        {updatePhongChieu.isPending
-                          ? "Đang lưu..."
-                          : "Cập nhật"}
+                        {changeStatusPhongChieu.isPending ? "Đang xử lý..." : "Xuất bản"}
                       </button>
+
                       <button
                         className="btn btn-outline-danger btn-sm"
                         onClick={() => handleDelete(pc.id)}
@@ -171,8 +188,8 @@ export default function PhongChieuChuaXuatBanList() {
         <nav>
           <ul className="pagination justify-content-center">
             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <button 
-                className="page-link" 
+              <button
+                className="page-link"
                 onClick={() => setCurrentPage(p => p - 1)}
                 disabled={currentPage === 1}
               >
@@ -183,8 +200,8 @@ export default function PhongChieuChuaXuatBanList() {
               <span className="page-link">{currentPage} / {totalPages}</span>
             </li>
             <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <button 
-                className="page-link" 
+              <button
+                className="page-link"
                 onClick={() => setCurrentPage(p => p + 1)}
                 disabled={currentPage === totalPages}
               >

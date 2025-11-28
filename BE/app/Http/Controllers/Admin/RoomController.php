@@ -61,7 +61,7 @@ class RoomController extends Controller
         }
 
         $room = Room::create($data);
-        
+
         $loaiThuong = LoaiGhe::firstOrCreate(['ten_loai_ghe' => 'Ghế Thường']);
         $loaiVIP = LoaiGhe::firstOrCreate(['ten_loai_ghe' => 'Ghế Vip']);
 
@@ -167,6 +167,28 @@ class RoomController extends Controller
         return response()->json([
             'message' => 'Xóa phòng chiếu thành công!',
             'data' => $room
+        ], 200);
+    }
+    public function changeStatus($id)
+    {
+        $room = Room::find($id);
+
+        if (!$room) {
+            return response()->json([
+                'message' => 'Không tìm thấy phòng chiếu!'
+            ], 404);
+        }
+
+        // Toggle trạng thái
+        $room->trang_thai = $room->trang_thai == 1 ? 0 : 1;
+        $room->save();
+
+        return response()->json([
+            'message' => 'Cập nhật trạng thái phòng chiếu thành công!',
+            'data' => [
+                'id' => $room->id,
+                'trang_thai_moi' => $room->trang_thai
+            ]
         ], 200);
     }
 }

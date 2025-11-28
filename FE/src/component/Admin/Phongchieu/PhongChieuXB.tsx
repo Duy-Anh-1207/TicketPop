@@ -1,12 +1,15 @@
 import { useState, useMemo } from "react";
-import { useListPhongChieuTH1 } from "../../../hook/PhongChieuHook";
+import { useListPhongChieuTH1, useDeletePhongChieu } from "../../../hook/PhongChieuHook";
 import type { PhongChieu } from "../../../types/phongchieu";
 import SoDoGhe from "./SoDoGhe";
+import Swal from "sweetalert2";
 
 const ITEMS_PER_PAGE = 5;
 
 export default function PhongChieuList() {
   const { data: phongChieuDaXuatBan, isLoading } = useListPhongChieuTH1();
+  const deletePhongChieu = useDeletePhongChieu();
+
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -28,12 +31,26 @@ export default function PhongChieuList() {
 
   const totalPages = Math.ceil(filteredPhongChieus.length / ITEMS_PER_PAGE);
 
-
   if (isLoading) return <p className="text-center mt-4">Đang tải danh sách phòng chiếu...</p>;
 
   const viewSoDoGhe = (id: number) => {
     setSelectedId(id);
     setOpen(true);
+  };
+
+  const handleDelete = (id: number) => {
+    Swal.fire({
+      title: "Xác nhận xóa?",
+      text: "Hành động này không thể hoàn tác!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deletePhongChieu.mutate(id);
+      }
+    });
   };
 
   return (
@@ -72,7 +89,6 @@ export default function PhongChieuList() {
               paginatedPhongChieus.map((pc: PhongChieu, index: number) => (
                 <tr key={pc.id}>
                   <td className="text-center">
-
                     {index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}
                   </td>
                   <td>{pc.ten_phong}</td>
@@ -93,6 +109,15 @@ export default function PhongChieuList() {
                       >
                         Xem bản đồ ghế
                       </button>
+
+                      {/* Nút XÓA thêm mới */}
+                      <button
+                        className="btn btn-outline-danger btn-sm"
+                        onClick={() => handleDelete(pc.id)}
+                        disabled={deletePhongChieu.isPending}
+                      >
+                        {deletePhongChieu.isPending ? "Đang xóa..." : "Xóa"}
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -111,10 +136,10 @@ export default function PhongChieuList() {
       {totalPages > 1 && (
         <nav>
           <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
               <button
                 className="page-link"
-                onClick={() => setCurrentPage(p => p - 1)}
+                onClick={() => setCurrentPage((p) => p - 1)}
                 disabled={currentPage === 1}
               >
                 Trước
@@ -123,10 +148,10 @@ export default function PhongChieuList() {
             <li className="page-item active">
               <span className="page-link">{currentPage} / {totalPages}</span>
             </li>
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
               <button
                 className="page-link"
-                onClick={() => setCurrentPage(p => p + 1)}
+                onClick={() => setCurrentPage((p) => p + 1)}
                 disabled={currentPage === totalPages}
               >
                 Sau

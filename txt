@@ -6,10 +6,9 @@ NGUYEN VAN A
 OTP
 
 
-nhân viên 
-phamduong06102005@gmail.com
-duong123
-
-admin
-duongptph50824@gmail.com
-duong11
+-- TK TEST VNPAY --
+Ngân hàng: NCB
+Số thẻ: 9704198526191432198
+Tên chủ thẻ:NGUYEN VAN A
+Ngày phát hành:07/15
+Mật khẩu OTP:123456

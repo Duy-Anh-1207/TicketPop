@@ -63,7 +63,7 @@ const ListDonVe = () => {
       render: (_: any, record: any) => (
         <button
           className="btn btn-primary btn-sm"
-          onClick={() => navigate(`/admin/ve/${record.id}`)}
+          onClick={() => navigate(`/admin/ve/${record.ma_don_hang}`)}
         >
           Xem chi tiết
         </button>
