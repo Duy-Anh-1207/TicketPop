@@ -103,7 +103,7 @@ Route::middleware('auth:sanctum')->delete('/dat-ve/{id}', [DatVeController::clas
 Route::get('/banners', [BannerController::class, 'index']);
 
 Route::post('/banners', [BannerController::class, 'store']);
-Route::get('/banners/{id}', [BannerController::class, 'show']);
+Route::get('/banners/{id}', [BannerController::class, 'show']); 
 Route::put('/banners/{id}', [BannerController::class, 'update']);
 Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
 
