@@ -33,4 +33,7 @@ class DatVe extends Model
     {
         return $this->hasOne(ThanhToan::class, 'dat_ve_id');
     }
+    public function maGiamGia(){
+        return $this->belongsTo(MaGiamGia::class, 'ma_giam_gia_id');
+    }
 }
