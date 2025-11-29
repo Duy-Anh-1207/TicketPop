@@ -99,7 +99,9 @@ const Booking = () => {
 
   // ===== Kiểm tra rule: không để 1 ghế trống giữa 2 ghế occupied (da_dat hoặc selected) =====
   const canSelectWithoutCreatingIsolated = (gheToToggle: any) => {
-    const isAlreadySelected = selectedSeats.some((s) => s.id === gheToToggle.id);
+    const isAlreadySelected = selectedSeats.some(
+      (s) => s.id === gheToToggle.id
+    );
     // Nếu đang bỏ chọn thì luôn cho phép
     if (isAlreadySelected) return true;
 
@@ -109,7 +111,9 @@ const Booking = () => {
 
     // Duyệt từng hàng, kiểm tra pattern Occupied - Empty - Occupied
     for (const hangKey of Object.keys(hangList)) {
-      const row = [...hangList[hangKey]].sort((a: any, b: any) => a.cot - b.cot);
+      const row = [...hangList[hangKey]].sort(
+        (a: any, b: any) => a.cot - b.cot
+      );
 
       // Tạo set các ghế occupied (da_dat hoặc selected trong simulation)
       const occupied = new Set<number>();
@@ -131,7 +135,7 @@ const Booking = () => {
 
         if (leftOccupied && rightOccupied && !midOccupied) {
           // BUT: nếu mid là ghế không tồn tại (không xảy ra vì row list là ghế liên tiếp),
-          // hoặc mid đang là ghế bị block (ví dụ không bán) thì có thể khác, 
+          // hoặc mid đang là ghế bị block (ví dụ không bán) thì có thể khác,
           // ở đây ta coi mọi ghế trong row là khả dụng trừ khi trang_thai === 'da_dat'.
           return false; // tạo ra ghế trống đơn lẻ => không cho chọn
         }
@@ -153,7 +157,9 @@ const Booking = () => {
     // Nếu chọn (không phải bỏ chọn) thì kiểm tra rule cấm để trống 1 ghế giữa 2 occupied
     if (!isSelected) {
       if (!canSelectWithoutCreatingIsolated(ghe)) {
-        message.warning("Không thể chọn: sẽ tạo 1 ghế trống nằm giữa 2 ghế đã/đang đặt!");
+        message.warning(
+          "Không thể chọn: sẽ tạo 1 ghế trống nằm giữa 2 ghế đã/đang đặt!"
+        );
         return;
       }
     }
@@ -163,8 +169,7 @@ const Booking = () => {
     } else {
       const giaVe = giaVeList.find((gv) => gv.loai_ghe_id === ghe.loai_ghe_id);
       const gia = giaVe?.gia_ve ?? 0;
-      if (gia === 0)
-        message.warning("Không tìm thấy giá vé cho loại ghế này!");
+      if (gia === 0) message.warning("Không tìm thấy giá vé cho loại ghế này!");
       setSelectedSeats([...selectedSeats, { ...ghe, gia }]);
     }
   };
@@ -327,6 +332,8 @@ const Booking = () => {
                             className={`seat-item ${
                               ghe.trang_thai === "da_dat"
                                 ? "booked"
+                                : ghe.trang_thai_ghe === 0
+                                ? "broken"
                                 : isSelected
                                 ? "selected"
                                 : ghe.loai_ghe_id === 2
@@ -367,7 +374,9 @@ const Booking = () => {
                         src={
                           food.image.startsWith("http")
                             ? food.image
-                            : `${import.meta.env.VITE_API_BASE_URL}${food.image}`
+                            : `${import.meta.env.VITE_API_BASE_URL}${
+                                food.image
+                              }`
                         }
                         alt={food.ten_do_an}
                         className="food-img"
