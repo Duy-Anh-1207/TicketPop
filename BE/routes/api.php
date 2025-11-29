@@ -216,9 +216,10 @@ Route::get('/client/loc-phim', [LocPhimController::class, 'index']);
 
 Route::post('/thanhtoan/momo', [MomoController::class, 'create']);
 Route::put('/thanh-toan/{id}/cap-nhat-trang-thai', [MomoController::class, 'capNhatTrangThai']);
-// Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
+Route::get('/thanhtoan/momo/return', [MomoController::class, 'return']);
 Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
 Route::post('/thanhtoan/momo/rollback-ghe', [MomoController::class, 'huyGhe']);
+Route::post('thanh-toan/quet-ve', [MomoController::class, 'capNhatTrangThai']);
 Route::prefix('vnpay')->group(function () {
     Route::post('/create', [VnpayController::class, 'create']);  
     Route::get('/return', [VnpayController::class, 'return']);   
