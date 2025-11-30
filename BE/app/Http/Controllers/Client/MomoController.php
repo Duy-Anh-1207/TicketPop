@@ -11,6 +11,8 @@ use App\Models\DatVe;
 use App\Models\PhuongThucThanhToan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ThanhToanThanhCong;
 
 // QR CODE
 use Endroid\QrCode\QrCode;
@@ -33,7 +35,7 @@ class MomoController extends Controller
             'ma_giam_gia_id' => 'nullable|integer',
         ]);
 
-        $datVe = DatVe::with(['nguoiDung:id,ten,email', 'chiTiet'])->findOrFail($req->dat_ve_id);
+        $datVe = DatVe::with(['nguoiDung:id,ten,email', 'chiTiet.ghe'])->findOrFail($req->dat_ve_id);
         $user  = $datVe->nguoiDung;
 
         $email = $user->email ?? null;
@@ -130,6 +132,7 @@ class MomoController extends Controller
     public function return(Request $req)
     {
         // Giải extraData (nếu có)
+        $tt = null; 
         $extra = null;
         if (!empty($req->extraData)) {
             $extra = json_decode(base64_decode($req->extraData), true);
@@ -155,11 +158,19 @@ class MomoController extends Controller
         // ✅ THÀNH CÔNG → Fallback tạo thanh_toan nếu IPN không chạy được (ví dụ localhost)
         if ((int)$req->resultCode === 0 && $datVeId) {
 
-            $datVe = DatVe::with(['chiTiet'])->find($datVeId);
+            $datVe = DatVe::with(['chiTiet.ghe'])->find($datVeId);
 
             if ($datVe && !ThanhToan::where('dat_ve_id', $datVe->id)->exists()) {
 
-                $gheIds = $datVe->chiTiet->pluck('ghe_id')->toArray();
+                $gheNames = $datVe->chiTiet->map(function ($ct) {
+    if ($ct->ghe) {
+        // ưu tiên tên hiển thị A1, B2...
+        return $ct->ghe->ten_hien_thi ?? $ct->ghe->ten_ghe ?? $ct->ghe_id;
+    }
+    return $ct->ghe_id;
+})->toArray();
+                $gheIds   = $datVe->chiTiet->pluck('ghe_id')->toArray();
+                $gheText = implode(', ', $gheNames);
 
                 DB::beginTransaction();
                 try {
@@ -200,7 +211,7 @@ class MomoController extends Controller
                         "Mã vé: {$datVe->id}\n" .
                         "Khách hàng: {$tenKhach}\n" .
                         ($emailKH ? "Email: {$emailKH}\n" : "") .
-                        "Ghế: " . implode(', ', $gheIds) . "\n" .
+                        "Ghế: " . $gheText . "\n" .
                         ($suatChieu ? "Suất chiếu: {$suatChieu}\n" : "") .
                         "Tổng tiền: {$tongTien} VND\n" .
                         "Trạng thái: ĐÃ THANH TOÁN\n" .
@@ -226,7 +237,10 @@ class MomoController extends Controller
                 }
             }
         }
-
+        // Sau khi commit xong mới gửi mail (fallback)
+        if ($tt && $tt->email) {
+            Mail::to($tt->email)->send(new ThanhToanThanhCong($tt));
+        }
         // Redirect về FE
         $status  = ((int)$req->resultCode === 0) ? 'success' : 'fail';
         $message = $req->message ?? '';
@@ -251,12 +265,20 @@ class MomoController extends Controller
             return response()->json(['message' => 'Thiếu dữ liệu extraData'], 400);
         }
 
-        $datVe = DatVe::with(['chiTiet'])->find($extra['dat_ve_id']);
+        $datVe = DatVe::with(['chiTiet.ghe'])->find($extra['dat_ve_id']);
         if (!$datVe) {
             return response()->json(['message' => 'Không tìm thấy đơn đặt vé'], 404);
         }
 
-        $gheIds = $datVe->chiTiet->pluck('ghe_id')->toArray();
+        $gheNames = $datVe->chiTiet->map(function ($ct) {
+    if ($ct->ghe) {
+        // ưu tiên tên hiển thị A1, B2...
+        return $ct->ghe->ten_hien_thi ?? $ct->ghe->ten_ghe ?? $ct->ghe_id;
+    }
+    return $ct->ghe_id;
+})->toArray();
+        $gheIds   = $datVe->chiTiet->pluck('ghe_id')->toArray();
+        $gheText = implode(', ', $gheNames);
 
         // ❌ THANH TOÁN THẤT BẠI → trả ghế, KHÔNG lưu thanh_toan
         if ((int)$req->resultCode !== 0) {
@@ -322,7 +344,7 @@ class MomoController extends Controller
                     "Mã vé: {$datVe->id}\n" .
                     "Khách hàng: {$tenKhach}\n" .
                     ($emailKH ? "Email: {$emailKH}\n" : "") .
-                    "Ghế: " . implode(', ', $gheIds) . "\n" .
+                    "Ghế: " . $gheText . "\n" .
                     ($suatChieu ? "Suất chiếu: {$suatChieu}\n" : "") .
                     "Tổng tiền: {$tongTien} VND\n" .
                     "Trạng thái: ĐÃ THANH TOÁN\n" .
@@ -343,7 +365,12 @@ class MomoController extends Controller
             }
 
             DB::commit();
-            return response()->json(['message' => 'Thanh toán thành công, đã tạo/cập nhật thanh toán và QR.']);
+            // Gửi email sau khi commit
+            if ($tt->email) {
+                Mail::to($tt->email)->send(new ThanhToanThanhCong($tt));
+            }
+
+            return response()->json(['message' => 'Thanh toán thành công, đã tạo/cập nhật thanh toán, QR và gửi email.']);
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
@@ -378,36 +405,36 @@ class MomoController extends Controller
     public function capNhatTrangThai(Request $request)
     {
         $request->validate([
-        'thanh_toan_id' => 'required|integer',
-        'da_quet'       => 'required|boolean',
-    ]);
+            'thanh_toan_id' => 'required|integer',
+            'da_quet'       => 'required|boolean',
+        ]);
 
-    // Tìm thanh toán theo ID
-    $thanhToan = ThanhToan::find($request->thanh_toan_id);
+        // Tìm thanh toán theo ID
+        $thanhToan = ThanhToan::find($request->thanh_toan_id);
 
-    if (!$thanhToan) {
+        if (!$thanhToan) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy thanh toán'
+            ], 404);
+        }
+
+        // Nếu đã quét rồi thì báo luôn
+        if ($thanhToan->da_quet) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vé đã được quét trước đó',
+                'data'    => $thanhToan
+            ]);
+        }
+
+        $thanhToan->da_quet = $request->da_quet;
+        $thanhToan->save();
+
         return response()->json([
-            'success' => false,
-            'message' => 'Không tìm thấy thanh toán'
-        ], 404);
-    }
-
-    // Nếu đã quét rồi thì báo luôn
-    if ($thanhToan->da_quet) {
-        return response()->json([
-            'success' => false,
-            'message' => 'Vé đã được quét trước đó',
+            'success' => true,
+            'message' => 'Quét vé thành công',
             'data'    => $thanhToan
         ]);
-    }
-
-    $thanhToan->da_quet = $request->da_quet;
-    $thanhToan->save();
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Quét vé thành công',
-        'data'    => $thanhToan
-    ]);
     }
 }
