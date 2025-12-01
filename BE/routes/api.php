@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\GiaVeController;
 use App\Http\Controllers\Client\CheckGheController;
 use App\Http\Controllers\Client\MomoController;
 use App\Http\Controllers\Client\VnpayController;
+use App\Http\Controllers\Admin\QuenMatKhauController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -204,6 +205,9 @@ Route::post('/gui-lai-ma', [DangKyController::class, 'guiLaiMa']);
 Route::post('/dang-nhap', [DangNhapController::class, 'dangNhap']);
 
 Route::post('/dang-xuat', [DangNhapController::class, 'dangXuat']);
+// Quên mật khẩu
+Route::post('/quen-mat-khau', [QuenMatKhauController::class, 'guiYeuCau']);
+Route::post('/dat-lai-mat-khau', [QuenMatKhauController::class, 'datLaiMatKhau']);
 
 
 Route::apiResource('quyen-truy-cap', QuyenTruyCapController::class);

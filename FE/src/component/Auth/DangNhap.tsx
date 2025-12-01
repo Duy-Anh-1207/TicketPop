@@ -36,6 +36,17 @@ export default function LoginPage() {
   const [error, setError] = useState<string>("");
   const [success, setSuccess] = useState<string>("");
   const [needVerify, setNeedVerify] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotPhone, setForgotPhone] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState<string | null>(null);
+  const [forgotStage, setForgotStage] = useState<'enter'|'verify'>('enter');
+  const [resetCode, setResetCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetMessage, setResetMessage] = useState<string | null>(null);
 
   // Nếu đã có token thì tự vào trang phù hợp
   useEffect(() => {
@@ -181,7 +192,13 @@ export default function LoginPage() {
                 Nhớ đăng nhập
               </label>
             </div>
-            <small className="text-muted">Quên mật khẩu?</small>
+            <button
+              type="button"
+              className="btn btn-link p-0"
+              onClick={() => { setShowForgotModal(true); setForgotEmail(email); setForgotMessage(null); }}
+            >
+              Quên mật khẩu?
+            </button>
           </div>
 
           <div className="d-grid">
@@ -226,6 +243,150 @@ export default function LoginPage() {
           }
         `}
       </style>
+
+      {/* Forgot password modal */}
+      {showForgotModal && (
+        <>
+          <div className="modal d-block" tabIndex={-1} role="dialog">
+            <div className="modal-dialog" role="document">
+              <div className="modal-content">
+                <div className="modal-header">
+                  <h5 className="modal-title">Quên mật khẩu</h5>
+                  <button type="button" className="btn-close" onClick={() => setShowForgotModal(false)} aria-label="Close"></button>
+                </div>
+                <div className="modal-body">
+                  {forgotMessage && (
+                    <div className="alert alert-info">{forgotMessage}</div>
+                  )}
+
+                  {forgotStage === 'enter' ? (
+                    <>
+                      <div className="mb-3">
+                        <label className="form-label">Email của bạn</label>
+                        <input
+                          type="email"
+                          className="form-control"
+                          value={forgotEmail}
+                          onChange={(e) => setForgotEmail(e.target.value)}
+                          placeholder="Nhập email để nhận mã"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Số điện thoại đã đăng ký</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={forgotPhone}
+                          onChange={(e) => setForgotPhone(e.target.value)}
+                          placeholder="Nhập số điện thoại của bạn"
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="mb-3">
+                        <label className="form-label">Mã xác thực</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={resetCode}
+                          onChange={(e) => setResetCode(e.target.value)}
+                          placeholder="Nhập mã 6 chữ số gửi vào email"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Mật khẩu mới</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Mật khẩu mới"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Xác nhận mật khẩu mới</label>
+                        <input
+                          type="password"
+                          className="form-control"
+                          value={newPasswordConfirm}
+                          onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                          placeholder="Nhập lại mật khẩu mới"
+                        />
+                      </div>
+                      {resetMessage && <div className="alert alert-info">{resetMessage}</div>}
+                    </>
+                  )}
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowForgotModal(false)}>Đóng</button>
+                  {forgotStage === 'enter' ? (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={forgotLoading}
+                      onClick={async () => {
+                        setForgotLoading(true);
+                        setForgotMessage(null);
+                        try {
+                          const res = await axios.post(`${API_BASE}/api/quen-mat-khau`, { email: forgotEmail, so_dien_thoai: forgotPhone });
+                          setForgotMessage(res.data?.message || 'Đã gửi mã. Kiểm tra email.');
+                          setForgotStage('verify');
+                        } catch (err: any) {
+                          setForgotMessage(err?.response?.data?.message || err?.message || 'Gửi yêu cầu thất bại');
+                        } finally {
+                          setForgotLoading(false);
+                        }
+                      }}
+                    >
+                      {forgotLoading ? 'Đang gửi...' : 'Gửi mã'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="btn btn-primary"
+                      disabled={resetLoading}
+                      onClick={async () => {
+                        setResetLoading(true);
+                        setResetMessage(null);
+                        try {
+                          const payload = {
+                            email: forgotEmail,
+                            code: resetCode,
+                            password: newPassword,
+                            password_confirmation: newPasswordConfirm,
+                          };
+                          const res = await axios.post(`${API_BASE}/api/dat-lai-mat-khau`, payload);
+                          setResetMessage(res.data?.message || 'Mật khẩu đã được đặt lại.');
+                          // close modal after short delay
+                          setTimeout(() => {
+                            setShowForgotModal(false);
+                            // reset states
+                            setForgotStage('enter');
+                            setForgotEmail('');
+                            setForgotPhone('');
+                            setResetCode('');
+                            setNewPassword('');
+                            setNewPasswordConfirm('');
+                            setResetMessage(null);
+                          }, 1200);
+                        } catch (err: any) {
+                          setResetMessage(err?.response?.data?.message || err?.message || 'Đặt lại mật khẩu thất bại');
+                        } finally {
+                          setResetLoading(false);
+                        }
+                      }}
+                    >
+                      {resetLoading ? 'Đang xử lý...' : 'Đặt lại mật khẩu'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="modal-backdrop show"></div>
+        </>
+      )}
     </div>
   );
 }
