@@ -20,7 +20,6 @@ use App\Http\Controllers\Admin\MaGiamGiaController;
 use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
-use App\Http\Controllers\Admin\DatVeController;
 use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
@@ -29,6 +28,7 @@ use App\Http\Controllers\Client\CheckGheController;
 use App\Http\Controllers\Client\MomoController;
 use App\Http\Controllers\Client\VnpayController;
 use App\Http\Controllers\Admin\QuenMatKhauController;
+use App\Http\Controllers\Admin\DatVeController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -48,7 +48,7 @@ Route::put('/room/{id}', [RoomController::class, 'update']);
 Route::delete('/room/{id}', [RoomController::class, 'destroy']);
 Route::put('/room/{id}/change-status', [RoomController::class, 'changeStatus']);
 
-
+Route::post('/dat-ve/{id}/ap-dung-voucher', [DatVeController::class, 'apDungVoucher']);
 
 Route::prefix('users')->group(function () {
     Route::get('/', [UserController::class, 'index']);
