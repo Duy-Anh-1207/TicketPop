@@ -46,7 +46,7 @@ const Navbar: React.FC = () => {
       >
         <li style={{ margin: "0 15px" }}>
             <Link
-              to="/khuyen-mai" // ✅ Chuyển hướng đến trang Voucher mới
+              to="/khuyen-mai"
               style={{
                 color: "black",
                 textDecoration: "none",
@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
               fontSize: "16px",
             }}
           >
-            🎬 Phim đang chiếu
+            Phim đang chiếu
           </a>
         </li>
         <li style={{ margin: "0 15px" }}>
@@ -77,7 +77,7 @@ const Navbar: React.FC = () => {
               fontSize: "16px",
             }}
           >
-            ⏳ Phim Sắp chiếu
+            Phim Sắp chiếu
           </a>
         </li>
         <li style={{ margin: "0 15px" }}>

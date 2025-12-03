@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Spin, message, Button } from "antd";
+import { Spin, message, Button, Input } from "antd";
 import axios from "axios";
 import "./Payment.scss";
 
@@ -34,7 +34,7 @@ const Payment = () => {
 
     try {
       const { data } = await axios.post(
-        "http://127.0.0.1:8000/api/vnpay/create", // <-- khớp route BE
+        "http://127.0.0.1:8000/api/vnpay/create",
         {
           dat_ve_id: datVe.id,
           amount: Number(datVe.tong_tien),
@@ -53,6 +53,28 @@ const Payment = () => {
   const datVeId = location.state?.datVeId;
   const [loading, setLoading] = useState(false);
   const [datVe, setDatVe] = useState<any>(null);
+  const [voucherCode, setVoucherCode] = useState("");
+  const [applying, setApplying] = useState(false);
+
+  const handleApplyVoucher = async () => {
+    if (!voucherCode.trim()) return message.warning("Vui lòng nhập mã");
+
+    setApplying(true);
+    try {
+      const res = await axios.post(
+        `http://127.0.0.1:8000/api/dat-ve/${datVe.id}/ap-dung-voucher`,
+        { voucher_code: voucherCode.trim() }
+      );
+
+      setDatVe(res.data.dat_ve);
+      setVoucherCode("");
+      message.success("Áp dụng mã giảm giá thành công!");
+    } catch (err: any) {
+      message.error(err.response?.data?.message || "Mã không hợp lệ");
+    } finally {
+      setApplying(false);
+    }
+  };
 
   useEffect(() => {
     if (!datVeId) {
@@ -170,7 +192,7 @@ const Payment = () => {
               <div className="seat-list">
                 {datVe.chi_tiet.map((ct: any) => (
                   <span key={ct.id} className="seat-tag">
-                    {ct.ghe.so_ghe} ({ct.ghe.loai_ghe?.ten_loai_ghe})
+                    {ct.ghe.so_ghe} 
                   </span>
                 ))}
               </div>
@@ -218,21 +240,75 @@ const Payment = () => {
               </h3>
             </div>
             <div className="voucher-section">
-              <div className="voucher-input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Nhập mã voucher"
-                  className="voucher-input"
-                />
-                <Button
-                  type="default"
-                  size="large"
-                  className="voucher-apply-btn"
-                >
-                  Áp dụng
-                </Button>
-              </div>
+              <div className="voucher-wrapper">
+                <div className="voucher-label">
+                  {datVe.ma_giam_gia
+                    ? "Đã áp dụng mã giảm giá"
+                    : "Bạn có mã giảm giá?"}
+                </div>
 
+                <div className="voucher-input-group">
+                  {datVe.ma_giam_gia ? (
+                    <div
+                      className="voucher-input voucher-applied"
+                      style={{
+                        backgroundColor: "#f0fdf4",
+                        border: "1px solid #86efac",
+                        color: "#166534",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        fontWeight: "500",
+                        cursor: "not-allowed",
+                        userSelect: "none",
+                      }}
+                    >
+                      {datVe.ma_giam_gia}
+                    </div>
+                  ) : (
+                    <Input
+                      className="voucher-input"
+                      placeholder="Nhập mã giảm giá"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value)}
+                      onPressEnter={handleApplyVoucher}
+                      disabled={applying || !!datVe.ma_giam_gia} 
+                      autoFocus={false}
+                    />
+                  )}
+
+                  <Button
+                    type="primary"
+                    className="voucher-btn"
+                    loading={applying}
+                    onClick={handleApplyVoucher}
+                    disabled={
+                      !!datVe.ma_giam_gia || applying || !voucherCode.trim()
+                    }
+                  >
+                    {datVe.ma_giam_gia ? "Đã áp dụng" : "Áp dụng"}
+                  </Button>
+                </div>
+
+                {datVe.ma_giam_gia && (
+                  <div className="voucher-applied-info">
+                    <svg
+                      className="check-icon"
+                      viewBox="0 0 16 16"
+                      fill="currentColor"
+                    >
+                      <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L7 10.586 5.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                    </svg>
+                    <span>
+                      Đã áp dụng mã <strong>{datVe.ma_giam_gia}</strong> - Giảm{" "}
+                      {datVe.giam_gia_percent
+                        ? `${datVe.giam_gia_percent}%`
+                        : `${new Intl.NumberFormat("vi-VN").format(
+                            datVe.giam_gia_so_tien
+                          )}₫`}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="payment-methods">
               <h4>Phương thức thanh toán</h4>
