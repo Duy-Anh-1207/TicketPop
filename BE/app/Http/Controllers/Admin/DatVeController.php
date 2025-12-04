@@ -586,7 +586,6 @@ class DatVeController extends Controller
         try {
             DB::beginTransaction();
 
-            // ---- LẤY ĐƠN ĐẶT VÉ + LOCK ----
             $datVe = DatVe::with([
                 'chiTiet.ghe',
                 'donDoAn',
@@ -604,7 +603,6 @@ class DatVeController extends Controller
                 ], 404);
             }
 
-            // ---- NGĂN TRƯỜNG HỢP ĐÃ THANH TOÁN ----
             if ($datVe->thanhToan()->exists()) {
                 DB::rollBack();
                 return response()->json([
@@ -613,7 +611,6 @@ class DatVeController extends Controller
                 ], 400);
             }
 
-            // ---- KHÔNG CHO ÁP LẠI VOUCHER ----
             if (!is_null($datVe->ma_giam_gia_id)) {
                 DB::rollBack();
                 return response()->json([
@@ -622,7 +619,6 @@ class DatVeController extends Controller
                 ], 400);
             }
 
-            // ---- LẤY VOUCHER ----
             $voucherCode = strtoupper(trim($request->voucher_code));
 
             $maGiamGia = MaGiamGia::where('ma', $voucherCode)
@@ -654,13 +650,11 @@ class DatVeController extends Controller
                 return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết hạn'], 400);
             }
 
-            // ---- GIỚI HẠN LƯỢT ----
             if ($maGiamGia->so_lan_da_su_dung >= $maGiamGia->so_lan_su_dung) {
                 DB::rollBack();
                 return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết lượt sử dụng'], 400);
             }
 
-            // ---- TÍNH TỔNG TIỀN GỐC ----
             $tongTienGoc = $datVe->tong_tien;
 
             if ($tongTienGoc < $maGiamGia->gia_tri_don_hang_toi_thieu) {
@@ -673,7 +667,6 @@ class DatVeController extends Controller
                 ], 400);
             }
 
-            // ---- TÍNH GIẢM GIÁ ----
             $soTienGiam = $tongTienGoc * ($maGiamGia->phan_tram_giam / 100);
 
             if ($maGiamGia->giam_toi_da) {
@@ -682,28 +675,24 @@ class DatVeController extends Controller
 
             $soTienGiam = min($soTienGiam, $tongTienGoc);
 
-            // ---- TÍNH TỔNG TIỀN MỚI ----
             $tongTienMoi = $tongTienGoc - $soTienGiam;
 
-            // ---- CẬP NHẬT ĐƠN ----
             $datVe->update([
-                'ma_giam_gia_id' => $maGiamGia->id,
                 'tong_tien'      => $tongTienMoi,
             ]);
 
-            // ---- TĂNG LƯỢT SỬ DỤNG ----
             $maGiamGia->increment('so_lan_da_su_dung');
 
             DB::commit();
 
-            // ---- LOAD LẠI ĐƠN ----
+
             $datVeMoi = DatVe::with([
                 'nguoiDung:id,ten,email,so_dien_thoai',
                 'lichChieu.phim:id,ten_phim,anh_poster',
                 'lichChieu.phong:id,ten_phong',
                 'chiTiet.ghe:id,so_ghe',
                 'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
-                'donDoAn.doAn:id,ten_do_an,gia_ban,image',
+                'donDoAn.doAn:id,ten_do_an,gia_ban,image', // <-- quan trọng
                 'maGiamGia:id,ma,phan_tram_giam,giam_toi_da'
             ])->findOrFail($id);
 
@@ -714,14 +703,23 @@ class DatVeController extends Controller
                 'tong_tien_cu' => $tongTienGoc,
                 'tong_tien_moi' => $tongTienMoi,
                 'dat_ve' => [
-                    'id' => $datVeMoi->id,
-                    'tong_tien' => $datVeMoi->tong_tien,
+                    'id'            => $datVeMoi->id,
+                    'tong_tien'     => $datVeMoi->tong_tien,
                     'ma_giam_gia_id' => $datVeMoi->ma_giam_gia_id,
-                    'nguoi_dung' => $datVeMoi->nguoiDung,
-                    'lich_chieu' => $datVeMoi->lichChieu,
-                    'chi_tiet' => $datVeMoi->chiTiet,
-                    'do_an' => $datVeMoi->donDoAn, // 👈 TRẢ VỀ LẠI ĐÚNG FIELD FE ĐANG XÀI
-                    'ma_giam_gia' => $datVeMoi->maGiamGia,
+                    'nguoi_dung'    => $datVeMoi->nguoiDung,
+                    'lich_chieu'    => $datVeMoi->lichChieu,
+                    'chi_tiet'      => $datVeMoi->chiTiet,
+                    'do_an'         => $datVeMoi->donDoAn->map(function ($ct) {
+                        return [
+                            'id'         => $ct->doAn->id,
+                            'ten_do_an'  => $ct->doAn->ten_do_an,
+                            'gia_ban'    => $ct->doAn->gia_ban,
+                            'image'      => $ct->doAn->image,
+                            'quantity'   => $ct->so_luong,
+                            'anh_do_an'  => $ct->doAn->image,
+                        ];
+                    }),
+                    'ma_giam_gia'   => $datVeMoi->maGiamGia,
                 ]
             ], 200);
         } catch (\Throwable $e) {
