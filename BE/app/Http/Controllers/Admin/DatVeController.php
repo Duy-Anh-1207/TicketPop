@@ -678,7 +678,8 @@ class DatVeController extends Controller
             $tongTienMoi = $tongTienGoc - $soTienGiam;
 
             $datVe->update([
-                'tong_tien'      => $tongTienMoi,
+                'tong_tien'=> $tongTienMoi,
+                'ma_giam_gia_id'=> $maGiamGia->id,
             ]);
 
             $maGiamGia->increment('so_lan_da_su_dung');
@@ -692,7 +693,7 @@ class DatVeController extends Controller
                 'lichChieu.phong:id,ten_phong',
                 'chiTiet.ghe:id,so_ghe',
                 'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
-                'donDoAn.doAn:id,ten_do_an,gia_ban,image', // <-- quan trọng
+                'donDoAn.doAn:id,ten_do_an,gia_ban,image', 
                 'maGiamGia:id,ma,phan_tram_giam,giam_toi_da'
             ])->findOrFail($id);
 
