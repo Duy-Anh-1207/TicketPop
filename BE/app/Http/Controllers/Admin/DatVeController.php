@@ -142,7 +142,7 @@ class DatVeController extends Controller
                 $datVe->tong_tien = $datVe->tong_tien + $tongTienDoAn;
                 $datVe->save();
             }
-            
+
             // Lấy tổng tiền sau khi tính ghế và đồ ăn
             $tongTienTruocGiam = $datVe->tong_tien;
             $soTienGiam = 0;
