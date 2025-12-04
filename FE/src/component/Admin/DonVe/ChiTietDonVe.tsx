@@ -3,6 +3,7 @@ import { Descriptions, Table, Spin, Button, Image, message, Tag } from "antd";
 import { useChiTietDonVeTheoMaGD } from "../../../hook/DonVeHook";
 import VeRap from "./VeRap";
 import { capNhatTrangThaiTheoMaGD } from "../../../provider/DonVeProvider"; // API PUT
+import VeDoAn from "./VeDoAn";
 
 const ChiTietDonVeRap = () => {
   const { maGiaoDich } = useParams();
@@ -18,22 +19,21 @@ const ChiTietDonVeRap = () => {
   const danhSachDoAn = payload.do_an || [];
 
   // ======================== In PDF tất cả vé + tự động cập nhật trạng thái ========================
-  const handleInVeRap = async () => {
-    if (!danhSachGhe.length) return message.error("Không có vé để in");
-
-    const el = document.querySelector("div[style*='display: none']") as HTMLElement;
-    if (!el) return;
+  const handleInVeRap = () => {
+    const el = document.getElementById("print-area") as HTMLElement;
+    if (!el) return message.error("Không tìm thấy nội dung để in");
 
     const newWindow = window.open("", "_blank", "width=800,height=600");
     if (!newWindow) return;
 
-    newWindow.document.write("<html><head><title>In vé rạp</title></head><body>");
+    newWindow.document.write("<html><head><title>In vé</title></head><body>");
     newWindow.document.write(el.innerHTML);
     newWindow.document.write("</body></html>");
     newWindow.document.close();
     newWindow.focus();
     newWindow.print();
   };
+
   const handleCapNhatTrangThai = async () => {
     try {
       await capNhatTrangThaiTheoMaGD(payload.ma_don_hang);
@@ -127,8 +127,8 @@ const ChiTietDonVeRap = () => {
         </>
       )}
 
-      {/* Vé rạp ẩn để in PDF */}
-      <div style={{ display: "none" }}>
+      <div id="print-area" style={{ display: "none" }}>
+        {/* Vé xem phim */}
         {danhSachGhe.map((ghe: any, index: number) => (
           <VeRap
             key={index}
@@ -137,10 +137,21 @@ const ChiTietDonVeRap = () => {
             phim={payload.phim}
             phong={payload.phong}
             gioChieu={`${payload.gio_chieu} - ${payload.gio_ket_thuc}`}
-            ghe={ghe}    // 🔥 mỗi vé = 1 ghế
+            ghe={ghe}
           />
         ))}
+
+        {/* Vé combo đồ ăn */}
+        {danhSachDoAn.length > 0 && (
+          <VeDoAn
+            maDonHang={payload.ma_don_hang}
+            items={danhSachDoAn} // truyền nguyên danh sách
+          />
+        )}
+
       </div>
+
+
     </div>
   );
 };
