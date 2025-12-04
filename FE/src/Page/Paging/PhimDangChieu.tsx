@@ -1,4 +1,5 @@
 import { useListPhim } from "../../hook/PhimHook";
+import { useListTheLoai } from "../../hook/TheLoaiHook";
 import type { Phim } from "../../types/phim";
 import { useState } from "react";
 import MovieCard from "../../component/Layout/ClientLayout/ListMovie/MovieCard";
@@ -6,6 +7,8 @@ import "./PhimDangVaSapChieu.css";
 
 const PhimDangChieu: React.FC = () => {
   const { data: movies, isLoading } = useListPhim({});
+  const { data: theLoaiData } = useListTheLoai();
+
   const [showTrailer, setShowTrailer] = useState(false);
   const [currentTrailer, setCurrentTrailer] = useState<string | null>(null);
 
@@ -16,44 +19,62 @@ const PhimDangChieu: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="text-center py-10 text-red-500">Đang tải phim...</div>
+      <div className="text-center py-10 text-red-500">
+        Đang tải phim...
+      </div>
     );
-  if (!movies || movies.length === 0) return <div>Không có phim nào</div>;
+
+  if (!movies || movies.length === 0) {
+    return <div>Không có phim nào</div>;
+  }
 
   const now = Date.now();
 
-  // Lọc phim đang chiếu
+  // Lọc phim đang chiếu theo ngày
   let phimDangChieu = movies.filter((m: Phim) => {
     const start = Date.parse(m.ngay_cong_chieu);
     const end = Date.parse(m.ngay_ket_thuc);
     return start <= now && now <= end;
   });
 
-  // Danh sách thể loại và quốc gia
-  const danhSachTheLoai = Array.from(new Set(movies.map((m) => m.the_loai)));
+  // Danh sách thể loại (dữ liệu từ API)
+  const danhSachTheLoai =
+    theLoaiData?.map((tl) => ({
+      id: Number(tl.id),
+      ten: tl.ten_the_loai,
+    })) ?? [];
+
+  // Danh sách quốc gia
   const danhSachQuocGia = Array.from(new Set(movies.map((m) => m.quoc_gia)));
 
-  // Áp dụng bộ lọc tên phim
+  // Lọc theo tên phim
   if (tenPhimLoc.trim() !== "") {
     phimDangChieu = phimDangChieu.filter((m) =>
       m.ten_phim.toLowerCase().includes(tenPhimLoc.toLowerCase())
     );
   }
 
-  // Áp dụng bộ lọc thể loại
+  // Lọc theo thể loại
   if (theLoaiLoc !== "Tất cả") {
-    phimDangChieu = phimDangChieu.filter((m) => m.the_loai === theLoaiLoc);
+    const idTheLoai = Number(theLoaiLoc);
+    phimDangChieu = phimDangChieu.filter(
+      (m) => Number(m.the_loai_id) === idTheLoai
+    );
   }
 
-  // Áp dụng bộ lọc quốc gia
+  // Lọc theo quốc gia
   if (quocGiaLoc !== "Tất cả") {
-    phimDangChieu = phimDangChieu.filter((m) => m.quoc_gia === quocGiaLoc);
+    phimDangChieu = phimDangChieu.filter(
+      (m) => m.quoc_gia === quocGiaLoc
+    );
   }
 
+  // Mở trailer
   const moTrailer = (url: string) => {
     let embedUrl = url;
     const match = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
     if (match) embedUrl = `https://www.youtube.com/embed/${match[1]}`;
+
     setCurrentTrailer(`${embedUrl}?autoplay=1`);
     setShowTrailer(true);
   };
@@ -68,6 +89,7 @@ const PhimDangChieu: React.FC = () => {
       {/* Bộ lọc */}
       <div className="filter-container mb-4">
         <div className="row g-3 align-items-center">
+
           {/* Ô tìm kiếm tên phim */}
           <div className="col-lg-4 col-md-6 col-12">
             <div className="input-group shadow-sm">
@@ -95,8 +117,8 @@ const PhimDangChieu: React.FC = () => {
             >
               <option value="Tất cả">Tất cả thể loại</option>
               {danhSachTheLoai.map((tl) => (
-                <option key={tl} value={tl}>
-                  {tl}
+                <option key={tl.id} value={tl.id}>
+                  {tl.ten}
                 </option>
               ))}
             </select>
@@ -119,50 +141,61 @@ const PhimDangChieu: React.FC = () => {
             </select>
           </div>
 
-          {/* Nút Reset (tùy chọn - rất hữu ích cho người dùng) */}
+          {/* Nút Reset các bộ lọc */}
           {(tenPhimLoc ||
             theLoaiLoc !== "Tất cả" ||
             quocGiaLoc !== "Tất cả") && (
-            <div className="col-lg-2 col-md-6 col-12">
-              <button
-                onClick={() => {
-                  setTenPhimLoc("");
-                  setTheLoaiLoc("Tất cả");
-                  setQuocGiaLoc("Tất cả");
-                }}
-                className="btn btn-outline-danger w-100 h-100"
-                style={{ height: "46px" }}
-              >
-                <i className="bi bi-arrow-repeat me-1"></i>
-                Đặt lại
-              </button>
-            </div>
-          )}
+              <div className="col-lg-2 col-md-6 col-12">
+                <button
+                  onClick={() => {
+                    setTenPhimLoc("");
+                    setTheLoaiLoc("Tất cả");
+                    setQuocGiaLoc("Tất cả");
+                  }}
+                  className="btn btn-outline-danger w-100 h-100"
+                  style={{ height: "46px" }}
+                >
+                  <i className="bi bi-arrow-repeat me-1"></i>
+                  Đặt lại
+                </button>
+              </div>
+            )}
         </div>
       </div>
 
+      {/* Danh sách phim */}
       <h2 className="section-title">
         Phim đang chiếu ({phimDangChieu.length})
       </h2>
+
       {phimDangChieu.length > 0 ? (
         <div className="movie-list">
           {phimDangChieu.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} openTrailer={moTrailer} />
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              openTrailer={moTrailer}
+            />
           ))}
         </div>
       ) : (
         <p>Không tìm thấy phim phù hợp</p>
       )}
 
+      {/* Modal trailer */}
       {showTrailer && (
         <div className="trailer-modal" onClick={dongTrailer}>
-          <div className="trailer-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="trailer-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <iframe
               src={currentTrailer ?? ""}
               title="Trailer"
               allow="autoplay; encrypted-media"
               allowFullScreen
             ></iframe>
+
             <button className="close-trailer" onClick={dongTrailer}>
               ✕
             </button>

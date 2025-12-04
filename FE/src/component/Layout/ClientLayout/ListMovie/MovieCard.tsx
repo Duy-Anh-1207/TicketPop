@@ -1,4 +1,5 @@
 import type { Phim } from "../../../../types/phim";
+import { useListTheLoai } from "../../../../hook/TheLoaiHook";
 import { useNavigate } from "react-router-dom";
 import "./MovieCard.css";
 
@@ -9,6 +10,18 @@ interface MovieCardProps {
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
   const navigate = useNavigate();
+
+  // Lấy danh sách thể loại từ API
+  const { data: theLoaiList } = useListTheLoai();
+
+  const theLoaiIds = Array.isArray(movie.the_loai_id)
+    ? movie.the_loai_id
+    : [movie.the_loai_id];
+
+  const tenTheLoaiList =
+    theLoaiList
+      ?.filter((t: any) => theLoaiIds.includes(String(t.id)))
+      .map((t: any) => t.ten_the_loai) || [];
 
   const toSlug = (text: string) =>
     text
@@ -63,7 +76,6 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
             </button>
           </div>
         </div>
-
       </div>
 
       <div className="movie-info">
@@ -80,7 +92,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
         <div className="movie-meta">
           <span className="duration">
             <svg viewBox="0 0 24 24" width="16" height="16">
-              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-5-3 1.5-1.5L10 14.25V7h2v7.25L9 17z"/>
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-5-3 1.5-1.5L10 14.25V7h2v7.25L9 17z" />
             </svg>
             {movie.thoi_luong} phút
           </span>
@@ -93,6 +105,11 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
         <div className="movie-tags">
           <span className="tag-country">{movie.quoc_gia}</span>
           <span className="tag-lang">{movie.ngon_ngu}</span>
+          {tenTheLoaiList.map((name: string, i: number) => (
+            <span key={i} className="tag-lang">
+              {name}
+            </span>
+          ))}
         </div>
       </div>
     </div>
