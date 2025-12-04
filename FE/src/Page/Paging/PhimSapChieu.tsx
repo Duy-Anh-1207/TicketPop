@@ -18,47 +18,58 @@ const PhimSapChieu: React.FC = () => {
 
   if (isLoading)
     return (
-      <div className="text-center py-10 text-red-500">Đang tải phim...</div>
+      <div className="text-center py-10 text-red-500">
+        Đang tải phim...
+      </div>
     );
-  if (!movies || movies.length === 0) return <div>Không có phim nào</div>;
+
+  if (!movies || movies.length === 0) {
+    return <div>Không có phim nào</div>;
+  }
 
   const now = Date.now();
 
-  // Lọc phim sắp chiếu
+  //  Lọc phim sắp chiếu 
   let phimSapChieu = movies.filter(
     (m: Phim) => Date.parse(m.ngay_cong_chieu) > now
   );
 
-  // Danh sách thể loại và quốc gia
-  const danhSachTheLoai = theLoaiData?.map((tl) => ({
-    id: tl.id,
-    ten: tl.ten_the_loai,
-  })) ?? [];
+  // Danh sách thể loại 
+  const danhSachTheLoai =
+    theLoaiData?.map((tl) => ({
+      id: Number(tl.id),
+      ten: tl.ten_the_loai,
+    })) ?? [];
 
+  // Danh sách quốc gia 
   const danhSachQuocGia = Array.from(new Set(movies.map((m) => m.quoc_gia)));
 
-  // Áp dụng bộ lọc tên phim
+  // Lọc theo tên 
   if (tenPhimLoc.trim() !== "") {
     phimSapChieu = phimSapChieu.filter((m) =>
       m.ten_phim.toLowerCase().includes(tenPhimLoc.toLowerCase())
     );
   }
 
-  // Áp dụng bộ lọc thể loại
+  // Lọc theo thể loại
   if (theLoaiLoc !== "Tất cả") {
-    phimSapChieu = phimSapChieu.filter((m) => m.the_loai_id === Number(theLoaiLoc));
+    const idTheLoai = Number(theLoaiLoc);
+    phimSapChieu = phimSapChieu.filter(
+      (m) => Number(m.the_loai_id) === idTheLoai
+    );
   }
 
-
-  // Áp dụng bộ lọc quốc gia
+  // Lọc theo quốc gia
   if (quocGiaLoc !== "Tất cả") {
     phimSapChieu = phimSapChieu.filter((m) => m.quoc_gia === quocGiaLoc);
   }
 
+  // Trailer 
   const moTrailer = (url: string) => {
     let embedUrl = url;
     const match = url.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/);
     if (match) embedUrl = `https://www.youtube.com/embed/${match[1]}`;
+
     setCurrentTrailer(`${embedUrl}?autoplay=1`);
     setShowTrailer(true);
   };
@@ -73,7 +84,7 @@ const PhimSapChieu: React.FC = () => {
       {/* Bộ lọc */}
       <div className="filter-container mb-4">
         <div className="row g-3 align-items-center">
-          {/* Ô tìm kiếm tên phim */}
+          {/* Tìm kiếm tên phim */}
           <div className="col-lg-4 col-md-6 col-12">
             <div className="input-group shadow-sm">
               <span className="input-group-text bg-white border-end-0">
@@ -124,50 +135,61 @@ const PhimSapChieu: React.FC = () => {
             </select>
           </div>
 
-          {/* Nút Reset (tùy chọn - rất hữu ích cho người dùng) */}
+          {/* Nút Reset */}
           {(tenPhimLoc ||
             theLoaiLoc !== "Tất cả" ||
             quocGiaLoc !== "Tất cả") && (
-              <div className="col-lg-2 col-md-6 col-12">
-                <button
-                  onClick={() => {
-                    setTenPhimLoc("");
-                    setTheLoaiLoc("Tất cả");
-                    setQuocGiaLoc("Tất cả");
-                  }}
-                  className="btn btn-outline-danger w-100 h-100"
-                  style={{ height: "46px" }}
-                >
-                  <i className="bi bi-arrow-repeat me-1"></i>
-                  Đặt lại
-                </button>
-              </div>
-            )}
+            <div className="col-lg-2 col-md-6 col-12">
+              <button
+                onClick={() => {
+                  setTenPhimLoc("");
+                  setTheLoaiLoc("Tất cả");
+                  setQuocGiaLoc("Tất cả");
+                }}
+                className="btn btn-outline-danger w-100 h-100"
+                style={{ height: "46px" }}
+              >
+                <i className="bi bi-arrow-repeat me-1"></i>
+                Đặt lại
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Danh sách phim */}
       <h2 className="section-title">
-        Phim đang chiếu ({phimSapChieu.length})
+        Phim sắp chiếu ({phimSapChieu.length})
       </h2>
+
       {phimSapChieu.length > 0 ? (
         <div className="movie-list">
           {phimSapChieu.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} openTrailer={moTrailer} />
+            <MovieCard
+              key={movie.id}
+              movie={movie}
+              openTrailer={moTrailer}
+            />
           ))}
         </div>
       ) : (
         <p>Không tìm thấy phim phù hợp</p>
       )}
 
+      {/* Modal trailer */}
       {showTrailer && (
         <div className="trailer-modal" onClick={dongTrailer}>
-          <div className="trailer-content" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="trailer-content"
+            onClick={(e) => e.stopPropagation()}
+          >
             <iframe
               src={currentTrailer ?? ""}
               title="Trailer"
               allow="autoplay; encrypted-media"
               allowFullScreen
             ></iframe>
+
             <button className="close-trailer" onClick={dongTrailer}>
               ✕
             </button>
