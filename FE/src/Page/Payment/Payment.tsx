@@ -7,6 +7,7 @@ import "./Payment.scss";
 const Payment = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [timeLeft, setTimeLeft] = useState(300);
 
   const handleThanhToanMoMo = async () => {
     try {
@@ -50,6 +51,7 @@ const Payment = () => {
     }
   };
 
+
   const datVeId = location.state?.datVeId;
   const [loading, setLoading] = useState(false);
   const [datVe, setDatVe] = useState<any>(null);
@@ -75,6 +77,29 @@ const Payment = () => {
       setApplying(false);
     }
   };
+
+  // Countdown 5 phút
+  useEffect(() => {
+    if (!datVe) return;
+
+    if (timeLeft <= 0) {
+      message.warning("Hết thời gian giữ ghế! Vui lòng đặt lại.");
+
+      // Điều hướng về trang chủ sau 2 giây
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft, datVe]);
+
 
   useEffect(() => {
     if (!datVeId) {
@@ -148,17 +173,87 @@ const Payment = () => {
               <span className="label">SĐT:</span>
               <span className="value">{soDienThoai}</span>
             </div>
-            {/* {datVe.nguoi_dung && (
-              <div className="info-item">
-                <span className="label">Tài khoản:</span>
-                <span className="value highlight">Thành viên</span>
-              </div>
-            )} */}
           </div>
+          <div className="voucher-section">
+            <div className="voucher-wrapper">
+              <div className="voucher-label">
+                {datVe.ma_giam_gia_id ? "Đã áp dụng mã giảm giá" : "Bạn có mã giảm giá?"}
+              </div>
+
+              <div className="voucher-input-group">
+                {datVe.ma_giam_gia_id ? (
+                  <div
+                    className="voucher-input voucher-applied"
+                    style={{
+                      backgroundColor: "#f0fdf4",
+                      border: "1px solid #86efac",
+                      color: "#166534",
+                      padding: "8px 12px",
+                      borderRadius: "6px",
+                      fontWeight: "500",
+                      cursor: "not-allowed",
+                      userSelect: "none",
+                    }}
+                  >
+                  </div>
+                ) : (
+                  // Ô nhập mã
+                  <Input
+                    className="voucher-input"
+                    placeholder="Nhập mã giảm giá"
+                    value={voucherCode}
+                    onChange={(e) => setVoucherCode(e.target.value)}
+                    onPressEnter={handleApplyVoucher}
+                    disabled={applying}
+                  />
+                )}
+
+                <Button
+                  type="primary"
+                  className="voucher-btn"
+                  loading={applying}
+                  onClick={handleApplyVoucher}
+                  disabled={!!datVe.ma_giam_gia_id || applying || !voucherCode.trim()}
+                >
+                  {datVe.ma_giam_gia_id ? "Đã áp dụng" : "Áp dụng"}
+                </Button>
+              </div>
+
+              {datVe.ma_giam_gia_id && (
+                <div className="voucher-applied-info">
+                  <svg className="check-icon" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L7 10.586 5.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                  </svg>
+
+                  <span>
+                    Đã áp dụng mã <strong></strong>
+
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
 
         <div className="right-column">
           <div className="movie-details">
+            <div
+              style={{
+                background: "#fff3cd",
+                padding: "12px",
+                borderRadius: "8px",
+                marginBottom: "15px",
+                border: "1px solid #ffeeba",
+                fontWeight: 600,
+                textAlign: "center",
+                color: "#856404",
+              }}
+            >
+              Thời gian còn lại để thanh toán:{" "}
+              {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
+            </div>
+
             <h2>{datVe.lich_chieu?.phim?.ten_phim}</h2>
             <p>Phòng: {datVe.lich_chieu?.phong?.ten_phong}</p>
             <p>
@@ -192,7 +287,7 @@ const Payment = () => {
               <div className="seat-list">
                 {datVe.chi_tiet.map((ct: any) => (
                   <span key={ct.id} className="seat-tag">
-                    {ct.ghe.so_ghe} 
+                    {ct.ghe.so_ghe}
                   </span>
                 ))}
               </div>
@@ -238,77 +333,6 @@ const Payment = () => {
                   }).format(Number(datVe.tong_tien))}
                 </span>
               </h3>
-            </div>
-            <div className="voucher-section">
-              <div className="voucher-wrapper">
-                <div className="voucher-label">
-                  {datVe.ma_giam_gia
-                    ? "Đã áp dụng mã giảm giá"
-                    : "Bạn có mã giảm giá?"}
-                </div>
-
-                <div className="voucher-input-group">
-                  {datVe.ma_giam_gia ? (
-                    <div
-                      className="voucher-input voucher-applied"
-                      style={{
-                        backgroundColor: "#f0fdf4",
-                        border: "1px solid #86efac",
-                        color: "#166534",
-                        padding: "8px 12px",
-                        borderRadius: "6px",
-                        fontWeight: "500",
-                        cursor: "not-allowed",
-                        userSelect: "none",
-                      }}
-                    >
-                      {datVe.ma_giam_gia}
-                    </div>
-                  ) : (
-                    <Input
-                      className="voucher-input"
-                      placeholder="Nhập mã giảm giá"
-                      value={voucherCode}
-                      onChange={(e) => setVoucherCode(e.target.value)}
-                      onPressEnter={handleApplyVoucher}
-                      disabled={applying || !!datVe.ma_giam_gia} 
-                      autoFocus={false}
-                    />
-                  )}
-
-                  <Button
-                    type="primary"
-                    className="voucher-btn"
-                    loading={applying}
-                    onClick={handleApplyVoucher}
-                    disabled={
-                      !!datVe.ma_giam_gia || applying || !voucherCode.trim()
-                    }
-                  >
-                    {datVe.ma_giam_gia ? "Đã áp dụng" : "Áp dụng"}
-                  </Button>
-                </div>
-
-                {datVe.ma_giam_gia && (
-                  <div className="voucher-applied-info">
-                    <svg
-                      className="check-icon"
-                      viewBox="0 0 16 16"
-                      fill="currentColor"
-                    >
-                      <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L7 10.586 5.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
-                    </svg>
-                    <span>
-                      Đã áp dụng mã <strong>{datVe.ma_giam_gia}</strong> - Giảm{" "}
-                      {datVe.giam_gia_percent
-                        ? `${datVe.giam_gia_percent}%`
-                        : `${new Intl.NumberFormat("vi-VN").format(
-                            datVe.giam_gia_so_tien
-                          )}₫`}
-                    </span>
-                  </div>
-                )}
-              </div>
             </div>
             <div className="payment-methods">
               <h4>Phương thức thanh toán</h4>
