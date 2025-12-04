@@ -14,7 +14,10 @@ const PhimDangChieu: React.FC = () => {
   const [theLoaiLoc, setTheLoaiLoc] = useState("Tất cả");
   const [quocGiaLoc, setQuocGiaLoc] = useState("Tất cả");
 
-  if (isLoading) return <div className="text-center py-10 text-red-500">Đang tải phim...</div>;
+  if (isLoading)
+    return (
+      <div className="text-center py-10 text-red-500">Đang tải phim...</div>
+    );
   if (!movies || movies.length === 0) return <div>Không có phim nào</div>;
 
   const now = Date.now();
@@ -63,44 +66,93 @@ const PhimDangChieu: React.FC = () => {
   return (
     <div className="container py-4">
       {/* Bộ lọc */}
-      <div className="filter-container mb-3 d-flex gap-2 flex-wrap">
-        <input
-          type="text"
-          placeholder="Tìm kiếm theo tên phim"
-          value={tenPhimLoc}
-          onChange={(e) => setTenPhimLoc(e.target.value)}
-          className="form-control"
-        />
-        <select
-          value={theLoaiLoc}
-          onChange={(e) => setTheLoaiLoc(e.target.value)}
-          className="form-select" style={{ minWidth: "180px" }}
-        >
-          <option value="Tất cả">Tất cả thể loại</option>
-          {danhSachTheLoai.map((tl) => (
-            <option key={tl} value={tl}>{tl}</option>
-          ))}
-        </select>
-        <select
-          value={quocGiaLoc}
-          onChange={(e) => setQuocGiaLoc(e.target.value)}
-          className="form-select"
-        >
-          <option value="Tất cả">Tất cả quốc gia</option>
-          {danhSachQuocGia.map((qg) => (
-            <option key={qg} value={qg}>{qg}</option>
-          ))}
-        </select>
+      <div className="filter-container mb-4">
+        <div className="row g-3 align-items-center">
+          {/* Ô tìm kiếm tên phim */}
+          <div className="col-lg-4 col-md-6 col-12">
+            <div className="input-group shadow-sm">
+              <span className="input-group-text bg-white border-end-0">
+                <i className="bi bi-search"></i>
+              </span>
+              <input
+                type="text"
+                placeholder="Tìm kiếm tên phim..."
+                value={tenPhimLoc}
+                onChange={(e) => setTenPhimLoc(e.target.value)}
+                className="form-control border-start-0 ps-0"
+                style={{ height: "46px" }}
+              />
+            </div>
+          </div>
+
+          {/* Lọc thể loại */}
+          <div className="col-lg-3 col-md-6 col-12">
+            <select
+              value={theLoaiLoc}
+              onChange={(e) => setTheLoaiLoc(e.target.value)}
+              className="form-select form-select-lg shadow-sm"
+              style={{ height: "46px" }}
+            >
+              <option value="Tất cả">Tất cả thể loại</option>
+              {danhSachTheLoai.map((tl) => (
+                <option key={tl} value={tl}>
+                  {tl}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Lọc quốc gia */}
+          <div className="col-lg-3 col-md-6 col-12">
+            <select
+              value={quocGiaLoc}
+              onChange={(e) => setQuocGiaLoc(e.target.value)}
+              className="form-select form-select-lg shadow-sm"
+              style={{ height: "46px" }}
+            >
+              <option value="Tất cả">Tất cả quốc gia</option>
+              {danhSachQuocGia.map((qg) => (
+                <option key={qg} value={qg}>
+                  {qg}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Nút Reset (tùy chọn - rất hữu ích cho người dùng) */}
+          {(tenPhimLoc ||
+            theLoaiLoc !== "Tất cả" ||
+            quocGiaLoc !== "Tất cả") && (
+            <div className="col-lg-2 col-md-6 col-12">
+              <button
+                onClick={() => {
+                  setTenPhimLoc("");
+                  setTheLoaiLoc("Tất cả");
+                  setQuocGiaLoc("Tất cả");
+                }}
+                className="btn btn-outline-danger w-100 h-100"
+                style={{ height: "46px" }}
+              >
+                <i className="bi bi-arrow-repeat me-1"></i>
+                Đặt lại
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      <h2 className="section-title">Phim đang chiếu ({phimDangChieu.length})</h2>
+      <h2 className="section-title">
+        Phim đang chiếu ({phimDangChieu.length})
+      </h2>
       {phimDangChieu.length > 0 ? (
         <div className="movie-list">
           {phimDangChieu.map((movie) => (
             <MovieCard key={movie.id} movie={movie} openTrailer={moTrailer} />
           ))}
         </div>
-      ) : <p>Không tìm thấy phim phù hợp</p>}
+      ) : (
+        <p>Không tìm thấy phim phù hợp</p>
+      )}
 
       {showTrailer && (
         <div className="trailer-modal" onClick={dongTrailer}>
@@ -111,7 +163,9 @@ const PhimDangChieu: React.FC = () => {
               allow="autoplay; encrypted-media"
               allowFullScreen
             ></iframe>
-            <button className="close-trailer" onClick={dongTrailer}>✕</button>
+            <button className="close-trailer" onClick={dongTrailer}>
+              ✕
+            </button>
           </div>
         </div>
       )}

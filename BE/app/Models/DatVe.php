@@ -11,6 +11,9 @@ class DatVe extends Model
         'nguoi_dung_id',
         'lich_chieu_id',
         'tong_tien',
+        'job_id',
+        'ma_giam_gia_id',
+        'so_tien_giam'
     ];
     public function nguoiDung()
     {
@@ -33,7 +36,8 @@ class DatVe extends Model
     {
         return $this->hasOne(ThanhToan::class, 'dat_ve_id');
     }
-    public function maGiamGia(){
+    public function maGiamGia()
+    {
         return $this->belongsTo(MaGiamGia::class, 'ma_giam_gia_id');
     }
 }

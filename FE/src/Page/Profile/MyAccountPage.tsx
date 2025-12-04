@@ -25,7 +25,7 @@ const MyAccountPage = () => {
   const [showPasswordFields, setShowPasswordFields] = useState(false);
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  
+
   // State cho ẩn/hiện mật khẩu
   const [showCurrentPw, setShowCurrentPw] = useState(false);
   const [showNewPw, setShowNewPw] = useState(false);
@@ -162,7 +162,7 @@ const MyAccountPage = () => {
           setUser({ ...user, ...updatedUser });
 
           Swal.fire("Thành công!", response.message || "Cập nhật thông tin thành công!", "success");
-          
+
           // Reset form mật khẩu
           setShowPasswordFields(false);
           setCurrentPassword(""); // Quan trọng: Xóa mật khẩu hiện tại sau khi thành công
@@ -183,467 +183,469 @@ const MyAccountPage = () => {
   return (
     <>
       <div className="container mt-4 mb-5" style={{ maxWidth: "900px" }}>
-      {/* Tabs */}
-      <div className="d-flex gap-2 mb-3">
-        <button
-          className={`btn ${activeTab === "account" ? "btn-primary" : "btn-outline-primary"}`}
-          onClick={() => setActiveTab("account")}
-        >
-          👤 Thông tin tài khoản
-        </button>
-        <button
-          className={`btn ${activeTab === "bookings" ? "btn-primary" : "btn-outline-primary"}`}
-          onClick={() => setActiveTab("bookings")}
-        >
-          🎟️ Lịch sử đặt vé
-        </button>
-      </div>
+        {/* Tabs */}
+        <div className="d-flex gap-2 mb-3">
+          <button
+            className={`btn ${activeTab === "account" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveTab("account")}
+          >
+            👤 Thông tin tài khoản
+          </button>
+          <button
+            className={`btn ${activeTab === "bookings" ? "btn-primary" : "btn-outline-primary"}`}
+            onClick={() => setActiveTab("bookings")}
+          >
+            🎟️ Lịch sử đặt vé
+          </button>
+        </div>
 
-      {/* TAB 1: THÔNG TIN TÀI KHOẢN */}
-      {activeTab === "account" && (
-        <div className="card shadow-sm border-0">
-          <div className="card-header bg-primary text-white">
-            <h3>Thông tin tài khoản</h3>
-          </div>
-          <div className="card-body p-4">
-            <form onSubmit={handleSubmit}>
-            {/* THÔNG TIN CƠ BẢN */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Họ và tên</label>
-              <input
-                type="text"
-                className="form-control"
-                value={ten}
-                onChange={(e) => setTen(e.target.value)}
-                required
-              />
+        {/* TAB 1: THÔNG TIN TÀI KHOẢN */}
+        {activeTab === "account" && (
+          <div className="card shadow-sm border-0">
+            <div className="card-header bg-primary text-white">
+              <h3>Thông tin tài khoản</h3>
             </div>
-            <div className="mb-3">
-              <label className="form-label fw-bold">Email</label>
-              <input
-                type="email"
-                className="form-control"
-                value={user.email}
-                disabled
-              />
-            </div>
-            <div className="mb-3">
-              <label className="form-label fw-bold">Số điện thoại</label>
-              <input
-                type="text"
-                className="form-control"
-                value={soDienThoai}
-                onChange={(e) => setSoDienThoai(e.target.value)}
-              />
-            </div>
-            
-            <hr className="my-4" />
-
-            {/* MẬT KHẨU HIỆN TẠI (Luôn yêu cầu) */}
-            <div className="mb-3">
-              <label className="form-label fw-bold">Mật khẩu hiện tại (Bắt buộc để lưu)</label>
-              <div className="input-group">
-                <input
-                  type={showCurrentPw ? "text" : "password"}
-                  className="form-control"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu hiện tại để xác nhận"
-                  required // Thêm required
-                />
-                <button 
-                  type="button" 
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowCurrentPw(!showCurrentPw)}
-                >
-                  <EyeIcon visible={showCurrentPw} />
-                </button>
-              </div>
-            </div>
-
-            {/* VÙNG THAY ĐỔI MẬT KHẨU MỚI */}
-            {!showPasswordFields ? (
-              // Nút "Thay đổi mật khẩu"
-              <div className="text-center">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setShowPasswordFields(true)}
-                >
-                  Thay đổi mật khẩu
-                </button>
-              </div>
-            ) : (
-              // Form đổi mật khẩu
-              <div id="password-section">
+            <div className="card-body p-4">
+              <form onSubmit={handleSubmit}>
+                {/* THÔNG TIN CƠ BẢN */}
                 <div className="mb-3">
-                  <label className="form-label fw-bold">Mật khẩu mới</label>
+                  <label className="form-label fw-bold">Họ và tên</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={ten}
+                    onChange={(e) => setTen(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Email</label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    value={user.email}
+                    disabled
+                  />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Số điện thoại</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={soDienThoai}
+                    onChange={(e) => setSoDienThoai(e.target.value)}
+                  />
+                </div>
+
+                <hr className="my-4" />
+
+                {/* MẬT KHẨU HIỆN TẠI (Luôn yêu cầu) */}
+                <div className="mb-3">
+                  <label className="form-label fw-bold">Mật khẩu hiện tại (Bắt buộc để lưu)</label>
                   <div className="input-group">
                     <input
-                      type={showNewPw ? "text" : "password"}
+                      type={showCurrentPw ? "text" : "password"}
                       className="form-control"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Nhập mật khẩu mới"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      placeholder="Nhập mật khẩu hiện tại để xác nhận"
+                      required // Thêm required
                     />
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       className="btn btn-outline-secondary"
-                      onClick={() => setShowNewPw(!showNewPw)}
+                      onClick={() => setShowCurrentPw(!showCurrentPw)}
                     >
-                      <EyeIcon visible={showNewPw} />
+                      <EyeIcon visible={showCurrentPw} />
                     </button>
                   </div>
                 </div>
-                <div className="mb-3">
-                  <label className="form-label fw-bold">Xác nhận mật khẩu mới</label>
-                  <input
-                    type={showNewPw ? "text" : "password"}
-                    className="form-control"
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    placeholder="Nhập lại mật khẩu mới"
-                  />
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-link p-0"
-                  onClick={() => setShowPasswordFields(false)}
-                >
-                  Hủy đổi mật khẩu
-                </button>
-              </div>
-            )}
-            
-            {/* NÚT LƯU CHUNG */}
-            <div className="text-end mt-4">
-              <button 
-                type="submit" 
-                className="btn btn-primary"
-                disabled={updateUserMutation.isPending}
-              >
-                {updateUserMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
-              </button>
-            </div>
-          </form>
-          </div>
-        </div>
-      )}
 
-      {/* TAB 2: LỊCH SỬ ĐẶT VÉ */}
-      {activeTab === "bookings" && (
-        <div className="card shadow-sm border-0">
-          <div className="card-header bg-primary text-white">
-            <h3>🎫 Lịch sử đặt vé</h3>
-          </div>
-          <div className="card-body p-4">
-            {bookingsLoading ? (
-              <div className="text-center py-5">
-                <div className="spinner-border text-primary" role="status">
-                  <span className="visually-hidden">Đang tải...</span>
+                {/* VÙNG THAY ĐỔI MẬT KHẨU MỚI */}
+                {!showPasswordFields ? (
+                  // Nút "Thay đổi mật khẩu"
+                  <div className="text-center">
+                    <button
+                      type="button"
+                      className="btn btn-outline-secondary"
+                      onClick={() => setShowPasswordFields(true)}
+                    >
+                      Thay đổi mật khẩu
+                    </button>
+                  </div>
+                ) : (
+                  // Form đổi mật khẩu
+                  <div id="password-section">
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Mật khẩu mới</label>
+                      <div className="input-group">
+                        <input
+                          type={showNewPw ? "text" : "password"}
+                          className="form-control"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Nhập mật khẩu mới"
+                        />
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => setShowNewPw(!showNewPw)}
+                        >
+                          <EyeIcon visible={showNewPw} />
+                        </button>
+                      </div>
+                    </div>
+                    <div className="mb-3">
+                      <label className="form-label fw-bold">Xác nhận mật khẩu mới</label>
+                      <input
+                        type={showNewPw ? "text" : "password"}
+                        className="form-control"
+                        value={passwordConfirm}
+                        onChange={(e) => setPasswordConfirm(e.target.value)}
+                        placeholder="Nhập lại mật khẩu mới"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      className="btn btn-link p-0"
+                      onClick={() => setShowPasswordFields(false)}
+                    >
+                      Hủy đổi mật khẩu
+                    </button>
+                  </div>
+                )}
+
+                {/* NÚT LƯU CHUNG */}
+                <div className="text-end mt-4">
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={updateUserMutation.isPending}
+                  >
+                    {updateUserMutation.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+                  </button>
                 </div>
-              </div>
-            ) : bookings.length === 0 ? (
-              <div className="alert alert-info text-center">
-                Bạn chưa có vé nào. <a href="/">Hãy đặt vé ngay!</a>
-              </div>
-            ) : (
-              <div className="table-responsive">
-                <table className="table table-hover table-striped">
-                  <thead className="table-light">
-                    <tr>
-                      <th>Mã đơn hàng</th>
-                      <th>Phim</th>
-                      <th>Ngày đặt</th>
-                      <th>Trạng thái</th>
-                      <th>Tổng tiền</th>
-                      <th>Hành động</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookings.map((booking: any, idx: number) => {
-                      const datVeId = booking.dat_ve_id ?? null;
-                      const details = datVeId ? bookingDetails.get(String(datVeId)) : null;
-                      return (
-                        <React.Fragment key={idx}>
-                          <tr>
-                            <td>
-                              <span className="badge bg-primary">{booking.ma_don_hang}</span>
-                            </td>
-                            <td>
-                              <strong>{booking.phim}</strong>
-                            </td>
-                            <td>{booking.ngay_dat}</td>
-                            <td>
-                              {(() => {
-                                const st = getShowStatus(booking, details);
-                                return <span className={`badge bg-${st.color}`}>{st.label}</span>;
-                              })()}
-                            </td>
-                            <td>
-                              <strong className="text-danger">{booking.tong_tien}</strong>
-                            </td>
-                            <td>
-                              <button
-                                type="button"
-                                className="btn btn-sm btn-outline-primary"
-                                onClick={async () => {
-                                  if (!datVeId) {
-                                    Swal.fire("Lỗi","Không có ID vé để lấy chi tiết","error");
-                                    return;
-                                  }
-                                  const det = await fetchBookingDetails(String(datVeId));
-                                  setSelectedBookingDetails(det || bookingDetails.get(String(datVeId)));
-                                  setSelectedBookingId(String(datVeId));
-                                  setShowDetailModal(true);
-                                }}
-                              >
-                                Xem chi tiết
-                              </button>
-                            </td>
-                          </tr>
-                          {details && (
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 2: LỊCH SỬ ĐẶT VÉ */}
+        {activeTab === "bookings" && (
+          <div className="card shadow-sm border-0">
+            <div className="card-header bg-primary text-white">
+              <h3>🎫 Lịch sử đặt vé</h3>
+            </div>
+            <div className="card-body p-4">
+              {bookingsLoading ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Đang tải...</span>
+                  </div>
+                </div>
+              ) : bookings.length === 0 ? (
+                <div className="alert alert-info text-center">
+                  Bạn chưa có vé nào. <a href="/">Hãy đặt vé ngay!</a>
+                </div>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover table-striped">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Phim</th>
+                        <th>Ngày đặt</th>
+                        <th>Trạng thái</th>
+                        <th>Tổng tiền</th>
+                        <th>Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {bookings.map((booking: any, idx: number) => {
+                        const datVeId = booking.dat_ve_id ?? null;
+                        const details = datVeId ? bookingDetails.get(String(datVeId)) : null;
+                        return (
+                          <React.Fragment key={idx}>
                             <tr>
-                              <td colSpan={6}>
-                                <div className="p-3 bg-light border-top">
-                                  <div className="row g-3">
-                                    {details.chi_tiet && details.chi_tiet.length > 0 && (
-                                      <div className="col-md-6">
-                                        <h6 className="text-primary fw-bold mb-2">
-                                          <i className="fa-solid fa-chair"></i> Ghế đã đặt
-                                        </h6>
-                                        <div className="d-flex flex-wrap gap-2">
-                                          {details.chi_tiet.map((chiTiet: any, i: number) => (
-                                            <span
-                                              key={i}
-                                              className="badge bg-success"
-                                              title={chiTiet.ghe?.loai_ghe?.ten_loai_ghe}
-                                            >
-                                              Ghế {chiTiet.ghe?.so_ghe}
-                                              <br />
-                                              <small>({chiTiet.ghe?.loai_ghe?.ten_loai_ghe})</small>
-                                            </span>
-                                          ))}
-                                        </div>
-                                      </div>
-                                    )}
-                                    {details.do_an && details.do_an.length > 0 && (
-                                      <div className="col-md-6">
-                                        <h6 className="text-primary fw-bold mb-2">
-                                          <i className="fa-solid fa-utensils"></i> Đồ ăn đã chọn
-                                        </h6>
-                                        <ul className="list-unstyled small">
-                                          {details.do_an.map((food: any, i: number) => (
-                                            <li key={i} className="mb-2 pb-2 border-bottom">
-                                              <div className="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                  <strong>{food.ten_do_an}</strong>
-                                                  <br />
-                                                  <span className="text-muted">Số lượng: {food.so_luong}</span>
-                                                </div>
-                                                <span className="badge bg-warning text-dark">
-                                                  {food.gia_ban} đ
-                                                </span>
-                                              </div>
-                                            </li>
-                                          ))}
-                                        </ul>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
+                              <td>
+                                <span className="badge bg-primary">{booking.ma_don_hang}</span>
+                              </td>
+                              <td>
+                                <strong>{booking.phim}</strong>
+                              </td>
+                              <td>{booking.ngay_dat}</td>
+                              <td>
+                                {(() => {
+                                  const st = getShowStatus(booking, details);
+                                  return <span className={`badge bg-${st.color}`}>{st.label}</span>;
+                                })()}
+                              </td>
+                              <td>
+                                <strong className="text-danger">{booking.tong_tien}</strong>
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  className="btn btn-sm btn-outline-primary"
+                                  onClick={async () => {
+                                    if (!datVeId) {
+                                      Swal.fire("Lỗi", "Không có ID vé để lấy chi tiết", "error");
+                                      return;
+                                    }
+                                    const det = await fetchBookingDetails(String(datVeId));
+                                    setSelectedBookingDetails(det || bookingDetails.get(String(datVeId)));
+                                    setSelectedBookingId(String(datVeId));
+                                    setShowDetailModal(true);
+                                  }}
+                                >
+                                  Xem chi tiết
+                                </button>
                               </td>
                             </tr>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Modal chi tiết đơn hàng */}
-      {showDetailModal && (
-        <>
-          <div className="modal d-block" tabIndex={-1} role="dialog">
-            <div className="modal-dialog modal-lg" role="document">
-              <div className="modal-content border-0 shadow-lg">
-                <div className="modal-header border-bottom-0 pb-0">
-                  <div></div>
-                  <button type="button" className="btn-close" onClick={() => setShowDetailModal(false)} aria-label="Close"></button>
-                </div>
-                <div className="modal-body pt-0">
-                  {(() => {
-                    const det = selectedBookingDetails || (selectedBookingId ? bookingDetails.get(selectedBookingId as string) : null);
-                    if (!det) return <p className="text-center">Đang tải chi tiết...</p>;
-
-                    // Debug: xem toàn bộ dữ liệu
-                    console.log("Chi tiết đơn vé:", det);
-
-                    const posterUrl = det.lich_chieu?.phim?.anh_poster 
-                      ? (det.lich_chieu.phim.anh_poster.startsWith('http') 
-                          ? det.lich_chieu.phim.anh_poster 
-                          : `http://127.0.0.1:8000/storage/${det.lich_chieu.phim.anh_poster}`)
-                      : '/placeholder-movie.png';
-                    
-                    const movieName = det.lich_chieu?.phim?.ten_phim || det.phim || 'Không rõ phim';
-                    const roomName = det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ';
-                    const showTime = det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu) : null;
-
-                    return (
-                      <div>
-                        {/* Movie Header Section */}
-                        <div className="row mb-4">
-                          <div className="col-md-4 text-center">
-                            <img 
-                              src={posterUrl} 
-                              alt={movieName}
-                              className="img-fluid rounded shadow-sm"
-                              style={{ maxHeight: '280px', objectFit: 'cover' }}
-                              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.png'; }}
-                            />
-                          </div>
-                          <div className="col-md-8">
-                            <h4 className="text-primary fw-bold mb-3">{movieName}</h4>
-                            
-                            {/* Showtime Info */}
-                            <div className="mb-3 p-3 bg-light rounded">
-                              <div className="row">
-                                <div className="col-md-6">
-                                  <p className="text-muted mb-1"><i className="fa-solid fa-door-open"></i> Phòng chiếu</p>
-                                  <p className="fw-bold text-dark">{roomName}</p>
-                                </div>
-                                <div className="col-md-6">
-                                  <p className="text-muted mb-1"><i className="fa-solid fa-clock"></i> Thời gian</p>
-                                  <p className="fw-bold text-dark">
-                                    {showTime ? showTime.toLocaleString('vi-VN', { 
-                                      year: 'numeric', 
-                                      month: '2-digit', 
-                                      day: '2-digit',
-                                      hour: '2-digit',
-                                      minute: '2-digit'
-                                    }) : 'Không rõ'}
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-
-                            {/* Payment Method */}
-                            <div className="mb-3">
-                              <p className="text-muted mb-1"><i className="fa-solid fa-credit-card"></i> Phương thức thanh toán</p>
-                              <p className="fw-bold text-success">{det.thanh_toan ?? '—'}</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* QR Code Section */}
-                        {det.thanh_toan && (
-                          <div className="row mb-4">
-                            <div className="col-md-4 offset-md-4 text-center">
-                              <div className="card border-0 shadow-sm p-3 bg-light">
-                                <h6 className="text-primary fw-bold mb-3">
-                                  <i className="fa-solid fa-qrcode me-2"></i>Mã QR Vé
-                                </h6>
-                                {det.qr_code ? (
-                                  <div className="d-flex justify-content-center" style={{ backgroundColor: '#fff', padding: '10px', borderRadius: '4px', display: 'inline-block', margin: '0 auto' }}>
-                                    <img 
-                                      src={`http://localhost:8000/storage/${det.qr_code}`}
-                                      alt="QR Code"
-                                      style={{ width: '180px', height: '180px', objectFit: 'contain' }}
-                                      onError={(e) => {
-                                        console.error("Lỗi tải ảnh QR từ:", det.qr_code);
-                                        (e.target as HTMLImageElement).style.display = 'none';
-                                      }}
-                                    />
-                                  </div>
-                                ) : (
-                                  <p className="text-muted">Chưa có mã QR</p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <hr />
-
-                        {/* Seats Section */}
-                        {det.chi_tiet && det.chi_tiet.length > 0 && (
-                          <div className="mb-4">
-                            <h6 className="text-primary fw-bold mb-3">
-                              <i className="fa-solid fa-chair me-2"></i>Ghế đã đặt ({det.chi_tiet.length})
-                            </h6>
-                            <div className="d-flex flex-wrap gap-2">
-                              {det.chi_tiet.map((ct: any, i: number) => (
-                                <div 
-                                  key={i} 
-                                  className="badge bg-success text-white p-2"
-                                  style={{ fontSize: '0.95rem', padding: '0.5rem 0.75rem !important' }}
-                                >
-                                  <div className="fw-bold">{ct.ghe?.so_ghe}</div>
-                                  <div style={{ fontSize: '0.8rem' }}>{ct.ghe?.loai_ghe?.ten_loai_ghe || 'Ghế'}</div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Food Section */}
-                        {det.do_an && det.do_an.length > 0 && (
-                          <div className="mb-4">
-                            <h6 className="text-primary fw-bold mb-3">
-                              <i className="fa-solid fa-utensils me-2"></i>Đồ ăn kèm ({det.do_an.length})
-                            </h6>
-                            <div className="row g-2">
-                              {det.do_an.map((f: any, i: number) => (
-                                <div key={i} className="col-md-6">
-                                  <div className="card border-0 bg-light">
-                                    <div className="card-body p-3">
-                                      <div className="d-flex justify-content-between align-items-start">
-                                        <div className="flex-grow-1">
-                                          <h6 className="card-title mb-1 fw-bold text-dark">{f.ten_do_an}</h6>
-                                          <small className="text-muted">x{f.so_luong}</small>
+                            {details && (
+                              <tr>
+                                <td colSpan={6}>
+                                  <div className="p-3 bg-light border-top">
+                                    <div className="row g-3">
+                                      {details.chi_tiet && details.chi_tiet.length > 0 && (
+                                        <div className="col-md-6">
+                                          <h6 className="text-primary fw-bold mb-2">
+                                            <i className="fa-solid fa-chair"></i> Ghế đã đặt
+                                          </h6>
+                                          <div className="d-flex flex-wrap gap-2">
+                                            {details.chi_tiet.map((chiTiet: any, i: number) => (
+                                              <span
+                                                key={i}
+                                                className="badge bg-success"
+                                                title={chiTiet.ghe?.loai_ghe?.ten_loai_ghe}
+                                              >
+                                                Ghế {chiTiet.ghe?.so_ghe}
+                                                <br />
+                                                <small>({chiTiet.ghe?.loai_ghe?.ten_loai_ghe})</small>
+                                              </span>
+                                            ))}
+                                          </div>
                                         </div>
-                                        <span className="badge bg-warning text-dark fw-bold">
-                                          {((f.gia_ban || 0) * (f.so_luong || 1)).toLocaleString('vi-VN')}₫
-                                        </span>
+                                      )}
+                                      {details.do_an && details.do_an.length > 0 && (
+                                        <div className="col-md-6">
+                                          <h6 className="text-primary fw-bold mb-2">
+                                            <i className="fa-solid fa-utensils"></i> Đồ ăn đã chọn
+                                          </h6>
+                                          <ul className="list-unstyled small">
+                                            {details.do_an.map((food: any, i: number) => (
+                                              <li key={i} className="mb-2 pb-2 border-bottom">
+                                                <div className="d-flex justify-content-between align-items-start">
+                                                  <div>
+                                                    <strong>{food.ten_do_an}</strong>
+                                                    <br />
+                                                    <span className="text-muted">Số lượng: {food.so_luong}</span>
+                                                  </div>
+                                                  <span className="badge bg-warning text-dark">
+                                                    {food.gia_ban} đ
+                                                  </span>
+                                                </div>
+                                              </li>
+                                            ))}
+                                          </ul>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Modal chi tiết đơn hàng */}
+        {showDetailModal && (
+          <>
+            <div className="modal d-block" tabIndex={-1} role="dialog">
+              <div className="modal-dialog modal-lg" role="document">
+                <div className="modal-content border-0 shadow-lg">
+                  <div className="modal-header border-bottom-0 pb-0">
+                    <div></div>
+                    <button type="button" className="btn-close" onClick={() => setShowDetailModal(false)} aria-label="Close"></button>
+                  </div>
+                  <div className="modal-body pt-0">
+                    {(() => {
+                      const det = selectedBookingDetails || (selectedBookingId ? bookingDetails.get(selectedBookingId as string) : null);
+                      if (!det) return <p className="text-center">Đang tải chi tiết...</p>;
+
+                      // Debug: xem toàn bộ dữ liệu
+                      console.log("Chi tiết đơn vé:", det);
+
+                      const posterUrl = det.lich_chieu?.phim?.anh_poster
+                        ? (det.lich_chieu.phim.anh_poster.startsWith('http')
+                          ? det.lich_chieu.phim.anh_poster
+                          : `http://127.0.0.1:8000/storage/${det.lich_chieu.phim.anh_poster}`)
+                        : '/placeholder-movie.png';
+
+                      const movieName = det.lich_chieu?.phim?.ten_phim || det.phim || 'Không rõ phim';
+                      const roomName = det.lich_chieu?.phong?.ten_phong || det.phong || 'Không rõ';
+                      const showTime = det.lich_chieu?.gio_chieu ? new Date(det.lich_chieu.gio_chieu) : null;
+
+                      return (
+                        <div>
+                          {/* Movie Header Section */}
+                          <div className="row mb-4">
+                            <div className="col-md-4 text-center">
+                              <img
+                                src={posterUrl}
+                                alt={movieName}
+                                className="img-fluid rounded shadow-sm"
+                                style={{ maxHeight: '280px', objectFit: 'cover' }}
+                                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-movie.png'; }}
+                              />
+                            </div>
+                            <div className="col-md-8">
+                              <h4 className="text-primary fw-bold mb-3">{movieName}</h4>
+
+                              {/* Showtime Info */}
+                              <div className="mb-3 p-3 bg-light rounded">
+                                <div className="row">
+                                  <div className="col-md-6">
+                                    <p className="text-muted mb-1"><i className="fa-solid fa-door-open"></i> Phòng chiếu</p>
+                                    <p className="fw-bold text-dark">{roomName}</p>
+                                  </div>
+                                  <div className="col-md-6">
+                                    <p className="text-muted mb-1"><i className="fa-solid fa-clock"></i> Thời gian</p>
+                                    <p className="fw-bold text-dark">
+                                      {showTime ? showTime.toLocaleString('vi-VN', {
+                                        year: 'numeric',
+                                        month: '2-digit',
+                                        day: '2-digit',
+                                        hour: '2-digit',
+                                        minute: '2-digit'
+                                      }) : 'Không rõ'}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Payment Method */}
+                              <div className="mb-3">
+                                <p className="text-muted mb-1"><i className="fa-solid fa-credit-card"></i> Phương thức thanh toán</p>
+                                <p className="fw-bold text-success">{det.thanh_toan ?? '—'}</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* QR Code Section */}
+                          {det.thanh_toan && (
+                            <div className="row mb-4">
+                              <div className="col-md-4 offset-md-4 text-center">
+                                <div className="card border-0 shadow-sm p-3 bg-light">
+                                  <h6 className="text-primary fw-bold mb-3">
+                                    <i className="fa-solid fa-qrcode me-2"></i>Mã QR Vé
+                                  </h6>
+                                  {det.qr_code ? (
+                                    <div className="d-flex justify-content-center" style={{ backgroundColor: '#fff', padding: '10px', borderRadius: '4px', display: 'inline-block', margin: '0 auto' }}>
+                                      <img
+                                        src={`http://localhost:8000/storage/${det.qr_code}`}
+                                        alt="QR Code"
+                                        style={{ width: '180px', height: '180px', objectFit: 'contain' }}
+                                        onError={(e) => {
+                                          console.error("Lỗi tải ảnh QR từ:", det.qr_code);
+                                          (e.target as HTMLImageElement).style.display = 'none';
+                                        }}
+                                      />
+                                    </div>
+                                  ) : (
+                                    <p className="text-muted">Chưa có mã QR</p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <hr />
+
+                          {/* Seats Section */}
+                          {det.chi_tiet && det.chi_tiet.length > 0 && (
+                            <div className="mb-4">
+                              <h6 className="text-primary fw-bold mb-3">
+                                <i className="fa-solid fa-chair me-2"></i>Ghế đã đặt ({det.chi_tiet.length})
+                              </h6>
+                              <div className="d-flex flex-wrap gap-2">
+                                {det.chi_tiet.map((ct: any, i: number) => (
+                                  <div
+                                    key={i}
+                                    className="badge bg-success text-white p-2"
+                                    style={{ fontSize: '0.95rem', padding: '0.5rem 0.75rem !important' }}
+                                  >
+                                    <div className="fw-bold">{ct.ghe?.so_ghe}</div>
+                                    <div style={{ fontSize: '0.8rem' }}>{ct.ghe?.loai_ghe?.ten_loai_ghe || 'Ghế'}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Food Section */}
+                          {det.do_an && det.do_an.length > 0 && (
+                            <div className="mb-4">
+                              <h6 className="text-primary fw-bold mb-3">
+                                <i className="fa-solid fa-utensils me-2"></i>Đồ ăn kèm ({det.do_an.length})
+                              </h6>
+                              <div className="row g-2">
+                                {det.do_an.map((f: any, i: number) => (
+                                  <div key={i} className="col-md-6">
+                                    <div className="card border-0 bg-light">
+                                      <div className="card-body p-3">
+                                        <div className="d-flex justify-content-between align-items-start">
+                                          <div className="flex-grow-1">
+                                            <h6 className="card-title mb-1 fw-bold text-dark">{f.ten_do_an}</h6>
+                                            <small className="text-muted">x{f.so_luong}</small>
+                                          </div>
+                                          <span className="badge bg-warning text-dark fw-bold">
+                                            {((f.gia_ban || 0) * (f.so_luong || 1)).toLocaleString('vi-VN')}₫
+                                          </span>
+                                        </div>
                                       </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                ))}
+                              </div>
                             </div>
+                          )}
+
+                          <hr />
+
+                          {/* Total Price */}
+                          <div className="d-flex justify-content-between align-items-center p-3 bg-primary bg-opacity-10 rounded">
+                            <h6 className="mb-0 fw-bold text-dark">Tổng tiền:</h6>
+                            <h5 className="mb-0 fw-bold text-danger">
+                              {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' })
+                                .format(det.tong_tien || det.tong || 0)}
+
+                            </h5>
                           </div>
-                        )}
-
-                        <hr />
-
-                        {/* Total Price */}
-                        <div className="d-flex justify-content-between align-items-center p-3 bg-primary bg-opacity-10 rounded">
-                          <h6 className="mb-0 fw-bold text-dark">Tổng tiền:</h6>
-                          <h5 className="mb-0 fw-bold text-danger">
-                            {((det.tong_tien || det.tong || 0)).toLocaleString('vi-VN')}₫
-                          </h5>
                         </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-                <div className="modal-footer border-top-0 pt-0">
-                  <button type="button" className="btn btn-primary" onClick={() => setShowDetailModal(false)}>
-                    <i className="fa-solid fa-check me-2"></i>Đóng
-                  </button>
+                      );
+                    })()}
+                  </div>
+                  <div className="modal-footer border-top-0 pt-0">
+                    <button type="button" className="btn btn-primary" onClick={() => setShowDetailModal(false)}>
+                      <i className="fa-solid fa-check me-2"></i>Đóng
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="modal-backdrop show"></div>
-        </>
-      )}
-    </div>
+            <div className="modal-backdrop show"></div>
+          </>
+        )}
+      </div>
     </>
   );
 };
