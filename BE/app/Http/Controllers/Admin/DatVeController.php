@@ -324,7 +324,8 @@ class DatVeController extends Controller
 
             $payload = array_merge($datVe->toArray(), [
                 'do_an' => $doAn,
-                'thanh_toan' => optional(ThanhToan::with('phuongThucThanhToan')->where('dat_ve_id', $datVe->id)->first())->phuongThucThanhToan?->ten ?? null
+                'thanh_toan' => optional(ThanhToan::with('phuongThucThanhToan')->where('dat_ve_id', $datVe->id)->first())->phuongThucThanhToan?->ten ?? null,
+                'qr_code' => optional(ThanhToan::where('dat_ve_id', $datVe->id)->first())->qr_code ?? null
             ]);
 
             return response()->json(['message' => 'Lấy chi tiết vé thành công!', 'data' => $payload], 200);
