@@ -14,49 +14,57 @@ const ScanVeRap = () => {
   const extractMaGiaoDich = (raw: string): string | null => {
     if (!raw) return null;
 
-    // 1) Trường hợp QR FE: "MA12345-A05"
-    const firstLine = raw.split("\n")[0];
-    if (firstLine.includes("-")) {
-      return firstLine.split("-")[0].trim();
-    }
+  raw = raw.trim();
 
-    // 2) Trường hợp QR BE: có dòng "Mã giao dịch: XYZ"
-    const match = raw.match(/Mã giao dịch:\s*([^\s]+)/i);
-    if (match && match[1]) {
-      return match[1].trim();
+  // 1) QR dạng FE: "12345678-A05"
+  if (raw.includes("-")) {
+    const parts = raw.split("-");
+    if (parts[0] && /^[0-9]+$/.test(parts[0])) {
+      return parts[0].trim();
     }
+  }
 
-    // 3) QR chỉ chứa mã giao dịch trần, ví dụ "MA123456"
-    if (/^[-A-Za-z0-9]+$/.test(raw.trim())) {
-      return raw.trim();
-    }
+  // 2) QR dạng MoMo Backend
+  const match = raw.match(/mã giao dịch:\s*([0-9]+)/i);
+  if (match && match[1]) return match[1].trim();
 
-    return null;
+  // 3) QR chỉ là số thuần (mã giao dịch)
+  if (/^[0-9]+$/.test(raw)) return raw;
+
+  return null;
+
   };
 
   const { ref } = useZxing({
     onDecodeResult(result) {
-      if (isProcessing) return;
+    const text = result.getText();
 
-      const text = result.getText();
-      setScanResult(text);
-      setIsProcessing(true);
+    // Nếu đang xử lý rồi thì bỏ qua (tránh spam)
+    if (isProcessing) return;
 
-      const maGD = extractMaGiaoDich(text);
-      if (!maGD) {
-        message.error("Không đọc được mã giao dịch từ QR");
-        setIsProcessing(false);
-        return;
-      }
+    setIsProcessing(true);
 
-      setMaGiaoDich(maGD);
-      message.success(`Đã đọc mã giao dịch: ${maGD}`);
+    // Lưu lại raw text để debug
+    setScanResult(text);
 
-      // Điều hướng tới màn chi tiết vé rạp của bạn
-      setTimeout(() => {
-        navigate(`/admin/ve/${maGD}`);
-      }, 600);
-    },
+    // Tách mã giao dịch
+    const maGD = extractMaGiaoDich(text);
+
+    // ❌ Không tách được -> QR không hợp lệ
+    if (!maGD) {
+      message.error("QR không hợp lệ! Vui lòng thử lại.");
+      setIsProcessing(false);
+      return;
+    }
+
+    // ✔️ OK
+    setMaGiaoDich(maGD);
+    message.success(`Đã nhận mã giao dịch: ${maGD}`);
+
+    setTimeout(() => {
+      navigate(`/admin/ve/${maGD}`);
+    }, 400);
+  },
   });
 
   const handleReset = () => {
