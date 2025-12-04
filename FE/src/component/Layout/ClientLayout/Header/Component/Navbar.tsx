@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
         </li>
         <li style={{ margin: "0 15px" }}>
           <a
-            href="#introduction"
+            href="/gioi-thieu"
             style={{
               color: "black",
               textDecoration: "none",

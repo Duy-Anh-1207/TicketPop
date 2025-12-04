@@ -83,7 +83,7 @@ import MyAccountPage from "../Page/Profile/MyAccountPage";
 import ListDonVe from "../component/Admin/DonVe/ListDonVe";
 import ChiTietDonVe from "../component/Admin/DonVe/ChiTietDonVe";
 import PromotionPage from "../Page/Promotion/PromotionPage";
-
+import GioiThieuPage from "../Page/About/GioiThieu";
 
 
 const Routermain = () => {
@@ -117,6 +117,7 @@ const Routermain = () => {
         { path: "thong-tin-tai-khoan", element: <MyAccountPage /> },
 
         { path: "khuyen-mai", element: <PromotionPage /> },
+        { path: "gioi-thieu", element: <GioiThieuPage /> },
 
 
         { path: "booking/:slug", element: <Booking /> },

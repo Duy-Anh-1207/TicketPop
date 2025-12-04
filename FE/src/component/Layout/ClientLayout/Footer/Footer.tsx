@@ -55,7 +55,10 @@ const Footer: React.FC = () => {
         <div>
           <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>TICKETPOP</h4>
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }}>Giới thiệu</li>
+            <li style={{ marginBottom: '5px' }} ><a href="gioi-thieu" style={{ textDecoration: 'none', color: 'black' }}>
+              giới thiệu
+            </a>
+           </li>
             <li style={{ marginBottom: '5px' }}>Liên hệ</li>
             <li style={{ marginBottom: '5px' }}>Tuyển dụng</li>
           </ul>
