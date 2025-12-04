@@ -1,4 +1,5 @@
-import { Table, Spin } from "antd";
+import { Table, Spin, Button } from "antd";
+import { QrcodeOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getDanhSachDatVe } from "../../../provider/DonVeProvider";
@@ -74,7 +75,13 @@ const ListDonVe = () => {
   return (
     <div className="container p-4">
       <h2 className="mb-4">🎟️ Quản lý đơn vé</h2>
-
+        <Button
+          type="primary"
+          icon={<QrcodeOutlined />}
+          onClick={() => navigate("/admin/scan-ve")} // 👈 sang trang quét QR
+        >
+          Quét vé
+        </Button>
       <div className="card p-3 mb-4 shadow-sm border-0 bg-light">
         <div className="row g-3 align-items-end">
           <div className="col-md-4">
