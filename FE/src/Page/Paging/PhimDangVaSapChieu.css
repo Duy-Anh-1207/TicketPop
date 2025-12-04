@@ -1,4 +1,4 @@
-/* Title */
+Title
 .section-title {
   font-size: 1.5rem;
   margin: 1.5rem 0 1rem;
@@ -6,14 +6,25 @@
   padding-bottom: 0.5rem;
 }
 
-/* Movie list container */
-.movie-list-single {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.movie-list {
+  display: grid;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+  gap: 24px;
+  padding: 16px;
 }
 
-/* Card */
+@media (min-width: 640px) {
+  .movie-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .movie-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 .movie-card-list {
   display: flex;
   background: #fff;
@@ -27,7 +38,6 @@
   transform: translateY(-2px);
 }
 
-/* Poster */
 .poster-list {
   width: 150px;
 
@@ -35,7 +45,6 @@
   cursor: pointer;
 }
 
-/* Info section */
 .movie-info-list {
   padding: 0.8rem;
 

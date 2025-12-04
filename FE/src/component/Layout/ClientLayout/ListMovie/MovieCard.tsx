@@ -1,6 +1,4 @@
-import { useListPhim } from "../../../../hook/PhimHook";
 import type { Phim } from "../../../../types/phim";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./MovieCard.css";
 
@@ -26,34 +24,75 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
     navigate(`/phim/${slug}-${movie.id}`);
   };
 
+  const posterUrl = movie.anh_poster?.startsWith("http")
+    ? movie.anh_poster
+    : `${import.meta.env.VITE_API_BASE_URL}/storage/${movie.anh_poster}`;
+
   return (
-    <div className="movie-card-list">
-      <img
-        className="poster-list"
-        src={
-          movie.anh_poster?.startsWith("http")
-            ? movie.anh_poster
-            : `${import.meta.env.VITE_API_BASE_URL}/storage/${movie.anh_poster}`
-        }
-        alt={movie.ten_phim}
-        onClick={handleGoDetail}
-      />
-      <div className="movie-info-list">
-        <h3 onClick={handleGoDetail}>{movie.ten_phim}</h3>
-        <p><strong>Thời lượng:</strong> {movie.thoi_luong} phút</p>
-        <p><strong>Quốc gia:</strong> {movie.quoc_gia}</p>
-        <p><strong>Khởi chiếu:</strong> {new Date(movie.ngay_cong_chieu).toLocaleDateString()}</p>
-        <p><strong>Ngôn ngữ:</strong> {movie.ngon_ngu}</p>
-        <div className="movie-actions-list">
-          <button
-            onClick={() => openTrailer(movie.trailer)}
-            className="btn btn-outline-primary"
-          >
-            Xem trailer
-          </button>
-          <button onClick={handleGoDetail} className="btn btn-primary">
-            Đặt vé
-          </button>
+    <div className="movie-card-modern group">
+      <div className="movie-poster-wrapper">
+        <img
+          src={posterUrl}
+          alt={movie.ten_phim}
+          className="movie-poster"
+          onClick={handleGoDetail}
+        />
+
+        <div className="movie-overlay">
+          <div className="overlay-actions">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                openTrailer(movie.trailer);
+              }}
+              className="btn-trailer"
+              title="Xem trailer"
+            >
+              <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                <path d="M8 5v14l11-7L8 5z" />
+              </svg>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleGoDetail();
+              }}
+              className="btn-book"
+            >
+              Đặt vé ngay
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <div className="movie-info">
+        <h3
+          className="movie-title"
+          onClick={handleGoDetail}
+          title={movie.ten_phim}
+        >
+          {movie.ten_phim.length > 40
+            ? movie.ten_phim.slice(0, 40) + "..."
+            : movie.ten_phim}
+        </h3>
+
+        <div className="movie-meta">
+          <span className="duration">
+            <svg viewBox="0 0 24 24" width="16" height="16">
+              <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14l-5-3 1.5-1.5L10 14.25V7h2v7.25L9 17z"/>
+            </svg>
+            {movie.thoi_luong} phút
+          </span>
+
+          <span className="year">
+            {new Date(movie.ngay_cong_chieu).getFullYear()}
+          </span>
+        </div>
+
+        <div className="movie-tags">
+          <span className="tag-country">{movie.quoc_gia}</span>
+          <span className="tag-lang">{movie.ngon_ngu}</span>
         </div>
       </div>
     </div>
