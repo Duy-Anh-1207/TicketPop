@@ -182,8 +182,7 @@ class DatVeController extends Controller
                     $maGiamGia->increment('so_lan_da_su_dung');
                 }
             }
-            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(1));
-            $datVe->job_id = null;
+            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(5));
             $datVe->save();
             DB::commit();
             $datVeLoaded = DatVe::find($datVe->id);
@@ -578,7 +577,7 @@ class DatVeController extends Controller
         }
     }
 
-     public function apDungVoucher(Request $request, $id)
+    public function apDungVoucher(Request $request, $id)
     {
         $request->validate([
             'voucher_code' => 'required|string|max:30',
@@ -601,7 +600,6 @@ class DatVeController extends Controller
                 return response()->json([
                     'success' => false,
                     'message' => 'Không tìm thấy đơn đặt vé',
-                    'dat_ve_id' => $id
                 ], 404);
             }
 
@@ -609,11 +607,11 @@ class DatVeController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Đơn hàng đã được thanh toán, không thể áp dụng mã giảm giá'
+                    'message' => 'Đơn hàng đã thanh toán, không thể áp dụng mã giảm giá'
                 ], 400);
             }
 
-            if ($datVe->ma_giam_gia_id !== null) {
+            if (!is_null($datVe->ma_giam_gia_id)) {
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
@@ -622,6 +620,7 @@ class DatVeController extends Controller
             }
 
             $voucherCode = strtoupper(trim($request->voucher_code));
+
             $maGiamGia = MaGiamGia::where('ma', $voucherCode)
                 ->lockForUpdate()
                 ->first();
@@ -630,8 +629,7 @@ class DatVeController extends Controller
                 DB::rollBack();
                 return response()->json([
                     'success' => false,
-                    'message' => 'Mã giảm giá không tồn tại',
-                    'voucher_nhap' => $voucherCode
+                    'message' => 'Mã giảm giá không tồn tại'
                 ], 400);
             }
 
@@ -641,6 +639,7 @@ class DatVeController extends Controller
             }
 
             $now = now();
+
             if ($maGiamGia->ngay_bat_dau > $now) {
                 DB::rollBack();
                 return response()->json(['success' => false, 'message' => 'Mã giảm giá chưa đến thời gian sử dụng'], 400);
@@ -651,7 +650,12 @@ class DatVeController extends Controller
                 return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết hạn'], 400);
             }
 
-            $tongTienGoc = $datVe->tong_tien + ($datVe->so_tien_giam ?? 0);
+            if ($maGiamGia->so_lan_da_su_dung >= $maGiamGia->so_lan_su_dung) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết lượt sử dụng'], 400);
+            }
+
+            $tongTienGoc = $datVe->tong_tien;
 
             if ($tongTienGoc < $maGiamGia->gia_tri_don_hang_toi_thieu) {
                 DB::rollBack();
@@ -663,26 +667,25 @@ class DatVeController extends Controller
                 ], 400);
             }
 
-            if ($maGiamGia->so_lan_da_su_dung >= $maGiamGia->so_lan_su_dung) {
-                DB::rollBack();
-                return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết lượt sử dụng'], 400);
+            $soTienGiam = $tongTienGoc * ($maGiamGia->phan_tram_giam / 100);
+
+            if ($maGiamGia->giam_toi_da) {
+                $soTienGiam = min($soTienGiam, $maGiamGia->giam_toi_da);
             }
 
-            $soTienGiam = $tongTienGoc * ($maGiamGia->phan_tram_giam / 100);
-            $soTienGiam = min($soTienGiam, $maGiamGia->giam_toi_da ?? PHP_INT_MAX);
             $soTienGiam = min($soTienGiam, $tongTienGoc);
 
             $tongTienMoi = $tongTienGoc - $soTienGiam;
 
             $datVe->update([
-                'ma_giam_gia_id' => $maGiamGia->id,
-                'so_tien_giam'   => $soTienGiam,
-                'tong_tien'      => $tongTienMoi,
+                'tong_tien'=> $tongTienMoi,
+                'ma_giam_gia_id'=> $maGiamGia->id,
             ]);
 
             $maGiamGia->increment('so_lan_da_su_dung');
 
             DB::commit();
+
 
             $datVeMoi = DatVe::with([
                 'nguoiDung:id,ten,email,so_dien_thoai',
@@ -690,7 +693,7 @@ class DatVeController extends Controller
                 'lichChieu.phong:id,ten_phong',
                 'chiTiet.ghe:id,so_ghe',
                 'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
-                'donDoAn.doAn:id,ten_do_an,image',
+                'donDoAn.doAn:id,ten_do_an,gia_ban,image', 
                 'maGiamGia:id,ma,phan_tram_giam,giam_toi_da'
             ])->findOrFail($id);
 
@@ -700,11 +703,28 @@ class DatVeController extends Controller
                 'giam_duoc' => $soTienGiam,
                 'tong_tien_cu' => $tongTienGoc,
                 'tong_tien_moi' => $tongTienMoi,
-                'dat_ve' => $datVeMoi
+                'dat_ve' => [
+                    'id'            => $datVeMoi->id,
+                    'tong_tien'     => $datVeMoi->tong_tien,
+                    'ma_giam_gia_id' => $datVeMoi->ma_giam_gia_id,
+                    'nguoi_dung'    => $datVeMoi->nguoiDung,
+                    'lich_chieu'    => $datVeMoi->lichChieu,
+                    'chi_tiet'      => $datVeMoi->chiTiet,
+                    'do_an'         => $datVeMoi->donDoAn->map(function ($ct) {
+                        return [
+                            'id'         => $ct->doAn->id,
+                            'ten_do_an'  => $ct->doAn->ten_do_an,
+                            'gia_ban'    => $ct->doAn->gia_ban,
+                            'image'      => $ct->doAn->image,
+                            'quantity'   => $ct->so_luong,
+                            'anh_do_an'  => $ct->doAn->image,
+                        ];
+                    }),
+                    'ma_giam_gia'   => $datVeMoi->maGiamGia,
+                ]
             ], 200);
         } catch (\Throwable $e) {
             DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => 'Áp dụng mã giảm giá thất bại',
