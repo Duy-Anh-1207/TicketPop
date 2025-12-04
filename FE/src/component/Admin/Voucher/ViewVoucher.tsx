@@ -119,7 +119,16 @@ export default function ViewVoucher() {
             <div className="col-md-6 mb-3">
               <label className="form-label fw-bold">Trạng thái</label>
               <p className="form-control-plaintext">
-                {voucher.trang_thai === 1 ? "Đã kích hoạt" : "Ngừng kích hoạt"}
+                {(() => {
+                  const status = voucher.trang_thai;
+                  const isActive = status === 1 || status === "1" || String(status).toLowerCase().includes("kích hoạt");
+                  
+                  return (
+                    <span className={`badge ${isActive ? "bg-success" : "bg-secondary"}`}>
+                      {isActive ? "Đang hoạt động" : "Ngừng hoạt động"}
+                    </span>
+                  );
+                })()}
               </p>
             </div>
 

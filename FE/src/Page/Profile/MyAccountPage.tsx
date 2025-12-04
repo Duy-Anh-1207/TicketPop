@@ -481,6 +481,9 @@ const MyAccountPage = () => {
                     const det = selectedBookingDetails || (selectedBookingId ? bookingDetails.get(selectedBookingId as string) : null);
                     if (!det) return <p className="text-center">Đang tải chi tiết...</p>;
 
+                    // Debug: xem toàn bộ dữ liệu
+                    console.log("Chi tiết đơn vé:", det);
+
                     const posterUrl = det.lich_chieu?.phim?.anh_poster 
                       ? (det.lich_chieu.phim.anh_poster.startsWith('http') 
                           ? det.lich_chieu.phim.anh_poster 
@@ -536,6 +539,34 @@ const MyAccountPage = () => {
                             </div>
                           </div>
                         </div>
+
+                        {/* QR Code Section */}
+                        {det.thanh_toan && (
+                          <div className="row mb-4">
+                            <div className="col-md-4 offset-md-4 text-center">
+                              <div className="card border-0 shadow-sm p-3 bg-light">
+                                <h6 className="text-primary fw-bold mb-3">
+                                  <i className="fa-solid fa-qrcode me-2"></i>Mã QR Vé
+                                </h6>
+                                {det.qr_code ? (
+                                  <div className="d-flex justify-content-center" style={{ backgroundColor: '#fff', padding: '10px', borderRadius: '4px', display: 'inline-block', margin: '0 auto' }}>
+                                    <img 
+                                      src={`http://localhost:8000/storage/${det.qr_code}`}
+                                      alt="QR Code"
+                                      style={{ width: '180px', height: '180px', objectFit: 'contain' }}
+                                      onError={(e) => {
+                                        console.error("Lỗi tải ảnh QR từ:", det.qr_code);
+                                        (e.target as HTMLImageElement).style.display = 'none';
+                                      }}
+                                    />
+                                  </div>
+                                ) : (
+                                  <p className="text-muted">Chưa có mã QR</p>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <hr />
 

@@ -16,6 +16,7 @@ export default function EditVoucher() {
   const { mutate: deleteVoucher, isPending: loadingDelete } = useDeleteVoucher();
 
   const [formData, setFormData] = useState({
+    ma: "",
     phan_tram_giam: "",
     ngay_bat_dau: "",
     ngay_ket_thuc: "",
@@ -30,6 +31,7 @@ export default function EditVoucher() {
   useEffect(() => {
     if (voucher) {
       setFormData({
+        ma: voucher.ma || "",
         phan_tram_giam: voucher.phan_tram_giam?.toString() || "",
         ngay_bat_dau: voucher.ngay_bat_dau?.split("T")[0] || "",
         ngay_ket_thuc: voucher.ngay_ket_thuc?.split("T")[0] || "",
@@ -85,6 +87,7 @@ export default function EditVoucher() {
     }
 
     const formDataToSend = new FormData();
+    formDataToSend.append("ma", formData.ma);
     formDataToSend.append("phan_tram_giam", formData.phan_tram_giam);
     formDataToSend.append("ngay_bat_dau", formData.ngay_bat_dau);
     formDataToSend.append("ngay_ket_thuc", formData.ngay_ket_thuc);

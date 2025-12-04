@@ -71,7 +71,8 @@ import ThongKeVe from "../component/Admin/ThongKe/ThongKeVe";
 import ThongKeDoanhThu from "../component/Admin/ThongKe/ThongKeDoanhThu";
 //Dashbroad
 import Dashbroad from "../component/Admin/Dashboard/Dashboard";
-
+//quet qr
+import ScanVeRap from "../component/Admin/DonVe/ScanVeRap";
 //Tin tức (CLIENT)
 import NewsPage from "../Page/News/NewsPage";
 import NewsDetailPage from "../Page/News/NewsDetailPage";
@@ -190,7 +191,8 @@ const Routermain = () => {
         { path: "dashboard", element: <Dashbroad /> },
         { path: "ve", element: <ListDonVe /> }, 
         { path: "ve/:maGiaoDich", element: <ChiTietDonVe /> },
-
+        // quét qr
+         { path: "scan-ve", element: <ScanVeRap /> },
 
       ],
     },

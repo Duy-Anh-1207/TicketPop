@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\DatVeController;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
+
 Route::get('/phim', [PhimController::class, 'index']);
 Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);

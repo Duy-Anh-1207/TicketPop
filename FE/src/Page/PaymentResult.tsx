@@ -1,5 +1,5 @@
 // src/pages/PaymentResult.tsx
-import { useEffect } from "react";
+// import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Result, Button } from "antd";
 import axios from "axios";
@@ -51,15 +51,15 @@ export default function PaymentResult() {
 
 
 
-  const amount = Number(params.get("amount") || 0).toLocaleString("vi-VN");
-  const orderId = params.get("orderId") || "";
+  // const amount = Number(params.get("amount") || 0).toLocaleString("vi-VN");
+  // const orderId = params.get("orderId") || "";
 
   return (
     <div style={{ minHeight: "70vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Result
         status={isSuccess ? "success" : "error"}
         title={isSuccess ? "Thanh toán thành công" : "Thanh toán thất bại"}
-        subTitle={`Mã đơn: ${orderId} • Số tiền: ${amount} đ`}
+        // subTitle={`Mã đơn: ${orderId} • Số tiền: ${amount} đ`}
         extra={[
           <Button type="primary" key="home" onClick={() => navigate("/")}>
             Về trang chủ
