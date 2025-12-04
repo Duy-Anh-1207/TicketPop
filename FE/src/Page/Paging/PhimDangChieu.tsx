@@ -1,4 +1,5 @@
 import { useListPhim } from "../../hook/PhimHook";
+import { useListTheLoai } from "../../hook/TheLoaiHook";
 import type { Phim } from "../../types/phim";
 import { useState } from "react";
 import MovieCard from "../../component/Layout/ClientLayout/ListMovie/MovieCard";
@@ -6,6 +7,7 @@ import "./PhimDangVaSapChieu.css";
 
 const PhimDangChieu: React.FC = () => {
   const { data: movies, isLoading } = useListPhim({});
+  const { data: theLoaiData } = useListTheLoai();
   const [showTrailer, setShowTrailer] = useState(false);
   const [currentTrailer, setCurrentTrailer] = useState<string | null>(null);
 
@@ -30,7 +32,10 @@ const PhimDangChieu: React.FC = () => {
   });
 
   // Danh sách thể loại và quốc gia
-  const danhSachTheLoai = Array.from(new Set(movies.map((m) => m.the_loai)));
+  const danhSachTheLoai = theLoaiData?.map((tl) => ({
+    id: tl.id,
+    ten: tl.ten_the_loai,
+  })) ?? [];
   const danhSachQuocGia = Array.from(new Set(movies.map((m) => m.quoc_gia)));
 
   // Áp dụng bộ lọc tên phim
@@ -42,8 +47,9 @@ const PhimDangChieu: React.FC = () => {
 
   // Áp dụng bộ lọc thể loại
   if (theLoaiLoc !== "Tất cả") {
-    phimDangChieu = phimDangChieu.filter((m) => m.the_loai === theLoaiLoc);
+    phimDangChieu = phimDangChieu.filter((m) => m.the_loai_id === Number(theLoaiLoc));
   }
+
 
   // Áp dụng bộ lọc quốc gia
   if (quocGiaLoc !== "Tất cả") {
@@ -95,8 +101,8 @@ const PhimDangChieu: React.FC = () => {
             >
               <option value="Tất cả">Tất cả thể loại</option>
               {danhSachTheLoai.map((tl) => (
-                <option key={tl} value={tl}>
-                  {tl}
+                <option key={tl.id} value={tl.id}>
+                  {tl.ten}
                 </option>
               ))}
             </select>
@@ -123,21 +129,21 @@ const PhimDangChieu: React.FC = () => {
           {(tenPhimLoc ||
             theLoaiLoc !== "Tất cả" ||
             quocGiaLoc !== "Tất cả") && (
-            <div className="col-lg-2 col-md-6 col-12">
-              <button
-                onClick={() => {
-                  setTenPhimLoc("");
-                  setTheLoaiLoc("Tất cả");
-                  setQuocGiaLoc("Tất cả");
-                }}
-                className="btn btn-outline-danger w-100 h-100"
-                style={{ height: "46px" }}
-              >
-                <i className="bi bi-arrow-repeat me-1"></i>
-                Đặt lại
-              </button>
-            </div>
-          )}
+              <div className="col-lg-2 col-md-6 col-12">
+                <button
+                  onClick={() => {
+                    setTenPhimLoc("");
+                    setTheLoaiLoc("Tất cả");
+                    setQuocGiaLoc("Tất cả");
+                  }}
+                  className="btn btn-outline-danger w-100 h-100"
+                  style={{ height: "46px" }}
+                >
+                  <i className="bi bi-arrow-repeat me-1"></i>
+                  Đặt lại
+                </button>
+              </div>
+            )}
         </div>
       </div>
 
