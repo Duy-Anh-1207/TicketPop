@@ -4,33 +4,70 @@ namespace App\Jobs;
 
 use App\Models\DatVe;
 use App\Models\ThanhToan;
+use App\Models\CheckGhe;
+use App\Models\DoAn;
+use Illuminate\Bus\Queueable;
+use Illuminate\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable as BusDispatchable;
 
 class XoaDonHang implements ShouldQueue
 {
-    use Queueable;
+    use BusDispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     protected $id;
-    public function __construct($id)
+
+    public function __construct($datVeId)
     {
-        $this->id = $id;
+        $this->id = $datVeId;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(): void
     {
-        $data = ThanhToan::where('dat_ve_id', $this->id)->get();
-        $datVe = DatVe::find($this->id);
+        DB::transaction(function () {
 
-        if ($data->isEmpty() && !$datVe->job_id) {
-            $res =  Http::delete("http://127.0.0.1:8000/api/dat_ve/$this->id");
+            $datVe = DatVe::with(['chiTiet', 'donDoAn'])
+                ->lockForUpdate()
+                ->find($this->id);
 
-            Log::info("Xoa DatVe: " . $res->body());
-        }
+            if (!$datVe) return;
+
+            // Nếu đã thanh toán => giữ nguyên
+            $exists = ThanhToan::where('dat_ve_id', $this->id)->exists();
+            if ($exists) {
+                Log::info("Đơn {$this->id} đã thanh toán => không xoá.");
+                return;
+            }
+
+            // Trả ghế
+            foreach ($datVe->chiTiet as $ct) {
+                CheckGhe::where('lich_chieu_id', $datVe->lich_chieu_id)
+                    ->where('ghe_id', $ct->ghe_id)
+                    ->update([
+                        'trang_thai' => 'trong',
+                        'nguoi_dung_id' => null,
+                        'expires_at' => null,
+                    ]);
+            }
+
+            // Hoàn đồ ăn
+            foreach ($datVe->donDoAn as $item) {
+                DoAn::where('id', $item->do_an_id)
+                    ->increment('so_luong_ton', $item->so_luong);
+            }
+
+            // Xoá chi tiết
+            $datVe->chiTiet()->delete();
+            $datVe->donDoAn()->delete();
+
+            // Xoá đơn
+            $datVe->delete();
+
+            Log::info(">>> ĐÃ XOÁ đơn {$this->id} vì KHÔNG thanh toán trong 5 phút.");
+        });
     }
 }

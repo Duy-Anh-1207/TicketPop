@@ -182,7 +182,7 @@ class DatVeController extends Controller
                     $maGiamGia->increment('so_lan_da_su_dung');
                 }
             }
-            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(10));
+            XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(1));
             $datVe->job_id = null;
             $datVe->save();
             DB::commit();
@@ -387,6 +387,13 @@ class DatVeController extends Controller
         }
     }
 
+    /**
+     * Lấy chi tiết vé theo mã giao dịch (ma_giao_dich)
+     * Dùng cho FE muốn xem theo mã thanh toán
+     */
+    /**
+     * Lấy chi tiết đơn vé theo mã giao dịch (Dùng chi tiết đơn vé - dat_ve_chi_tiet)
+     */
     public function ChiTietDonVe($maGiaoDich)
     {
         try {
@@ -469,6 +476,9 @@ class DatVeController extends Controller
         }
     }
 
+    /**
+     * In vé theo mã giao dịch (ma_giao_dich)
+     */
     public function inVeTheoMaGD($maGiaoDich)
     {
         try {
@@ -567,7 +577,7 @@ class DatVeController extends Controller
         }
     }
 
-    public function apDungVoucher(Request $request, $id)
+     public function apDungVoucher(Request $request, $id)
     {
         $request->validate([
             'voucher_code' => 'required|string|max:30',

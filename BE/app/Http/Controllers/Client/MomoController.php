@@ -132,7 +132,7 @@ class MomoController extends Controller
     public function return(Request $req)
     {
         // Giải extraData (nếu có)
-        $tt = null; 
+        $tt = null;
         $extra = null;
         if (!empty($req->extraData)) {
             $extra = json_decode(base64_decode($req->extraData), true);
@@ -163,12 +163,12 @@ class MomoController extends Controller
             if ($datVe && !ThanhToan::where('dat_ve_id', $datVe->id)->exists()) {
 
                 $gheNames = $datVe->chiTiet->map(function ($ct) {
-    if ($ct->ghe) {
-        // ưu tiên tên hiển thị A1, B2...
-        return $ct->ghe->ten_hien_thi ?? $ct->ghe->ten_ghe ?? $ct->ghe_id;
-    }
-    return $ct->ghe_id;
-})->toArray();
+                    if ($ct->ghe) {
+                        // ưu tiên tên hiển thị A1, B2...
+                        return $ct->ghe->ten_hien_thi ?? $ct->ghe->ten_ghe ?? $ct->ghe_id;
+                    }
+                    return $ct->ghe_id;
+                })->toArray();
                 $gheIds   = $datVe->chiTiet->pluck('ghe_id')->toArray();
                 $gheText = implode(', ', $gheNames);
 
@@ -271,12 +271,12 @@ class MomoController extends Controller
         }
 
         $gheNames = $datVe->chiTiet->map(function ($ct) {
-    if ($ct->ghe) {
-        // ưu tiên tên hiển thị A1, B2...
-        return $ct->ghe->ten_hien_thi ?? $ct->ghe->ten_ghe ?? $ct->ghe_id;
-    }
-    return $ct->ghe_id;
-})->toArray();
+            if ($ct->ghe) {
+                // ưu tiên tên hiển thị A1, B2...
+                return $ct->ghe->ten_hien_thi ?? $ct->ghe->ten_ghe ?? $ct->ghe_id;
+            }
+            return $ct->ghe_id;
+        })->toArray();
         $gheIds   = $datVe->chiTiet->pluck('ghe_id')->toArray();
         $gheText = implode(', ', $gheNames);
 
