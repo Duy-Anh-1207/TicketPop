@@ -183,7 +183,6 @@ class DatVeController extends Controller
                 }
             }
             XoaDonHang::dispatch($datVe->id)->delay(now()->addMinutes(5));
-            $datVe->job_id = null;
             $datVe->save();
             DB::commit();
             $datVeLoaded = DatVe::find($datVe->id);
@@ -581,84 +580,157 @@ class DatVeController extends Controller
     public function apDungVoucher(Request $request, $id)
     {
         $request->validate([
-            'voucher_code' => 'required|string',
+            'voucher_code' => 'required|string|max:30',
         ]);
 
-        // 1. Lấy thông tin đặt vé
-        $datVe = DatVe::with('lichChieu')->find($id);
+        try {
+            DB::beginTransaction();
 
-        if (!$datVe) {
+            // ---- LẤY ĐƠN ĐẶT VÉ + LOCK ----
+            $datVe = DatVe::with([
+                'chiTiet.ghe',
+                'donDoAn',
+                'nguoiDung:id,ten,email,so_dien_thoai',
+                'lichChieu:id,phim_id,phong_id',
+            ])
+                ->lockForUpdate()
+                ->find($id);
+
+            if (!$datVe) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy đơn đặt vé',
+                ], 404);
+            }
+
+            // ---- NGĂN TRƯỜNG HỢP ĐÃ THANH TOÁN ----
+            if ($datVe->thanhToan()->exists()) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đơn hàng đã thanh toán, không thể áp dụng mã giảm giá'
+                ], 400);
+            }
+
+            // ---- KHÔNG CHO ÁP LẠI VOUCHER ----
+            if (!is_null($datVe->ma_giam_gia_id)) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đơn hàng đã áp dụng mã giảm giá rồi'
+                ], 400);
+            }
+
+            // ---- LẤY VOUCHER ----
+            $voucherCode = strtoupper(trim($request->voucher_code));
+
+            $maGiamGia = MaGiamGia::where('ma', $voucherCode)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$maGiamGia) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mã giảm giá không tồn tại'
+                ], 400);
+            }
+
+            if ($maGiamGia->trang_thai !== 'KÍCH HOẠT') {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Mã giảm giá không khả dụng'], 400);
+            }
+
+            $now = now();
+
+            if ($maGiamGia->ngay_bat_dau > $now) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Mã giảm giá chưa đến thời gian sử dụng'], 400);
+            }
+
+            if ($maGiamGia->ngay_ket_thuc < $now) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết hạn'], 400);
+            }
+
+            // ---- GIỚI HẠN LƯỢT ----
+            if ($maGiamGia->so_lan_da_su_dung >= $maGiamGia->so_lan_su_dung) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Mã giảm giá đã hết lượt sử dụng'], 400);
+            }
+
+            // ---- TÍNH TỔNG TIỀN GỐC ----
+            $tongTienGoc = $datVe->tong_tien;
+
+            if ($tongTienGoc < $maGiamGia->gia_tri_don_hang_toi_thieu) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Đơn hàng chưa đủ điều kiện áp dụng mã giảm giá',
+                    'tong_tien_hien_tai' => $tongTienGoc,
+                    'yeu_cau_toi_thieu' => $maGiamGia->gia_tri_don_hang_toi_thieu
+                ], 400);
+            }
+
+            // ---- TÍNH GIẢM GIÁ ----
+            $soTienGiam = $tongTienGoc * ($maGiamGia->phan_tram_giam / 100);
+
+            if ($maGiamGia->giam_toi_da) {
+                $soTienGiam = min($soTienGiam, $maGiamGia->giam_toi_da);
+            }
+
+            $soTienGiam = min($soTienGiam, $tongTienGoc);
+
+            // ---- TÍNH TỔNG TIỀN MỚI ----
+            $tongTienMoi = $tongTienGoc - $soTienGiam;
+
+            // ---- CẬP NHẬT ĐƠN ----
+            $datVe->update([
+                'ma_giam_gia_id' => $maGiamGia->id,
+                'tong_tien'      => $tongTienMoi,
+            ]);
+
+            // ---- TĂNG LƯỢT SỬ DỤNG ----
+            $maGiamGia->increment('so_lan_da_su_dung');
+
+            DB::commit();
+
+            // ---- LOAD LẠI ĐƠN ----
+            $datVeMoi = DatVe::with([
+                'nguoiDung:id,ten,email,so_dien_thoai',
+                'lichChieu.phim:id,ten_phim,anh_poster',
+                'lichChieu.phong:id,ten_phong',
+                'chiTiet.ghe:id,so_ghe',
+                'chiTiet.ghe.loaiGhe:id,ten_loai_ghe',
+                'donDoAn.doAn:id,ten_do_an,gia_ban,image',
+                'maGiamGia:id,ma,phan_tram_giam,giam_toi_da'
+            ])->findOrFail($id);
+
             return response()->json([
-                'message' => 'Không tìm thấy đơn đặt vé!',
-            ], 404);
-        }
-
-        // 2. Lấy mã giảm giá
-        $ma = $request->voucher_code;
-        $voucher = MaGiamGia::where('ma', $ma)->first();
-
-        if (!$voucher) {
+                'success' => true,
+                'message' => 'Áp dụng mã giảm giá thành công!',
+                'giam_duoc' => $soTienGiam,
+                'tong_tien_cu' => $tongTienGoc,
+                'tong_tien_moi' => $tongTienMoi,
+                'dat_ve' => [
+                    'id' => $datVeMoi->id,
+                    'tong_tien' => $datVeMoi->tong_tien,
+                    'ma_giam_gia_id' => $datVeMoi->ma_giam_gia_id,
+                    'nguoi_dung' => $datVeMoi->nguoiDung,
+                    'lich_chieu' => $datVeMoi->lichChieu,
+                    'chi_tiet' => $datVeMoi->chiTiet,
+                    'do_an' => $datVeMoi->donDoAn, // 👈 TRẢ VỀ LẠI ĐÚNG FIELD FE ĐANG XÀI
+                    'ma_giam_gia' => $datVeMoi->maGiamGia,
+                ]
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
             return response()->json([
-                'message' => 'Mã giảm giá không tồn tại!',
-            ], 400);
+                'success' => false,
+                'message' => 'Áp dụng mã giảm giá thất bại',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        // 3. Kiểm tra điều kiện mã giảm giá
-        if ($voucher->so_luong <= 0) {
-            return response()->json([
-                'message' => 'Mã giảm giá đã hết lượt sử dụng!',
-            ], 400);
-        }
-
-        if ($voucher->ngay_het_han < now()) {
-            return response()->json([
-                'message' => 'Mã giảm giá đã hết hạn!',
-            ], 400);
-        }
-
-        // 4. Tính tiền giảm
-        $tongTien = $datVe->tong_tien;
-        $giamGiaPercent = $voucher->phan_tram_giam;
-        $giamGiaTien = $voucher->so_tien_giam;
-
-        if ($giamGiaPercent > 0) {
-            // Giảm theo %
-            $soTienGiam = intval($tongTien * ($giamGiaPercent / 100));
-        } else {
-            // Giảm theo số tiền
-            $soTienGiam = intval($giamGiaTien);
-        }
-
-        // Đảm bảo giảm không vượt tổng tiền
-        if ($soTienGiam > $tongTien) $soTienGiam = $tongTien;
-
-        // 5. Lưu lại vào đơn đặt vé
-        $datVe->ma_giam_gia = $voucher->ma;
-        $datVe->giam_gia_percent = $giamGiaPercent;
-        $datVe->giam_gia_so_tien = $soTienGiam;
-        $datVe->tong_tien_sau_giam = max(0, $tongTien - $soTienGiam);
-        $datVe->save();
-
-        // 6. Giảm số lượng voucher
-        $voucher->so_luong -= 1;
-        $voucher->save();
-
-        // 7. Trả dữ liệu FE cần (CHUẨN CHO REACT)
-        return response()->json([
-            'message' => 'Áp dụng mã giảm giá thành công!',
-            'dat_ve' => [
-                'id' => $datVe->id,
-                'tong_tien' => $datVe->tong_tien,
-                'tong_tien_sau_giam' => $datVe->tong_tien_sau_giam,
-
-                // 3 trường FE đang cần
-                'ma_giam_gia' => $datVe->ma_giam_gia,
-                'giam_gia_percent' => $datVe->giam_gia_percent,
-                'giam_gia_so_tien' => $datVe->giam_gia_so_tien,
-
-                // Optional: trả lại cả vé + quan hệ cho FE
-                'lich_chieu' => $datVe->lichChieu,
-            ],
-        ]);
     }
 }
