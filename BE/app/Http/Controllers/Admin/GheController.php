@@ -94,7 +94,7 @@ class GheController extends Controller
         return response()->json([
             'success' => true,
             'data' => $ghe,
-            'message' => 'Ghế ' . $ghe->so_ghe . ' đã chuyển sang trạng thái ' . ($ghe->trang_thai === 1 ? 'HỎNG' : 'HOẠT ĐỘNG')
+            'message' => 'Ghế ' . $ghe->so_ghe . ' đã chuyển sang trạng thái ' . ($ghe->trang_thai === 0 ? 'HỎNG' : 'HOẠT ĐỘNG')
         ]);
     }
 
