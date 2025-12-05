@@ -15,14 +15,12 @@
   width: 100vw;
   height: 100vh;
 
-  background-image: url("https://wallpaperaccess.com/full/3295831.jpg");
   /* đổi link của bạn */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
-  filter: blur(6px) brightness(0.45);
-  /* blur + tối nhẹ -> nổi poster */
+ 
   z-index: -1;
 }
 
@@ -30,7 +28,6 @@
   padding: 25px;
   border-radius: 12px;
   margin-bottom: 40px;
-  background: rgba(0,0,0,0.4); /* nền mờ nhẹ */
   backdrop-filter: blur(4px);
 }
 

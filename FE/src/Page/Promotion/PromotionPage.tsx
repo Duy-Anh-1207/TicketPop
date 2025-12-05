@@ -6,12 +6,15 @@ import type { Voucher } from "../../types/Voucher";
 const VoucherCard: React.FC<{ voucher: Voucher }> = ({ voucher }) => {
   const getImageUrl = (img: string | undefined) => {
     if (!img) return "https://placehold.co/600x400?text=Voucher";
+
     if (img.startsWith("http")) return img;
-    const baseUrl = (
-      import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
-    ).replace("/api", "");
-    return `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`;
+
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
+    return `${baseUrl}/storage/${img.replace("vouchers/", "vouchers/")}`;
   };
+
+
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(voucher.ma);
