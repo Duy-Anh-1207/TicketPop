@@ -56,7 +56,7 @@ class VnpayController extends Controller
         $vnp_ReturnUrl = $vnp_ReturnUrlBackend . '?front_result_url=' . urlencode($frontResultUrl);
 
         // Dùng dat_ve_id làm mã đơn hàng gửi lên VNPAY
-        $vnp_TxnRef = (string) $datVe->id;
+        $vnp_TxnRef = (string) $datVe->id. strtoupper(Str::random(4));
 
         $amount = (int) $req->amount;
 
