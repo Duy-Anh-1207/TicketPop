@@ -99,7 +99,7 @@ export default function CreatePhongChieu() {
           <div className="col-md-6 mb-3">
             <label className="form-label">Số hàng thường</label>
             <input
-              type="number"
+              type="text"
               className="form-control"
               name="hang_thuong"
               value={form.hang_thuong}
@@ -110,7 +110,7 @@ export default function CreatePhongChieu() {
           <div className="col-md-6 mb-3">
             <label className="form-label">Số hàng VIP</label>
             <input
-              type="number"
+              type="text"
               className="form-control"
               name="hang_vip"
               value={form.hang_vip}

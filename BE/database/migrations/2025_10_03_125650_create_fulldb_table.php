@@ -196,6 +196,7 @@ return new class extends Migration
             $table->foreignId('nguoi_dung_id')->constrained('nguoi_dung')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignId('phuong_thuc_thanh_toan_id')->constrained('phuong_thuc_thanh_toan')->onUpdate('cascade')->onDelete('cascade');
             $table->string('ma_giao_dich', 255)->unique();
+            $table->string('ma_giam_gia_id', 50)->nullable();
             $table->decimal('tong_tien_goc', 10, 2)->nullable();
             $table->string('email', 255);
             $table->string('ho_ten', 255);
