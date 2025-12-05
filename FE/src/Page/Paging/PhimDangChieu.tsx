@@ -55,14 +55,19 @@ const PhimDangChieu: React.FC = () => {
   // 
   // BỘ LỌC THỂ LOẠI
   if (theLoaiLoc !== "Tất cả") {
-    phimDangChieu = phimDangChieu.filter((m) => {
-      const ids = Array.isArray(m.the_loai_id)
-        ? m.the_loai_id.map(String)
-        : [String(m.the_loai_id)];
+    const idTheLoai = Number(theLoaiLoc);
 
-      return ids.includes(theLoaiLoc);
+    phimDangChieu = phimDangChieu.filter((m) => {
+      const arr = Array.isArray(m.the_loai_id)
+        ? m.the_loai_id.map(Number)
+        : String(m.the_loai_id)
+          .split(",")
+          .map((id) => Number(id.trim()));
+
+      return arr.includes(idTheLoai);
     });
   }
+
 
   //
   // BỘ LỌC QUỐC GIA
