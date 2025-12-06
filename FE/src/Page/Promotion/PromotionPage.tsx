@@ -6,12 +6,15 @@ import type { Voucher } from "../../types/Voucher";
 const VoucherCard: React.FC<{ voucher: Voucher }> = ({ voucher }) => {
   const getImageUrl = (img: string | undefined) => {
     if (!img) return "https://placehold.co/600x400?text=Voucher";
+
     if (img.startsWith("http")) return img;
-    const baseUrl = (
-      import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"
-    ).replace("/api", "");
-    return `${baseUrl}${img.startsWith("/") ? "" : "/"}${img}`;
+
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
+    return `${baseUrl}/storage/${img.replace("vouchers/", "vouchers/")}`;
   };
+
+
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(voucher.ma);
@@ -21,7 +24,7 @@ const VoucherCard: React.FC<{ voucher: Voucher }> = ({ voucher }) => {
   const displayDiscount = () => {
     if (voucher.phan_tram_giam) return `GIẢM ${voucher.phan_tram_giam}%`;
     if (voucher.giam_toi_da)
-      return `GIẢM TỚI ${voucher.giam_toi_da.toLocaleString("vi-VN")}Đ`;
+  return `GIẢM TỚI ${Number(voucher.giam_toi_da).toLocaleString("vi-VN")}đ`;
     return "ƯU ĐÃI ĐẶC BIỆT";
   };
 
@@ -74,7 +77,7 @@ const VoucherCard: React.FC<{ voucher: Voucher }> = ({ voucher }) => {
             <div className="text-warning fw-semibold mt-3">
               <i className="fa-solid fa-tag me-2"></i>
               Đơn tối thiểu:{" "}
-              {voucher.gia_tri_don_hang_toi_thieu.toLocaleString("vi-VN")}đ
+              {Number(voucher.gia_tri_don_hang_toi_thieu).toLocaleString("vi-VN")}đ
             </div>
           ) : null}
         </div>

@@ -54,10 +54,18 @@ const PhimSapChieu: React.FC = () => {
   // Lọc theo thể loại
   if (theLoaiLoc !== "Tất cả") {
     const idTheLoai = Number(theLoaiLoc);
-    phimSapChieu = phimSapChieu.filter(
-      (m) => Number(m.the_loai_id) === idTheLoai
-    );
+
+    phimSapChieu = phimSapChieu.filter((m) => {
+      const arr = Array.isArray(m.the_loai_id)
+        ? m.the_loai_id.map(Number)
+        : String(m.the_loai_id)
+          .split(",")
+          .map((id) => Number(id.trim()));
+
+      return arr.includes(idTheLoai);
+    });
   }
+
 
   // Lọc theo quốc gia
   if (quocGiaLoc !== "Tất cả") {

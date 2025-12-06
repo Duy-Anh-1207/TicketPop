@@ -16,7 +16,9 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
 
   const theLoaiIds = Array.isArray(movie.the_loai_id)
     ? movie.the_loai_id
-    : [movie.the_loai_id];
+    : String(movie.the_loai_id)
+      .split(",")
+      .map(id => id.trim());
 
   const tenTheLoaiList =
     theLoaiList
