@@ -602,4 +602,17 @@ class LichChieuController extends Controller
             ], 500);
         }
     }
+    public function getLichTheoPhong($id)
+    {
+        $lichTheoPhong = LichChieu::with(['phim', 'phong'])
+            ->where('phong_id', $id)
+            ->orderBy('gio_chieu', 'asc')
+            ->get();
+
+        return response()->json([
+            'room' => $id,
+            'total' => $lichTheoPhong->count(),
+            'data' => $lichTheoPhong
+        ]);
+    }
 }
