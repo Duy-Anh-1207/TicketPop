@@ -408,6 +408,7 @@ class LichChieuController extends Controller
             'data' => $lichChieu,
         ], 200);
     }
+
     public function getPhienBanTheoPhimId($id)
     {
         $phim = Phim::find($id);
@@ -602,6 +603,7 @@ class LichChieuController extends Controller
             ], 500);
         }
     }
+    
     public function getLichTheoPhong($id)
     {
         $lichTheoPhong = LichChieu::with(['phim', 'phong'])

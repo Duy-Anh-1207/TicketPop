@@ -85,6 +85,8 @@ Route::get('/deleted', [LichChieuController::class, 'deleted']);
 Route::delete('/force-delete/{id}', [LichChieuController::class, 'forceDelete']);
 Route::get('/phim/{id}/phien-ban', [LichChieuController::class, 'getPhienBanTheoPhimId']);
 Route::get('/rooms/{id}/lichTheoPhong', [LichChieuController::class, 'getLichTheoPhong']);
+
+
 //gia ve
 Route::get('/gia-ve/{lichChieuId}', [LichChieuController::class, 'getGiaVeByLichChieu']);
 // don do an
