@@ -21,8 +21,8 @@ const VoucherCard: React.FC<{ voucher: Voucher }> = ({ voucher }) => {
   const displayDiscount = () => {
     if (voucher.phan_tram_giam) return `GIẢM ${voucher.phan_tram_giam}%`;
     if (voucher.giam_toi_da)
-  return `GIẢM TỚI ${Number(voucher.giam_toi_da).toLocaleString("vi-VN")}đ`;
-    return "ƯU ĐÃI ĐẶC BIỆT";
+   return `GIẢM TỚI ${Number(voucher.giam_toi_da).toLocaleString("vi-VN")}đ`;
+ return "ƯU ĐÃI ĐẶC BIỆT";
   };
 
   const isHot = voucher.phan_tram_giam && voucher.phan_tram_giam >= 30;
