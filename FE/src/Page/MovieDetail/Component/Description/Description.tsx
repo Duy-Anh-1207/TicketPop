@@ -128,11 +128,13 @@ const Description = () => {
           <p><strong>Quốc gia:</strong> {movie.quoc_gia}</p>
           <p><strong>Ngôn ngữ:</strong> {movie.ngon_ngu}</p>
           <p><strong>Thể loại:</strong> {getTenTheLoai(movie.the_loai_id).map((name, index) => (
-            <span key={index} >{name}</span>
-          ))}</p>
+            <span key={index} >{name}, </span>
+          ))}
+          </p>
           <p><strong>Phiên bản:</strong>  {getTenPhienBan(movie.phien_ban_id).map((name, index) => (
-            <span key={index}> {name}</span>
-          ))}</p>
+            <span key={index}> {name}, </span>
+          ))}
+          </p>
 
 
 

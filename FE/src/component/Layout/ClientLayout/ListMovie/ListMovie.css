@@ -6,6 +6,31 @@
   margin-bottom: 50px;
 }
 
+.container::before {
+  content: "";
+  position: fixed;
+  /* để background đứng yên khi scroll */
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+
+  /* đổi link của bạn */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+ 
+  z-index: -1;
+}
+
+.section-wrapper {
+  padding: 25px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  backdrop-filter: blur(4px);
+}
+
 .loading,
 .no-movies {
   text-align: center;
@@ -34,7 +59,7 @@
 }
 
 .movie-card {
-  flex: 0 0 calc(25% - 20px); 
+  flex: 0 0 calc(25% - 20px);
   margin: 0 10px;
   transition: transform 0.5s ease;
 }
@@ -73,7 +98,7 @@
   text-align: center;
   flex: 1;
   text-decoration: underline;
-  line-height: 1.125rem; 
+  line-height: 1.125rem;
   margin-top: 10px;
 }
 
@@ -178,7 +203,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.7); 
+  background: rgba(0, 0, 0, 0.7);
   color: #fff;
   display: flex;
   flex-direction: column;
@@ -198,7 +223,7 @@
   margin: 0 0 10px 0;
   font-weight: bold;
   text-transform: uppercase;
-  color: #ffd700; 
+  color: #ffd700;
 }
 
 .movie-details {
@@ -214,7 +239,7 @@
 }
 
 .movie-details i {
-  color: #ffd700; 
+  color: #ffd700;
 }
 
 @media (max-width: 768px) {
@@ -235,13 +260,13 @@
 
 @media (max-width: 1024px) {
   .movie-card {
-    flex: 0 0 calc(50% - 20px); 
+    flex: 0 0 calc(50% - 20px);
   }
 }
 
 @media (max-width: 768px) {
   .movie-card {
-    flex: 0 0 calc(100% - 20px); 
+    flex: 0 0 calc(100% - 20px);
   }
 
   .card-img-top {

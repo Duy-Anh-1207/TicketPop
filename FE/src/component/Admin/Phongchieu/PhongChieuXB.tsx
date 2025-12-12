@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { useListPhongChieuTH1, useDeletePhongChieu } from "../../../hook/PhongChieuHook";
+import { useListPhongChieuTH1, useDeletePhongChieu, useChangeStatusPhongChieu } from "../../../hook/PhongChieuHook";
 import type { PhongChieu } from "../../../types/phongchieu";
 import SoDoGhe from "./SoDoGhe";
 import Swal from "sweetalert2";
@@ -9,6 +9,8 @@ const ITEMS_PER_PAGE = 5;
 export default function PhongChieuList() {
   const { data: phongChieuDaXuatBan, isLoading } = useListPhongChieuTH1();
   const deletePhongChieu = useDeletePhongChieu();
+  const changeStatusPhongChieu = useChangeStatusPhongChieu();
+
 
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [open, setOpen] = useState(false);
@@ -53,6 +55,18 @@ export default function PhongChieuList() {
     });
   };
 
+  const handleChangeStatus = (id: number) => {
+    Swal.fire({
+      title: "Bảo trì phòng chiếu?",
+      text: "Phòng chiếu sẽ được đưa vào bảo trì",
+      icon: "question",
+      showCancelButton: true, 
+      confirmButtonText: "Bảo trì",
+      cancelButtonText: "Hủy",
+    }).then((result) => {
+      if (result.isConfirmed) changeStatusPhongChieu.mutate(id);
+    });
+  };
   return (
     <div className="container p-4">
       <h4 className="mb-4 text-center">🎬 Danh sách phòng chiếu đã xuất bản</h4>
@@ -108,6 +122,13 @@ export default function PhongChieuList() {
                         className="btn btn-outline-secondary btn-sm"
                       >
                         Xem bản đồ ghế
+                      </button>
+                      <button
+                        className="btn btn-outline-success btn-sm"
+                        onClick={() => handleChangeStatus(pc.id)}
+                        disabled={changeStatusPhongChieu.isPending}
+                      >
+                        {changeStatusPhongChieu.isPending ? "Đang xử lý..." : "Bảo trì"}
                       </button>
 
                       {/* Nút XÓA thêm mới */}

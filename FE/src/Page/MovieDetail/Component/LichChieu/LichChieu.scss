@@ -1,118 +1,202 @@
 .lichchieu-wrapper {
   max-width: 1200px;
-  margin: 40px auto 0;
-  padding: 30px;
-  border-radius: 12px;
-  background-color: #f1f4b3;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  margin-bottom: 50px;
+  margin: 40px auto 60px;
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: 1px solid #f0f0f0;
 
   .title {
-    font-size: 22px;
-    font-weight: 700;
-    margin-bottom: 25px;
-    text-transform: uppercase;
+    font-size: 26px;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 30px;
     color: #222;
-    text-align: center; 
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+
+    &::after {
+      content: "";
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #e50914, #ff4444);
+      display: block;
+      margin: 12px auto 0;
+      border-radius: 2px;
+    }
   }
 
   .days-container {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
     flex-wrap: wrap;
-    margin-bottom: 25px;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+    padding: 0 8px;
 
     .day-btn {
       flex: 1;
-      min-width: 120px;
+      min-width: 110px;
+      padding: 14px 8px;
       text-align: center;
-      padding: 12px 0;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      background: #fff;
-      cursor: pointer;
-      transition: all 0.25s ease;
       font-weight: 600;
-      color: #333;
+      font-size: 15px;
+      border: 2px solid #ddd;
+      border-radius: 12px;
+      background: #fff;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.3s ease;
 
-      &:hover {
-        border-color: #ff4444;
-        color: #ff4444;
+      &:hover:not(.disabled) {
+        border-color: #e50914;
+        color: #e50914;
+        transform: translateY(-2px);
       }
 
       &.active {
-        background: #ff4444;
-        color: #fff;
-        border-color: #ff4444;
-
-        &:hover {
-          background: #ff4444;
-          color: #fff;
-        }
+        background: linear-gradient(135deg, #e50914, #ff4444);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 6px 16px rgba(229, 9, 20, 0.3);
       }
 
       &.disabled {
-        background: #f0f0f0;
-        color: #999;
-        border-color: #ddd;
+        background: #f8f8f8;
+        color: #aaa;
+        border-color: #eee;
         cursor: not-allowed;
-
-        &:hover {
-          background: #f0f0f0 !important;
-          color: #999 !important;
-          border-color: #ddd !important;
-        }
+        opacity: 0.6;
       }
     }
   }
 
   .schedule-box {
-    padding: 25px;
-    border-radius: 10px;
-    background: #fff;
-    border: 1px solid #eee;
-    animation: fadeIn 0.3s ease;
+    background: #f9f9f9;
+    border-radius: 14px;
+    padding: 28px;
+    border: 1px solid #eaeaea;
+    min-height: 200px;
+  }
 
-    h4 {
-      font-weight: 700;
-      margin-bottom: 20px;
+  .room-group {
+    margin-bottom: 28px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .room-name {
+    font-size: 20px;
+    font-weight: 700;
+    color: #e50914;
+    margin: 0 0 16px 4px;
+    padding-left: 8px;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 5px;
+      height: 24px;
+      background: #e50914;
+      border-radius: 3px;
+    }
+  }
+
+  .showtimes-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    padding: 0 4px;
+  }
+
+  .showtime-item {
+    background: white;
+    border: 2px solid #e5e5e5;
+    border-radius: 14px;
+    padding: 14px 16px;
+    text-align: center;
+    min-width: 110px;
+    flex: 1;
+    max-width: 140px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+
+    &:hover {
+      transform: translateY(-6px);
+      border-color: #e50914;
+      box-shadow: 0 12px 25px rgba(229, 9, 20, 0.25);
+    }
+
+    .time {
+      font-size: 1.5rem;
+      font-weight: 800;
       color: #222;
-      font-size: 18px;
+      margin-bottom: 6px;
+      letter-spacing: 0.5px;
     }
 
-    .schedule-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 15px;
-
-      .showtime {
-        padding: 12px 0;
-        text-align: center;
-        border-radius: 8px;
-        background: #f3f3f3;
-        border: 1px solid #ddd;
-        font-weight: 600;
-        transition: 0.25s;
-
-        &:hover {
-          background: #ff4444;
-          color: white;
-          border-color: #ff4444;
-        }
-      }
+    .version-tag {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #e50914;
+      background: rgba(229, 9, 20, 0.12);
+      padding: 4px 10px;
+      border-radius: 8px;
+      display: inline-block;
+      min-width: 60px;
     }
+  }
+
+  p {
+    text-align: center;
+    color: #777;
+    font-size: 16px;
+    padding: 20px;
   }
 }
 
-// Animation khi hiển thị lịch
-@keyframes fadeIn {
+@keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+.room-group {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+@media (max-width: 768px) {
+  .lichchieu-wrapper {
+    margin: 20px 12px 40px;
+    padding: 20px;
+  }
+
+  .days-container .day-btn {
+    min-width: 90px;
+    padding: 12px 4px;
+    font-size: 14px;
+  }
+
+  .showtime-item {
+    min-width: 100px;
+    padding: 12px 10px;
+  }
+
+  .room-name {
+    font-size: 18px;
   }
 }

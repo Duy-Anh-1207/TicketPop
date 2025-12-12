@@ -7,7 +7,6 @@ const GioiThieu: React.FC = () => {
 
       {/* Banner */}
       <div className="about-hero">
-        <div className="overlay"></div>
         <h1 className="hero-title">Giới thiệu về hệ thống đặt vé phim</h1>
         <p className="hero-desc">
           Trải nghiệm điện ảnh đỉnh cao – Nhanh chóng, tiện lợi, và chính xác.
@@ -21,9 +20,9 @@ const GioiThieu: React.FC = () => {
           <h2>🎞 Sứ mệnh của chúng tôi</h2>
           <p>
             Website đặt vé xem phim được xây dựng nhằm mang đến cho người dùng
-            trải nghiệm đặt vé nhanh nhất, mượt nhất và thân thiện nhất.
-            Chúng tôi mong muốn trở thành lựa chọn hàng đầu mỗi khi bạn muốn
-            tận hưởng những bộ phim hấp dẫn tại rạp.
+            trải nghiệm đặt vé nhanh nhất, mượt nhất và thân thiện nhất. Chúng tôi
+            mong muốn trở thành lựa chọn hàng đầu mỗi khi bạn muốn tận hưởng
+            những bộ phim hấp dẫn tại rạp.
           </p>
         </section>
 
@@ -49,6 +48,7 @@ const GioiThieu: React.FC = () => {
 
       </div>
     </div>
+
   );
 };
 

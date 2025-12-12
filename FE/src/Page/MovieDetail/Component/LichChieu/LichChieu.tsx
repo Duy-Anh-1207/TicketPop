@@ -5,7 +5,14 @@ import { getLichChieuTheoPhim } from "../../../../provider/Client/lichChieuClien
 
 interface LichChieuItem {
   id: number;
-  phong: { id: number; ten_phong: string };
+  phong: {
+    id: number;
+    ten_phong: string;
+  };
+  phien_ban: {
+    id: number;
+    the_loai: string;
+  } | null;
   gio_chieu: string;
 }
 
@@ -100,9 +107,8 @@ const LichChieu = () => {
           return (
             <button
               key={day.value}
-              className={`day-btn ${isSelected ? "active" : ""} ${
-                !hasShowtime ? "disabled" : ""
-              }`}
+              className={`day-btn ${isSelected ? "active" : ""} ${!hasShowtime ? "disabled" : ""
+                }`}
               onClick={() => handleSelectDate(day.value)}
               disabled={!hasShowtime}
             >
@@ -117,25 +123,53 @@ const LichChieu = () => {
           loading ? (
             <p>Đang tải lịch chiếu...</p>
           ) : lichChieu.length > 0 ? (
-            <div className="schedule-grid">
-              {lichChieu.map((lc) => {
-                const date = new Date(lc.gio_chieu);
-                const gioPhut = date.toLocaleTimeString("vi-VN", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
-                return (
-                  <div
-                    key={lc.id}
-                    className="showtime"
-                    onClick={() => handleSelectShowtime(lc)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {gioPhut}
+            <>
+              {Object.entries(
+                lichChieu.reduce((groups, lc) => {
+                  const phongId = lc.phong.id;
+                  const key = `${phongId}`;
+                  if (!groups[key]) {
+                    groups[key] = {
+                      phong: lc.phong,
+                      showtimes: [],
+                    };
+                  }
+                  groups[key].showtimes.push(lc);
+                  return groups;
+                }, {} as Record<string, { phong: LichChieuItem["phong"]; showtimes: LichChieuItem[] }>)
+              )
+                .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                .map(([_, group]) => (
+                  <div key={group.phong.id} className="room-group">
+                    <h4 className="room-name">
+                      {group.phong.ten_phong}
+                    </h4>
+                    <div className="showtimes-row">
+                      {group.showtimes
+                        .sort((a, b) => new Date(a.gio_chieu).getTime() - new Date(b.gio_chieu).getTime())
+                        .map((lc) => {
+                          const date = new Date(lc.gio_chieu);
+                          const gioPhut = date.toLocaleTimeString("vi-VN", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          });
+                          const phienBan = lc.phien_ban?.the_loai || "Thường";
+
+                          return (
+                            <div
+                              key={lc.id}
+                              className="showtime-item"
+                              onClick={() => handleSelectShowtime(lc)}
+                            >
+                              <div className="time">{gioPhut}</div>
+                              <div className="version-tag">{phienBan}</div>
+                            </div>
+                          );
+                        })}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+            </>
           ) : (
             <p>Không có suất chiếu nào trong ngày này.</p>
           )
