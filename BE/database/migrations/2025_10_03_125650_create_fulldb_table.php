@@ -90,7 +90,7 @@ return new class extends Migration
             $table->timestamps();
             $table->softDeletes();
         });
-
+  
 
 
         Schema::create('danh_gia', function (Blueprint $table) {
