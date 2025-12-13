@@ -408,6 +408,7 @@ class LichChieuController extends Controller
             'data' => $lichChieu,
         ], 200);
     }
+
     public function getPhienBanTheoPhimId($id)
     {
         $phim = Phim::find($id);
@@ -601,5 +602,19 @@ class LichChieuController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+    
+    public function getLichTheoPhong($id)
+    {
+        $lichTheoPhong = LichChieu::with(['phim', 'phong'])
+            ->where('phong_id', $id)
+            ->orderBy('gio_chieu', 'asc')
+            ->get();
+
+        return response()->json([
+            'room' => $id,
+            'total' => $lichTheoPhong->count(),
+            'data' => $lichTheoPhong
+        ]);
     }
 }

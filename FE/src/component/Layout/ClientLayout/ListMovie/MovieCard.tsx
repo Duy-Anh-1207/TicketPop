@@ -1,4 +1,5 @@
 import type { Phim } from "../../../../types/phim";
+import { useListTheLoai } from "../../../../hook/TheLoaiHook";
 import { useNavigate } from "react-router-dom";
 import "./MovieCard.css";
 
@@ -9,6 +10,20 @@ interface MovieCardProps {
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
   const navigate = useNavigate();
+
+  // 🔹 Lấy danh sách thể loại từ API
+  const { data: theLoaiList } = useListTheLoai();
+
+  const theLoaiIds = Array.isArray(movie.the_loai_id)
+    ? movie.the_loai_id
+    : String(movie.the_loai_id)
+      .split(",")
+      .map(id => id.trim());
+
+  const tenTheLoaiList =
+    theLoaiList
+      ?.filter((t: any) => theLoaiIds.includes(String(t.id)))
+      .map((t: any) => t.ten_the_loai) || [];
 
   const toSlug = (text: string) =>
     text
@@ -63,7 +78,6 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
             </button>
           </div>
         </div>
-
       </div>
 
       <div className="movie-info">
@@ -93,6 +107,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, openTrailer }) => {
         <div className="movie-tags">
           <span className="tag-country">{movie.quoc_gia}</span>
           <span className="tag-lang">{movie.ngon_ngu}</span>
+            {tenTheLoaiList.map((name: string, i: number) => (
+              <span key={i} className="tag-lang">
+                {name}
+              </span>
+            ))}
+
         </div>
       </div>
     </div>

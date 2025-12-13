@@ -442,7 +442,10 @@ const MyAccountPage = () => {
                                                     <span className="text-muted">Số lượng: {food.so_luong}</span>
                                                   </div>
                                                   <span className="badge bg-warning text-dark">
-                                                    {food.gia_ban} đ
+                                                    {new Intl.NumberFormat("vi-VN", {
+                                                      style: "currency",
+                                                      currency: "VND",
+                                                    }).format((food.gia_ban || 0))}
                                                   </span>
                                                 </div>
                                               </li>
