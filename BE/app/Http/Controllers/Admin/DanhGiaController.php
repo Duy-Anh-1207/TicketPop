@@ -36,6 +36,16 @@ class DanhGiaController extends Controller
             ], 403);
         }
 
+        // 3️⃣ Check đã đánh giá chưa
+        $daDanhGia = DanhGia::where('nguoi_dung_id', $user->id)
+            ->where('phim_id', $request->phim_id)
+            ->exists();
+
+        if ($daDanhGia) {
+            return response()->json([
+                'message' => 'Bạn đã đánh giá phim này rồi'
+            ], 409);
+        }
         // 4️⃣ Lưu đánh giá
         $danhGia = DanhGia::create([
             'nguoi_dung_id' => $user->id,
