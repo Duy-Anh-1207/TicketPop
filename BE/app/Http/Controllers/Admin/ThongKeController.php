@@ -118,26 +118,89 @@ class ThongKeController extends Controller
 
     // II. THỐNG KÊ DOANH THU 
 
-    public function tyLePhuongThucThanhToan(Request $request)
-    {
-        $phimId = $request->query('phim_id');
-        $range = $this->rangeDate($request->from_date, $request->to_date);
+     // Thống kê ghế theo ngày
+    public function thongKeGheTheoNgay(Request $request)
+   {
+    // 1. Khoảng ngày
+    $range = $this->rangeDate(
+        $request->from_date,
+        $request->to_date
+    );
 
-        $query = DB::table('thanh_toan')
-            ->leftJoin('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
-            ->leftJoin('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
-            ->leftJoin('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
-            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
-            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
-            ->select(
-                DB::raw('COALESCE(phuong_thuc_thanh_toan.ten, "Khác") as ten'),
-                DB::raw('COUNT(thanh_toan.id) as so_luong')
-            )
-            ->groupBy('ten')
-            ->get();
+    // 2. Tổng số ghế
+    $tongSoGhe = DB::table('ghe')->count();
 
-        return response()->json(['status' => true, 'data' => $query]);
+    // 3. Ghế bán theo từng NGÀY + GIỜ
+    $gheBan = DB::table('dat_ve_chi_tiet')
+        ->join('dat_ve', 'dat_ve_chi_tiet.dat_ve_id', '=', 'dat_ve.id')
+        ->join('thanh_toan', 'dat_ve.id', '=', 'thanh_toan.dat_ve_id')
+        ->when($range, fn ($q) =>
+            $q->whereBetween('thanh_toan.created_at', $range)
+        )
+        ->select(
+            DB::raw('DATE(thanh_toan.created_at) as ngay'),
+            DB::raw('HOUR(thanh_toan.created_at) as gio'),
+            DB::raw('COUNT(DISTINCT dat_ve_chi_tiet.ghe_id) as ghe_ban_trong_gio')
+        )
+        ->groupBy(
+            DB::raw('DATE(thanh_toan.created_at)'),
+            DB::raw('HOUR(thanh_toan.created_at)')
+        )
+        ->orderBy('ngay')
+        ->orderBy('gio')
+        ->get();
+
+    // 4. Build dữ liệu lũy kế theo từng ngày + giờ
+    $data = [];
+    $gheDaBanLuyKeTheoNgay = [];
+
+    foreach ($gheBan as $item) {
+        $keyNgay = $item->ngay;
+
+        // reset lũy kế khi sang ngày mới
+        if (!isset($gheDaBanLuyKeTheoNgay[$keyNgay])) {
+            $gheDaBanLuyKeTheoNgay[$keyNgay] = 0;
+        }
+
+        $gheDaBanLuyKeTheoNgay[$keyNgay] += $item->ghe_ban_trong_gio;
+
+        $data[] = [
+            'ngay' => $item->ngay,
+            'gio' => sprintf('%02d:00', $item->gio),
+            'ghe_da_ban' => $gheDaBanLuyKeTheoNgay[$keyNgay],
+            'ghe_trong' => max(0, $tongSoGhe - $gheDaBanLuyKeTheoNgay[$keyNgay])
+        ];
     }
+
+    return response()->json([
+        'status' => true,
+        'from_date' => $request->from_date,
+        'to_date' => $request->to_date,
+        'tong_ghe' => $tongSoGhe,
+        'data' => $data
+    ]);
+}
+
+    // public function tyLePhuongThucThanhToan(Request $request)
+    // {
+    //     $phimId = $request->query('phim_id');
+    //     $range = $this->rangeDate($request->from_date, $request->to_date);
+
+    //     $query = DB::table('thanh_toan')
+    //         ->leftJoin('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
+    //         ->leftJoin('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+    //         ->leftJoin('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+    //         ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
+    //         ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
+    //         ->select(
+    //             DB::raw('COALESCE(phuong_thuc_thanh_toan.ten, "Khác") as ten'),
+    //             DB::raw('COUNT(thanh_toan.id) as so_luong')
+    //         )
+    //         ->groupBy('ten')
+    //         ->get();
+
+    //     return response()->json(['status' => true, 'data' => $query]);
+    // }
     //doanh thu phim
     public function doanhThuPhim(Request $request)
     {
