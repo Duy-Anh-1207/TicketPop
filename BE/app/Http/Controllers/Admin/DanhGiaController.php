@@ -21,6 +21,20 @@ class DanhGiaController extends Controller
             'so_sao'  => 'required|integer|min:1|max:5',
             'noi_dung' => 'nullable|string'
         ]);
+         // 2️⃣ Check user đã mua phim chưa
+        $daMua = DatVeChiTiet::whereHas('datVe', function ($q) use ($nguoiDungId, $phimId) {
+            $q->where('nguoi_dung_id', $nguoiDungId)
+                ->whereHas('lichChieu', function ($q2) use ($phimId) {
+                    $q2->where('phim_id', $phimId);
+                })
+                ->whereHas('thanhToan');
+        })->exists();
+
+        if (!$daMua) {
+            return response()->json([
+                'message' => 'Bạn phải mua phim này mới được đánh giá'
+            ], 403);
+        }
 
         // 4️⃣ Lưu đánh giá
         $danhGia = DanhGia::create([
