@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\MaGiamGiaController;
 use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
+use App\Http\Controllers\Admin\DanhGiaController;
 use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
@@ -38,6 +39,7 @@ Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);
 Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
+Route::middleware('auth:sanctum')->post('/danh-gia', [DanhGiaController::class, 'store']);
 
 // Route::apiResource('vai_tro', PhimController::class);
 
