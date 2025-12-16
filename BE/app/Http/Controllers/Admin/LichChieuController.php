@@ -408,6 +408,105 @@ class LichChieuController extends Controller
             'data' => $lichChieu,
         ], 200);
     }
+    // ✅ Thêm lịch chiếu tự động cho nhiều ngày trong 1 phòng
+public function copyLichChieuByDateRange(Request $request)
+{
+    $request->validate([
+        'ngay_mau'        => 'required|date_format:Y-m-d',
+        'ngay_bat_dau'    => 'required|date_format:Y-m-d',
+        'ngay_ket_thuc'   => 'required|date_format:Y-m-d|after_or_equal:ngay_bat_dau',
+        'bo_qua_suat_bi_trung' => 'sometimes|boolean',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $ngayMau      = Carbon::createFromFormat('Y-m-d', $request->ngay_mau)->startOfDay();
+        $batDau       = Carbon::createFromFormat('Y-m-d', $request->ngay_bat_dau)->startOfDay();
+        $ketThuc      = Carbon::createFromFormat('Y-m-d', $request->ngay_ket_thuc)->startOfDay();
+        $skipConflict = $request->boolean('bo_qua_suat_bi_trung', true);
+
+        // Lấy toàn bộ lịch chiếu ngày mẫu
+        $lichMau = LichChieu::whereDate('gio_chieu', $ngayMau)->get();
+
+        if ($lichMau->isEmpty()) {
+            throw new Exception("Không có lịch chiếu nào trong ngày mẫu {$ngayMau->format('d/m/Y')}");
+        }
+
+        $createdCount = 0;
+
+        for ($day = $batDau->copy(); $day->lte($ketThuc); $day->addDay()) {
+            foreach ($lichMau as $mau) {
+
+                // ✅ Giữ nguyên giờ, đổi ngày
+                $gioMau = Carbon::parse($mau->gio_chieu);
+                $ketMau = Carbon::parse($mau->gio_ket_thuc);
+
+                // ✅ duration để xử lý suất qua 00:00 (kết thúc ngày hôm sau)
+                $durationMinutes = $gioMau->diffInMinutes($ketMau);
+
+                $gioMoi = $gioMau->copy()->setDate($day->year, $day->month, $day->day);
+                $ketThucMoi = $gioMoi->copy()->addMinutes($durationMinutes);
+
+                // 🚫 check trùng lịch theo khoảng thời gian
+                $trung = LichChieu::where('phong_id', $mau->phong_id)
+                    ->where('gio_chieu', '<', $ketThucMoi)
+                    ->where('gio_ket_thuc', '>', $gioMoi)
+                    ->exists();
+
+                if ($trung) {
+                    if ($skipConflict) continue;
+                    throw new Exception("Trùng lịch phòng {$mau->phong_id} ngày {$day->format('d/m/Y')}");
+                }
+
+                // ✅ tạo lịch mới
+                $new = LichChieu::create([
+                    'phim_id'      => $mau->phim_id,
+                    'phong_id'     => $mau->phong_id,
+                    'phien_ban_id' => $mau->phien_ban_id,
+                    'gio_chieu'    => $gioMoi,
+                    'gio_ket_thuc' => $ketThucMoi,
+                ]);
+
+                // ✅ copy giá vé (KHÔNG dùng $mau->giaVe nữa)
+                $giaVeMau = GiaVe::where('lich_chieu_id', $mau->id)->get();
+                foreach ($giaVeMau as $gv) {
+                    GiaVe::create([
+                        'lich_chieu_id' => $new->id,
+                        'loai_ghe_id'   => $gv->loai_ghe_id,
+                        'gia_ve'        => $gv->gia_ve,
+                    ]);
+                }
+
+                // ✅ tạo check_ghe
+                $gheList = Ghe::where('phong_id', $mau->phong_id)->get();
+                if ($gheList->isNotEmpty()) {
+                    DB::table('check_ghe')->insert(
+                        $gheList->map(fn ($ghe) => [
+                            'lich_chieu_id' => $new->id,
+                            'ghe_id'        => $ghe->id,
+                            'trang_thai'    => 'trong',
+                            'created_at'    => now(),
+                            'updated_at'    => now(),
+                        ])->toArray()
+                    );
+                }
+
+                $createdCount++;
+            }
+        }
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Copy lịch chiếu theo khoảng ngày thành công',
+            'so_suat' => $createdCount,
+        ]);
+    } catch (Exception $e) {
+        DB::rollBack();
+        return response()->json(['error' => $e->getMessage()], 422);
+    }
+}
+
 
     public function getPhienBanTheoPhimId($id)
     {

@@ -81,6 +81,7 @@ Route::get('/lich-chieu/{id}', [LichChieuController::class, 'show']);
 Route::put('/lich-chieu/{id}', [LichChieuController::class, 'update']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::get('/lich-chieu/find-next', [LichChieuController::class, 'findNextAvailableTime']);
+Route::post('/lich-chieu/copy-by-date-range', [LichChieuController::class, 'copyLichChieuByDateRange']);
 Route::delete('/lich-chieu/{id}', [LichChieuController::class, 'destroy']);
 Route::post('/lich-chieu/{id}/restore', [LichChieuController::class, 'restore']);
 Route::get('/deleted', [LichChieuController::class, 'deleted']);
