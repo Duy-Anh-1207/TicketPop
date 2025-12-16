@@ -14,4 +14,10 @@ class DanhGia extends Model
         'noi_dung',
         'trang_thai'
     ];
+    public function phim(){
+        return $this->belongsTo(Phim::class,'phim_id');
+    }
+    public function nguoiDung(){
+        return $this->belongsTo(NguoiDung::class,'nguoi_dung_id');
+    }
 }

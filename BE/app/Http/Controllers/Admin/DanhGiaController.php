@@ -10,6 +10,31 @@ use Illuminate\Support\Facades\Auth;
 
 class DanhGiaController extends Controller
 {
+    public function index(Request $request)
+    {
+        $request->validate([
+            'phim_id' => 'required|exists:phim,id'
+        ]);
+
+        $phimId = $request->phim_id;
+
+        $danhGia = DanhGia::with([
+            'nguoiDung:id,ten,email',
+            'phim:id,ten_phim'
+        ])
+            ->where('phim_id', $phimId)
+            ->orderByDesc('created_at')          
+            ->paginate(10)
+            ->appends([
+                'phim_id' => $phimId
+            ]);
+
+        return response()->json([
+            'message' => 'Danh sách đánh giá theo phim',
+            'data'    => $danhGia
+        ], 200);
+    }
+
     public function store(Request $request)
     {
         $user = Auth::user();
@@ -21,7 +46,7 @@ class DanhGiaController extends Controller
             'so_sao'  => 'required|integer|min:1|max:5',
             'noi_dung' => 'nullable|string'
         ]);
-         // 2️⃣ Check user đã mua phim chưa
+        // 2️⃣ Check user đã mua phim chưa
         $daMua = DatVeChiTiet::whereHas('datVe', function ($q) use ($nguoiDungId, $phimId) {
             $q->where('nguoi_dung_id', $nguoiDungId)
                 ->whereHas('lichChieu', function ($q2) use ($phimId) {
