@@ -40,7 +40,7 @@ Route::post('/phim', [PhimController::class, 'store']);
 Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
 Route::middleware('auth:sanctum')->post('/danh-gia', [DanhGiaController::class, 'store']);
-Route::middleware('auth:sanctum')->get('/danh-gia', [DanhGiaController::class, 'index']);
+Route::get('/danh-gia', [DanhGiaController::class, 'index']);
 
 
 // Route::apiResource('vai_tro', PhimController::class);
