@@ -69,3 +69,15 @@ export const deleteLichChieu = async (id: number | string) => {
   const { data } = await axiosClient.delete(`/lich-chieu/${id}`);
   return data;
 };
+export const copyLichChieuByDateRange = async (payload: {
+  ngay_mau: string;        // 2025-12-17
+  ngay_bat_dau: string;    // 2025-12-20
+  ngay_ket_thuc: string;   // 2025-12-25
+  bo_qua_suat_bi_trung?: boolean;
+}) => {
+  const res = await axiosClient.post(
+    "/lich-chieu/copy-by-date-range",
+    payload
+  );
+  return res.data;
+};

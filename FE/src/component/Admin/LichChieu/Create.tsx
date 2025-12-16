@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 // 🆕 import thêm hàm auto
-import { createLichChieu, createLichChieuAutoOneDay } from "../../../provider/LichChieuProviders";
+import { createLichChieu, createLichChieuAutoOneDay, copyLichChieuByDateRange } from "../../../provider/LichChieuProviders";
 import { getListPhim } from "../../../provider/PhimProvider";
 import { getListPhongChieu } from "../../../provider/PhongChieuProvider";
 
@@ -20,6 +20,10 @@ export default function CreateLichChieu() {
   const [lichChieuList, setLichChieuList] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingPhienBan, setLoadingPhienBan] = useState(false);
+  const [showCopyByDate, setShowCopyByDate] = useState(false);
+const [ngayMau, setNgayMau] = useState("");
+const [ngayBatDau, setNgayBatDau] = useState("");
+const [ngayKetThuc, setNgayKetThuc] = useState("");
 
   const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: { phim_id: "" },
@@ -220,6 +224,42 @@ export default function CreateLichChieu() {
       setLoading(false);
     }
   };
+  const handleCopyByDateRange = async () => {
+  if (!ngayMau || !ngayBatDau || !ngayKetThuc) {
+    Swal.fire("Thiếu dữ liệu", "Vui lòng chọn đầy đủ ngày", "warning");
+    return;
+  }
+
+  if (ngayBatDau > ngayKetThuc) {
+    Swal.fire("Sai khoảng ngày", "Ngày bắt đầu phải ≤ ngày kết thúc", "error");
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await copyLichChieuByDateRange({
+      ngay_mau: ngayMau,
+      ngay_bat_dau: ngayBatDau,
+      ngay_ket_thuc: ngayKetThuc,
+      bo_qua_suat_bi_trung: true,
+    });
+
+    Swal.fire(
+      "🎉 Thành công",
+      res.message || "Đã copy lịch chiếu thành công",
+      "success"
+    ).then(() => navigate("/admin/lich-chieu"));
+  } catch (err: any) {
+    Swal.fire(
+      "Lỗi",
+      err.response?.data?.message || "Copy lịch chiếu thất bại",
+      "error"
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // ------------------------
   // 🔹 Giao diện
@@ -352,11 +392,70 @@ export default function CreateLichChieu() {
               >
                 ⚙️ Thêm tự động cả ngày
               </button>
+              <button
+  type="button"
+  className="btn btn-secondary me-2"
+  onClick={() => setShowCopyByDate(!showCopyByDate)}
+>
+  📆 Copy lịch theo ngày
+</button>
 
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? "⏳ Đang lưu..." : "💾 Lưu tất cả"}
               </button>
             </div>
+            {showCopyByDate && (
+  <div className="border rounded p-3 mt-3 bg-light">
+    <h6 className="fw-bold text-dark">📆 Copy lịch chiếu theo khoảng ngày</h6>
+
+    <div className="row g-3">
+      <div className="col-md-4">
+        <label>📅 Ngày mẫu</label>
+        <input
+          type="date"
+          className="form-control"
+          value={ngayMau}
+          onChange={(e) => setNgayMau(e.target.value)}
+        />
+      </div>
+
+      <div className="col-md-4">
+        <label>➡️ Từ ngày</label>
+        <input
+          type="date"
+          className="form-control"
+          value={ngayBatDau}
+          onChange={(e) => setNgayBatDau(e.target.value)}
+        />
+      </div>
+
+      <div className="col-md-4">
+        <label>⬅️ Đến ngày</label>
+        <input
+          type="date"
+          className="form-control"
+          value={ngayKetThuc}
+          onChange={(e) => setNgayKetThuc(e.target.value)}
+        />
+      </div>
+    </div>
+
+    <div className="text-end mt-3">
+      <button
+        type="button"
+        className="btn btn-success"
+        onClick={handleCopyByDateRange}
+        disabled={loading}
+      >
+        ⚙️ Copy lịch chiếu
+      </button>
+    </div>
+
+    <small className="text-muted d-block mt-2">
+      📌 Hệ thống sẽ copy toàn bộ lịch của ngày mẫu sang các ngày được chọn
+    </small>
+  </div>
+)}
           </form>
         </div>
       </div>
