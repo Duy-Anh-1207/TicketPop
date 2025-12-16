@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\MaGiamGiaController;
 use App\Http\Controllers\Admin\TinTucController;
 use App\Http\Controllers\Admin\DangKyController;
 use App\Http\Controllers\Admin\DangNhapController;
+use App\Http\Controllers\Admin\DanhGiaController;
 use App\Http\Controllers\Admin\DonDoAnController;
 use App\Http\Controllers\Client\LocPhimController;
 use App\Http\Controllers\Admin\QuyenTruyCapController;
@@ -38,6 +39,7 @@ Route::get('/phim/{id}', [PhimController::class, 'show']);
 Route::post('/phim', [PhimController::class, 'store']);
 Route::put('/phim/{id}', [PhimController::class, 'update']);
 Route::delete('/phim/{id}', [PhimController::class, 'destroy']);
+Route::middleware('auth:sanctum')->post('/danh-gia', [DanhGiaController::class, 'store']);
 
 // Route::apiResource('vai_tro', PhimController::class);
 
@@ -111,7 +113,7 @@ Route::middleware('auth:sanctum')->delete('/dat-ve/{id}', [DatVeController::clas
 Route::get('/banners', [BannerController::class, 'index']);
 
 Route::post('/banners', [BannerController::class, 'store']);
-Route::get('/banners/{id}', [BannerController::class, 'show']); 
+Route::get('/banners/{id}', [BannerController::class, 'show']);
 Route::put('/banners/{id}', [BannerController::class, 'update']);
 Route::delete('/banners/{id}', [BannerController::class, 'destroy']);
 
@@ -186,8 +188,9 @@ Route::prefix('thong-ke')->group(function () {
     Route::get('/phan-bo-loai-ve', [ThongKeController::class, 'phanBoLoaiVe']);
     Route::get('/ve-theo-gio-hom-nay', [ThongKeController::class, 'veTheoGioHomNay']);
 
+
     // THỐNG KÊ DOANH THU
-    Route::get('/ty-le-phuong-thuc-thanh-toan', [ThongKeController::class, 'tyLePhuongThucThanhToan']);
+    Route::get('/ghe-theo-ngay', [ThongKeController::class, 'GheTheoNgay']);
     Route::get('/doanh-thu-phim', [ThongKeController::class, 'doanhThuPhim']);
     Route::get('/doanh-thu-do-an', [ThongKeController::class, 'doanhThuDoAn']);
     Route::get('/doanh-thu-theo-thang', [ThongKeController::class, 'doanhThuTheoThang']);
@@ -229,7 +232,7 @@ Route::post('/thanhtoan/momo/ipn', [MomoController::class, 'ipn']);
 Route::post('/thanhtoan/momo/rollback-ghe', [MomoController::class, 'huyGhe']);
 Route::post('thanh-toan/quet-ve', [MomoController::class, 'capNhatTrangThai']);
 Route::prefix('vnpay')->group(function () {
-    Route::post('/create', [VnpayController::class, 'create']);  
-    Route::get('/return', [VnpayController::class, 'return']);   
-    Route::get('/ipn',    [VnpayController::class, 'ipn']);     
+    Route::post('/create', [VnpayController::class, 'create']);
+    Route::get('/return', [VnpayController::class, 'return']);
+    Route::get('/ipn',    [VnpayController::class, 'ipn']);
 });

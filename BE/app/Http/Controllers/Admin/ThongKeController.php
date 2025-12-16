@@ -17,7 +17,6 @@ class ThongKeController extends Controller
             $from . " 00:00:00",
             $to . " 23:59:59"
         ];
-        
     }
 
     // I. THỐNG KÊ VÉ 
@@ -118,26 +117,55 @@ class ThongKeController extends Controller
 
     // II. THỐNG KÊ DOANH THU 
 
-    public function tyLePhuongThucThanhToan(Request $request)
+    // Thống kê ghế theo ngày
+    public function GheTheoNgay(Request $request)
     {
-        $phimId = $request->query('phim_id');
-        $range = $this->rangeDate($request->from_date, $request->to_date);
+        // 1. Khoảng ngày
+        $range = $this->rangeDate(
+            $request->from_date,
+            $request->to_date
+        );
 
-        $query = DB::table('thanh_toan')
-            ->leftJoin('phuong_thuc_thanh_toan', 'thanh_toan.phuong_thuc_thanh_toan_id', '=', 'phuong_thuc_thanh_toan.id')
-            ->leftJoin('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
-            ->leftJoin('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
-            ->when($phimId, fn($q) => $q->where('lich_chieu.phim_id', $phimId))
-            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
-            ->select(
-                DB::raw('COALESCE(phuong_thuc_thanh_toan.ten, "Khác") as ten'),
-                DB::raw('COUNT(thanh_toan.id) as so_luong')
+        // 2. Tổng số ghế
+        $tongSoGhe = DB::table('ghe')->count();
+
+        // 3. Ghế bán theo NGÀY
+        $gheBanTheoNgay = DB::table('dat_ve_chi_tiet')
+            ->join('dat_ve', 'dat_ve_chi_tiet.dat_ve_id', '=', 'dat_ve.id')
+            ->join('thanh_toan', 'dat_ve.id', '=', 'thanh_toan.dat_ve_id')
+            ->when(
+                $range,
+                fn($q) =>
+                $q->whereBetween('thanh_toan.created_at', $range)
             )
-            ->groupBy('ten')
+            ->select(
+                DB::raw('DATE(thanh_toan.created_at) as ngay'),
+                DB::raw('COUNT(DISTINCT dat_ve_chi_tiet.ghe_id) as ghe_da_ban')
+            )
+            ->groupBy(DB::raw('DATE(thanh_toan.created_at)'))
+            ->orderBy('ngay')
             ->get();
 
-        return response()->json(['status' => true, 'data' => $query]);
+        // 4. Build data
+        $data = [];
+
+        foreach ($gheBanTheoNgay as $item) {
+            $data[] = [
+                'ngay' => $item->ngay,
+                'ghe_da_ban' => $item->ghe_da_ban,
+                'ghe_trong' => max(0, $tongSoGhe - $item->ghe_da_ban),
+            ];
+        }
+
+        return response()->json([
+            'status' => true,
+            'from_date' => $request->from_date,
+            'to_date' => $request->to_date,
+            'tong_ghe' => $tongSoGhe,
+            'data' => $data
+        ]);
     }
+
     //doanh thu phim
     public function doanhThuPhim(Request $request)
     {

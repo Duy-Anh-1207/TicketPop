@@ -2,7 +2,7 @@ import React from "react";
 import Navbar from "./Component/Navbar";
 import SearchBar from "./Component/Search";
 import Logo from "../Logo/Logo";
-import LoginButton from "./Component/LoginBtn";
+import LoginButton from "../../../Layout/ClientLayout/Header/Component/LoginBtn";
 
 const Header: React.FC = () => {
   return (
@@ -21,7 +21,7 @@ const Header: React.FC = () => {
         <div>
           <Logo />
         </div>
-        <div style={ { display:'flex', gap:'50px' } }>
+        <div style={{ display: 'flex', gap: '50px' }}>
           <div
             style={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
           >

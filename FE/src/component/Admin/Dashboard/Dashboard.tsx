@@ -96,8 +96,9 @@ const Dashboard: React.FC = () => {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data?.doanhThu || []}>
             <XAxis dataKey="label" />
-            <YAxis />
-            <Tooltip />
+            <YAxis width={90}
+              tickFormatter={formatCurrency} />
+            <Tooltip formatter={(value: any) => formatCurrency(value)} />
             <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
