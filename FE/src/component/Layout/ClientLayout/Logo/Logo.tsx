@@ -1,22 +1,33 @@
 import { Link } from "react-router-dom";
+import logo from "/src/assets/logo.png";
 
 const Logo = () => {
   return (
     <Link
       to="/"
-      className="d-inline-block px-2 py-1"
       style={{
-        backgroundColor: "#f5f5f5",
-        fontWeight: 900,
-        fontSize: "25px",
-        backgroundImage:
-          "linear-gradient(90deg, rgba(43,29,82,0.94), rgba(98,0,255,0.95))",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        textDecoration: "none",
+        display: "flex",
+        alignItems: "center",
+        height: "100%",
       }}
     >
-      TicketPop
+      <img
+        src={logo}
+        alt="TicketPop"
+        style={{
+          height: "160px",        // TO hơn
+          maxWidth: "100%",
+          objectFit: "contain",
+          transition: "transform 0.3s ease",
+          cursor: "pointer",
+        }}
+        onMouseEnter={(e) =>
+          (e.currentTarget.style.transform = "scale(1.05)")
+        }
+        onMouseLeave={(e) =>
+          (e.currentTarget.style.transform = "scale(1)")
+        }
+      />
     </Link>
   );
 };

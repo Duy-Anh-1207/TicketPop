@@ -6,6 +6,13 @@
   margin-bottom: 50px;
 }
 
+/* ===== ÉP TOÀN BỘ CHỮ TRONG CONTAINER SANG TRẮNG ===== */
+.container,
+.container * {
+  color: #ffffff;
+}
+
+
 .container::before {
   content: "";
   position: fixed;
@@ -14,6 +21,12 @@
   left: 0;
   width: 100vw;
   height: 100vh;
+  background-image: 
+    linear-gradient(
+      rgba(0, 0, 0, 0.65),
+      rgba(0, 0, 0, 0.65)
+    ),
+    url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1920&q=80");
 
   /* đổi link của bạn */
   background-size: cover;
@@ -41,6 +54,7 @@
 .section-title {
   margin-top: 50px;
   text-align: center;
+  color: #ffd700;
   font-weight: bold;
   text-transform: uppercase;
   font-size: clamp(1.5rem, 4vw, 2rem);
@@ -61,6 +75,7 @@
 .movie-card {
   flex: 0 0 calc(25% - 20px);
   margin: 0 10px;
+  color: #ffffff;
   transition: transform 0.5s ease;
 }
 
@@ -92,7 +107,7 @@
 .trailer-link {
   display: flex;
   gap: 8px;
-  color: #5c5c5c;
+  color: #ffffff;
   font-size: 1rem;
   cursor: pointer;
   text-align: center;
@@ -118,6 +133,7 @@
   height: 40px;
   cursor: pointer;
   flex-shrink: 0;
+  color: #000000;
 }
 
 .slider-arrow {
@@ -126,7 +142,7 @@
   transform: translateY(-50%);
   font-size: 1.75rem;
   cursor: pointer;
-  color: #333;
+  color: #ffffff;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 50%;
   padding: 5px;

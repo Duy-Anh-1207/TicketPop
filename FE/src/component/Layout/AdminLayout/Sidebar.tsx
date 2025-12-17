@@ -3,6 +3,8 @@ import { Icon } from "@iconify/react";
 import { Link } from "react-router-dom";
 import { useUserPermissions } from "../../../hook/useUserPermissions";
 import axios from "axios";
+import logo from "/src/assets/logo.png";
+
 
 interface MenuItem {
   id: number;
@@ -32,6 +34,8 @@ const Sidebar: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const { canAccess } = useUserPermissions();
 
+
+ 
   // Fetch menu từ API
   useEffect(() => {
     const fetchMenus = async () => {
@@ -39,23 +43,23 @@ const Sidebar: React.FC = () => {
         // VITE_API_URL trong .env có dạng: http://127.0.0.1:8000/api
         const apiBase = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
         const response = await axios.get(`${apiBase}/menu`);
-        
+
         let allMenus: MenuItem[] = response.data;
-        
+
         // Lấy user từ localStorage
         const user = JSON.parse(localStorage.getItem('user') || 'null');
-        
+
         // Nếu là Staff (vai_tro_id !== 1), lọc menu từ bảng quyen_truy_cap
         if (user && user.vai_tro_id !== 1) {
           try {
             const permResponse = await axios.get(`${apiBase}/quyen-truy-cap`);
             const allPerms = permResponse.data.data || [];
-            
+
             // Lấy danh sách menu_id mà user này được phép xem
             const allowedMenuIds = allPerms
               .filter((perm: any) => perm.vai_tro_id === user.vai_tro_id)
               .map((perm: any) => perm.menu_id);
-            
+
             // Lọc menu: chỉ giữ lại những menu user có quyền
             allMenus = allMenus.filter((menu) => allowedMenuIds.includes(menu.id));
           } catch (error) {
@@ -66,7 +70,7 @@ const Sidebar: React.FC = () => {
 
         // Lọc menu cha (ma_cha = null) và đang hoạt động
         const parentMenus = allMenus.filter((menu) => !menu.ma_cha && menu.trang_thai);
-        
+
         // Nhóm menu con theo ma_cha
         const groupedMenus: MenuGroup[] = parentMenus.map((parent) => {
           const childMenus = allMenus.filter(
@@ -107,16 +111,20 @@ const Sidebar: React.FC = () => {
   return (
     <aside className="left-sidebar with-vertical">
       <div className="brand-logo d-flex align-items-center justify-content-between">
-        <a
-          href="https://bootstrapdemos.wrappixel.com/spike/dist/main/index.html"
-          className="text-nowrap logo-img"
-        >
+        {/* LOGO */}
+        <Link to="/" className="text-nowrap logo-img">
           <img
-            src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/logos/logo-light.svg"
-            className="dark-logo"
-            alt="Logo-Dark"
+            src={logo}
+            alt="Logo"
+            style={{
+              height: "120px",       // chỉnh to/nhỏ tại đây
+              objectFit: "contain",
+              width: "250px",
+            }}
           />
-        </a>
+        </Link>
+
+        {/* TOGGLER MOBILE */}
         <a
           href="#"
           className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
@@ -125,7 +133,6 @@ const Sidebar: React.FC = () => {
           <i className="ti ti-x"></i>
         </a>
       </div>
-
       <div className="scroll-sidebar" data-simplebar>
         <nav className="sidebar-nav">
           <ul id="sidebarnav" className="mb-0">
@@ -206,39 +213,7 @@ const Sidebar: React.FC = () => {
           </ul>
         </nav>
       </div>
-
-      <div className="fixed-profile mx-3 mt-3">
-        <div className="card bg-primary-subtle mb-0 shadow-none">
-          <div className="card-body p-4">
-            <div className="d-flex align-items-center justify-content-between gap-3">
-              <div className="d-flex align-items-center gap-3">
-                <img
-                  src="https://bootstrapdemos.wrappixel.com/spike/dist/assets/images/profile/user-1.jpg"
-                  width="45"
-                  height="45"
-                  className="img-fluid rounded-circle"
-                  alt="spike-img"
-                />
-                <div>
-                  <h5 className="mb-1">Mike</h5>
-                  <p className="mb-0">Admin</p>
-                </div>
-              </div>
-              <a
-                href="https://bootstrapdemos.wrappixel.com/spike/dist/main/authentication-login.html"
-                className="position-relative"
-                data-bs-toggle="tooltip"
-                data-bs-placement="top"
-                data-bs-title="Logout"
-              >
-                <Icon icon="solar:logout-line-duotone" className="fs-8" />
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
     </aside>
   );
 };
-
 export default Sidebar;

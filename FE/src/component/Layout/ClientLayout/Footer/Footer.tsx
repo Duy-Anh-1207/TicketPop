@@ -1,66 +1,48 @@
-import React from 'react';
-import Logo from '../Logo/Logo';
+import React from "react";
+import Logo from "../Logo/Logo";
+import "./Footer.css";
+
 const Footer: React.FC = () => {
   return (
-    <footer style={{ color: 'black', borderTop: '1px solid black', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', maxWidth: '1200px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>
-            <Logo />
-          </div>
+    <footer className="footer-bg">
+      <div className="footer-container">
+        <div className="footer-col footer-logo">
+          <Logo />
         </div>
 
-
-        <div>
-          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>TÀI KHOẢN</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }} ><a href="dang-nhap" style={{ textDecoration: 'none', color: 'black' }}>
-              Đăng nhập
-            </a>
-            </li>
-            <li style={{ marginBottom: '5px' }}>
-              <a href="dang-ky" style={{ textDecoration: 'none', color: 'black' }}>
-                Đăng kí
-              </a>
-            </li>
+        <div className="footer-col">
+          <h4>TÀI KHOẢN</h4>
+          <ul>
+            <li><a href="dang-nhap">Đăng nhập</a></li>
+            <li><a href="dang-ky">Đăng ký</a></li>
           </ul>
         </div>
 
-        <div>
-          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>XEM PHIM</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }} ><a href="dang-chieu" style={{ textDecoration: 'none', color: 'black' }}>
-              Phim đang chiếu
-            </a>
-            </li>
-            <li style={{ marginBottom: '5px' }}>
-              <a href="sap-chieu" style={{ textDecoration: 'none', color: 'black' }}>
-                Phim sắp chiếu
-              </a>
-            </li>
-            <li style={{ marginBottom: '5px' }}>Phim lẻ</li>
-            <li style={{ marginBottom: '5px' }}>Phim bộ</li>
+        <div className="footer-col">
+          <h4>XEM PHIM</h4>
+          <ul>
+            <li><a href="dang-chieu">Phim đang chiếu</a></li>
+            <li><a href="sap-chieu">Phim sắp chiếu</a></li>
+            <li>Phim lẻ</li>
+            <li>Phim bộ</li>
           </ul>
         </div>
 
-        <div>
-          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>DỊCH VỤ</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }}>Thẻ quà tặng</li>
-            <li style={{ marginBottom: '5px' }}>Membership</li>
-            <li style={{ marginBottom: '5px' }}>Membership</li>
+        <div className="footer-col">
+          <h4>DỊCH VỤ</h4>
+          <ul>
+            <li>Thẻ quà tặng</li>
+            <li>Membership</li>
+            <li>Membership</li>
           </ul>
         </div>
 
-        <div>
-          <h4 style={{ fontSize: '18px', marginBottom: '10px' }}>TICKETPOP</h4>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '5px' }} ><a href="gioi-thieu" style={{ textDecoration: 'none', color: 'black' }}>
-              giới thiệu
-            </a>
-           </li>
-            <li style={{ marginBottom: '5px' }}>Liên hệ</li>
-            <li style={{ marginBottom: '5px' }}>Tuyển dụng</li>
+        <div className="footer-col">
+          <h4>TICKETPOP</h4>
+          <ul>
+            <li><a href="gioi-thieu">Giới thiệu</a></li>
+            <li>Liên hệ</li>
+            <li>Tuyển dụng</li>
           </ul>
         </div>
       </div>

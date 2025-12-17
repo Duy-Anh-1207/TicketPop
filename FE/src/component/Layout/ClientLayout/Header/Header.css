@@ -1,0 +1,89 @@
+.header-bg {
+  position: relative;
+  width: 100%;
+  padding: 15px 0;
+
+  background-image:
+    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+    url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1920&q=80");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.header-top {
+  width: 1200px;
+  margin: 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  backdrop-filter: blur(6px);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.header-nav {
+  width: 1200px;
+  margin: 15px auto 0;
+}
+
+/* chữ & icon sáng */
+.header-bg * {
+  color: #fff;
+}
+
+/* mobile */
+@media (max-width: 1200px) {
+  .header-top,
+  .header-nav {
+    width: 100%;
+    padding: 0 16px;
+  }
+}
+/* ÉP TOÀN BỘ CHỮ + ICON TRONG HEADER SANG TRẮNG */
+.header-bg,
+.header-bg * {
+  color: #ffffff !important;
+}
+
+/* link */
+.header-bg a {
+  color: #ffffff !important;
+}
+
+/* icon (font-awesome, iconify…) */
+.header-bg i,
+.header-bg svg {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+}
+/* ===== FIX MÀU CHỮ TRONG Ô TÌM KIẾM ===== */
+
+/* chữ người dùng gõ */
+.header-bg input,
+.header-bg input[type="text"],
+.header-bg input[type="search"] {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+/* placeholder */
+.header-bg input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* khi focus */
+.header-bg input:focus {
+  outline: none;
+  border-color: #ffd700 !important;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.35);
+}
+

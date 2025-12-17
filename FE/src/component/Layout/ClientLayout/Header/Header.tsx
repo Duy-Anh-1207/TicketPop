@@ -3,38 +3,23 @@ import Navbar from "./Component/Navbar";
 import SearchBar from "./Component/Search";
 import Logo from "../Logo/Logo";
 import LoginButton from "../../../Layout/ClientLayout/Header/Component/LoginBtn";
+import "./Header.css";
 
 const Header: React.FC = () => {
   return (
-    <header
-      style={{ backgroundColor: "#ffffff", color: "#000", padding: "10px 0" }}
-    >
-      <div
-        style={{
-          width: "1200px",
-          margin: "0 auto",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
+    <header className="header-bg">
+      <div className="header-top">
+        <div className="header-left">
           <Logo />
         </div>
-        <div style={{ display: 'flex', gap: '50px' }}>
-          <div
-            style={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
-          >
-            <SearchBar />
-          </div>
 
-          <div>
-            <LoginButton />
-          </div>
+        <div className="header-right">
+          <SearchBar />
+          <LoginButton />
         </div>
       </div>
 
-      <div style={{ width: "1200px", margin: "10px auto 0" }}>
+      <div className="header-nav">
         <Navbar />
       </div>
     </header>
