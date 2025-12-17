@@ -45,8 +45,16 @@ export const createFood = async (data: Omit<Food, "id" | "created_at" | "updated
 // Cập nhật food
 export const updateFood = async (
     id: number | string,
-    values: Record<string, any>
+    values: FormData | Record<string, any>
 ) => {
+    if (values instanceof FormData) {
+        const { data } = await axiosClient.post(`/foods/${id}`, values, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return data;
+    }
     const { data } = await axiosClient.put(`/foods/${id}`, values);
     return data;
 };
