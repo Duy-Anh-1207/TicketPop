@@ -62,46 +62,62 @@ export default function FoodList() {
     });
   };
 
-  // Popup Cập nhật (Giữ nguyên logic upload ảnh)
+  // Popup Cập nhật (Đã thêm Mô Tả & Chia 2 cột)
   const handleEdit = (food: Food) => {
-    // Logic lấy ảnh preview (fallback nếu lỗi)
+    // Logic lấy ảnh preview
     const currentImageUrl = food.image ? `${API_BASE_URL}${food.image}` : 'https://via.placeholder.com/100x100?text=No+Image';
+    
+    // Lấy mô tả hiện tại (nếu null thì để rỗng)
+    const currentMoTa = food.mo_ta || "";
 
     Swal.fire({
       title: `✏️ Cập nhật: ${food.ten_do_an}`,
-      width: '650px',
+      width: '800px', // Tăng độ rộng để chứa 2 cột
       html: `
         <div class="text-start">
-          <div class="mb-3">
-            <label class="form-label fw-bold">Tên món ăn <span class="text-danger">*</span></label>
-            <input id="swal-ten" class="form-control" value="${food.ten_do_an}">
-          </div>
+          <div class="row g-3">
+              <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label fw-bold">Tên món ăn <span class="text-danger">*</span></label>
+                    <input id="swal-ten" class="form-control" value="${food.ten_do_an}">
+                  </div>
 
-          <div class="row g-2 mb-3">
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Giá nhập</label>
-              <input id="swal-gia-nhap" type="number" class="form-control" value="${Number(food.gia_nhap)}">
-            </div>
-            <div class="col-md-4">
-              <label class="form-label fw-bold">Giá bán <span class="text-danger">*</span></label>
-              <input id="swal-gia-ban" type="number" class="form-control fw-bold text-success" value="${Number(food.gia_ban)}">
-            </div>
-            <div class="col-md-4">
-               <label class="form-label fw-bold">Tồn kho</label>
-               <input id="swal-ton-kho" type="number" class="form-control" value="${food.so_luong_ton}">
-            </div>
-          </div>
+                  <div class="row g-2">
+                    <div class="col-6 mb-3">
+                      <label class="form-label fw-bold">Giá nhập</label>
+                      <input id="swal-gia-nhap" type="number" class="form-control" value="${Number(food.gia_nhap)}">
+                    </div>
+                    <div class="col-6 mb-3">
+                      <label class="form-label fw-bold">Giá bán <span class="text-danger">*</span></label>
+                      <input id="swal-gia-ban" type="number" class="form-control fw-bold text-success" value="${Number(food.gia_ban)}">
+                    </div>
+                    <div class="col-12 mb-3">
+                       <label class="form-label fw-bold">Tồn kho</label>
+                       <input id="swal-ton-kho" type="number" class="form-control" value="${food.so_luong_ton}">
+                    </div>
+                  </div>
+              </div>
 
-          <div class="mb-3 border-top pt-3">
-             <label class="form-label fw-bold">Hình ảnh</label>
-             <div class="d-flex align-items-center gap-3">
-                <img id="swal-preview-img" src="${currentImageUrl}" 
-                     alt="Preview" class="img-thumbnail" 
-                     style="width: 70px; height: 70px; object-fit: cover"
-                     onerror="this.src='https://placehold.co/70?text=N/A'">
-                <input id="swal-image-input" type="file" class="form-control" accept="image/*"
-                    onchange="document.getElementById('swal-preview-img').src = window.URL.createObjectURL(this.files[0])">
-             </div>
+              <div class="col-md-6">
+                  <div class="mb-3">
+                     <label class="form-label fw-bold">Mô tả</label>
+                     <textarea id="swal-mo-ta" class="form-control" rows="3" placeholder="Nhập mô tả món ăn...">${currentMoTa}</textarea>
+                  </div>
+
+                  <div class="mb-3 border-top pt-2">
+                     <label class="form-label fw-bold">Hình ảnh</label>
+                     <div class="d-flex align-items-center gap-3">
+                        <img id="swal-preview-img" src="${currentImageUrl}" 
+                             alt="Preview" class="img-thumbnail" 
+                             style="width: 80px; height: 80px; object-fit: cover"
+                             onerror="this.src='https://placehold.co/80?text=N/A'">
+                        <div class="flex-grow-1">
+                            <input id="swal-image-input" type="file" class="form-control text-sm" accept="image/*"
+                                onchange="document.getElementById('swal-preview-img').src = window.URL.createObjectURL(this.files[0])">
+                        </div>
+                     </div>
+                  </div>
+              </div>
           </div>
         </div>
       `,
@@ -115,6 +131,9 @@ export default function FoodList() {
         const gia_ban = (document.getElementById('swal-gia-ban') as HTMLInputElement).value;
         const so_luong_ton = (document.getElementById('swal-ton-kho') as HTMLInputElement).value;
         const imageInput = document.getElementById('swal-image-input') as HTMLInputElement;
+        
+        // Lấy giá trị mô tả
+        const mo_ta = (document.getElementById('swal-mo-ta') as HTMLTextAreaElement).value;
 
         if (!ten_do_an || !gia_ban) {
           Swal.showValidationMessage('Vui lòng điền đủ thông tin!');
@@ -122,11 +141,14 @@ export default function FoodList() {
         }
 
         const formData = new FormData();
-        formData.append('_method', 'PUT');
+        formData.append('_method', 'PUT'); // Quan trọng cho Backend PHP/Laravel
+        
         formData.append('ten_do_an', ten_do_an);
         formData.append('gia_nhap', gia_nhap);
         formData.append('gia_ban', gia_ban);
         formData.append('so_luong_ton', so_luong_ton);
+        formData.append('mo_ta', mo_ta); // Gửi mô tả lên server
+
         if (imageInput.files && imageInput.files[0]) {
             formData.append('image', imageInput.files[0]); 
         }
@@ -183,7 +205,6 @@ export default function FoodList() {
               <th>Giá nhập</th>
               <th>Giá bán</th>
               <th>Số lượng tồn</th>
-              {/* ✅ SỬA LỖI: Tăng chiều rộng cột lên 220px để chứa đủ 2 nút */}
               <th style={{ minWidth: "220px" }}>Hành động</th>
             </tr>
           </thead>
@@ -224,7 +245,6 @@ export default function FoodList() {
                       </span>
                     </td>
                     <td>
-                      {/* ✅ SỬA LỖI: text-nowrap để không bị xuống dòng */}
                       <div className="d-flex justify-content-center gap-2 text-nowrap">
                         {canEdit && (
                           <button
