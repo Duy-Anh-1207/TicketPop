@@ -48,7 +48,7 @@ export const useUpdateFood = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, values }: { id: string | number; values: Partial<Food> }) =>
+    mutationFn: ({ id, values }: { id: string | number; values: FormData | Partial<Food> }) =>
       updateFood(id, values),
     onSuccess: () => {
       Swal.fire("✅ Thành công!", "Đã cập nhật food.", "success");
