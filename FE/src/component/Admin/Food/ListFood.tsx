@@ -5,6 +5,9 @@ import type { Food } from "../../../types/foods";
 import { canAccess } from "../../../utils/permissions";
 import { useNavigate } from "react-router-dom";
 
+// Đảm bảo biến môi trường đã đúng
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const MENU_ID = 5;
 const ITEMS_PER_PAGE = 5;
 
@@ -18,6 +21,7 @@ export default function FoodList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Format tiền tệ
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
   };
@@ -37,55 +41,67 @@ export default function FoodList() {
 
   const totalPages = Math.ceil(filteredFoods.length / ITEMS_PER_PAGE);
 
-  if (isLoading) return (
-    <div className="d-flex justify-content-center mt-5">
-      <div className="spinner-border text-primary" role="status">
-        <span className="visually-hidden">Loading...</span>
-      </div>
-    </div>
-  );
+  if (isLoading) return <p className="text-center mt-4">Đang tải danh sách...</p>;
 
   const canEdit = canAccess(MENU_ID, 2);
   const canDeletePerm = canAccess(MENU_ID, 3);
   const canCreate = canAccess(MENU_ID, 1);
 
+  // Xử lý Xóa
   const handleDelete = (id: number) => {
     Swal.fire({
       title: "Xác nhận xóa?",
       text: "Hành động này không thể hoàn tác!",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Xóa ngay",
+      confirmButtonText: "Xóa",
       cancelButtonText: "Hủy",
+      confirmButtonColor: "#dc3545",
     }).then((result) => {
       if (result.isConfirmed) deleteFood.mutate(id);
     });
   };
 
+  // Popup Cập nhật (Giữ nguyên logic upload ảnh)
   const handleEdit = (food: Food) => {
+    // Logic lấy ảnh preview (fallback nếu lỗi)
+    const currentImageUrl = food.image ? `${API_BASE_URL}${food.image}` : 'https://via.placeholder.com/100x100?text=No+Image';
+
     Swal.fire({
       title: `✏️ Cập nhật: ${food.ten_do_an}`,
+      width: '650px',
       html: `
         <div class="text-start">
           <div class="mb-3">
-            <label class="form-label fw-bold">Tên món ăn</label>
-            <input id="swal-input1" class="form-control" value="${food.ten_do_an}">
+            <label class="form-label fw-bold">Tên món ăn <span class="text-danger">*</span></label>
+            <input id="swal-ten" class="form-control" value="${food.ten_do_an}">
           </div>
-          <div class="row g-2">
-            <div class="col-6 mb-3">
+
+          <div class="row g-2 mb-3">
+            <div class="col-md-4">
               <label class="form-label fw-bold">Giá nhập</label>
-              <input id="swal-input2" type="number" class="form-control" value="${Number(food.gia_nhap)}">
+              <input id="swal-gia-nhap" type="number" class="form-control" value="${Number(food.gia_nhap)}">
             </div>
-            <div class="col-6 mb-3">
-              <label class="form-label fw-bold">Giá bán</label>
-              <input id="swal-input3" type="number" class="form-control" value="${Number(food.gia_ban)}">
+            <div class="col-md-4">
+              <label class="form-label fw-bold">Giá bán <span class="text-danger">*</span></label>
+              <input id="swal-gia-ban" type="number" class="form-control fw-bold text-success" value="${Number(food.gia_ban)}">
             </div>
-            <div class="col-12 mb-3">
-              <label class="form-label fw-bold">Số lượng tồn</label>
-              <input id="swal-input4" type="number" class="form-control" value="${food.so_luong_ton}">
+            <div class="col-md-4">
+               <label class="form-label fw-bold">Tồn kho</label>
+               <input id="swal-ton-kho" type="number" class="form-control" value="${food.so_luong_ton}">
             </div>
+          </div>
+
+          <div class="mb-3 border-top pt-3">
+             <label class="form-label fw-bold">Hình ảnh</label>
+             <div class="d-flex align-items-center gap-3">
+                <img id="swal-preview-img" src="${currentImageUrl}" 
+                     alt="Preview" class="img-thumbnail" 
+                     style="width: 70px; height: 70px; object-fit: cover"
+                     onerror="this.src='https://placehold.co/70?text=N/A'">
+                <input id="swal-image-input" type="file" class="form-control" accept="image/*"
+                    onchange="document.getElementById('swal-preview-img').src = window.URL.createObjectURL(this.files[0])">
+             </div>
           </div>
         </div>
       `,
@@ -94,27 +110,33 @@ export default function FoodList() {
       cancelButtonText: "Hủy",
       focusConfirm: false,
       preConfirm: () => {
-        const ten_do_an = (document.getElementById('swal-input1') as HTMLInputElement).value;
-        const gia_nhap = (document.getElementById('swal-input2') as HTMLInputElement).value;
-        const gia_ban = (document.getElementById('swal-input3') as HTMLInputElement).value;
-        const so_luong_ton = (document.getElementById('swal-input4') as HTMLInputElement).value;
+        const ten_do_an = (document.getElementById('swal-ten') as HTMLInputElement).value;
+        const gia_nhap = (document.getElementById('swal-gia-nhap') as HTMLInputElement).value;
+        const gia_ban = (document.getElementById('swal-gia-ban') as HTMLInputElement).value;
+        const so_luong_ton = (document.getElementById('swal-ton-kho') as HTMLInputElement).value;
+        const imageInput = document.getElementById('swal-image-input') as HTMLInputElement;
 
-        if (!ten_do_an || !gia_nhap || !gia_ban || !so_luong_ton) {
-          Swal.showValidationMessage('Vui lòng điền đầy đủ thông tin');
+        if (!ten_do_an || !gia_ban) {
+          Swal.showValidationMessage('Vui lòng điền đủ thông tin!');
           return false;
         }
 
-        return { 
-          ten_do_an, 
-          gia_nhap: Number(gia_nhap), 
-          gia_ban: Number(gia_ban), 
-          so_luong_ton: Number(so_luong_ton) 
-        };
+        const formData = new FormData();
+        formData.append('_method', 'PUT');
+        formData.append('ten_do_an', ten_do_an);
+        formData.append('gia_nhap', gia_nhap);
+        formData.append('gia_ban', gia_ban);
+        formData.append('so_luong_ton', so_luong_ton);
+        if (imageInput.files && imageInput.files[0]) {
+            formData.append('image', imageInput.files[0]); 
+        }
+
+        return formData; 
       }
     }).then((result) => {
       if (result.isConfirmed && result.value) {
         updateFood.mutate(
-          { id: food.id, values: result.value },
+          { id: food.id, values: result.value }, 
           { onSuccess: () => Swal.fire("✅ Đã cập nhật!", "", "success") }
         );
       }
@@ -122,167 +144,150 @@ export default function FoodList() {
   };
 
   return (
-    <div className="container py-4">
-      {/* Header & Button */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="mb-0 fw-bold text-primary">🍽️ Quản lý món ăn</h4>
+    <div className="container p-4">
+      {/* Header */}
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4 className="mb-0 fw-bold">🍽️ Quản lý món ăn</h4>
         {canCreate && (
           <button
-            className="btn btn-success shadow-sm"
+            className="btn btn-success"
             onClick={() => navigate("/admin/foods/them-moi")}
           >
-            <span className="me-2">➕</span> Thêm món mới
+            ➕ Thêm món ăn
           </button>
         )}
       </div>
 
-      {/* Card bao quanh nội dung chính */}
-      <div className="card shadow border-0 rounded-3">
-        <div className="card-body">
-          
-          {/* Search Bar - Stylized */}
-          <div className="row mb-3">
-            <div className="col-md-6 col-12">
-              <div className="input-group">
-                <span className="input-group-text bg-white border-end-0">
-                  🔍
-                </span>
-                <input
-                  type="text"
-                  className="form-control border-start-0 ps-0"
-                  placeholder="Tìm kiếm món ăn..."
-                  value={searchTerm}
-                  onChange={(e) => {
-                    setSearchTerm(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+      {/* Search */}
+      <div className="mb-3 w-50">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Tìm theo tên món ăn..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
+      </div>
 
-          <div className="table-responsive">
-            <table className="table table-hover align-middle mb-0">
-              <thead className="table-light text-secondary">
-                <tr className="text-nowrap">
-                  <th className="text-center" style={{ width: "50px" }}>STT</th>
-                  <th>Tên món ăn</th>
-                  <th className="text-center">Ảnh</th>
-                  <th className="text-end">Giá nhập</th>
-                  <th className="text-end">Giá bán</th>
-                  <th className="text-center">Tồn kho</th>
-                  <th className="text-center" style={{ width: "150px" }}>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedFoods.length > 0 ? (
-                  paginatedFoods.map((food: Food, index: number) => {
-                    const imageUrl = food.image
-                      ? `${import.meta.env.VITE_API_BASE_URL}${food.image}`
-                      : null;
+      {/* Table */}
+      <div className="table-responsive">
+        <table className="table table-bordered table-striped text-center align-middle shadow-sm bg-white rounded">
+          <thead className="table-light">
+            <tr>
+              <th style={{ width: "50px" }}>STT</th>
+              <th>Tên món ăn</th>
+              <th>Ảnh</th>
+              <th>Giá nhập</th>
+              <th>Giá bán</th>
+              <th>Số lượng tồn</th>
+              {/* ✅ SỬA LỖI: Tăng chiều rộng cột lên 220px để chứa đủ 2 nút */}
+              <th style={{ minWidth: "220px" }}>Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {paginatedFoods.length > 0 ? (
+              paginatedFoods.map((food: Food, index: number) => {
+                const imageUrl = food.image
+                  ? `${API_BASE_URL}${food.image}`
+                  : null;
 
-                    return (
-                      <tr key={food.id}>
-                        <td className="text-center text-muted fw-bold">
-                          {index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}
-                        </td>
-                        <td className="fw-semibold">{food.ten_do_an}</td>
-                        <td className="text-center">
-                          {imageUrl ? (
-                            <img
-                              src={imageUrl}
-                              alt={food.ten_do_an}
-                              className="rounded shadow-sm"
-                              style={{
-                                width: 50,
-                                height: 50,
-                                objectFit: "cover",
-                              }}
-                            />
-                          ) : (
-                            <span className="text-muted small">No Image</span>
-                          )}
-                        </td>
-                        <td className="text-end text-secondary">{formatCurrency(Number(food.gia_nhap))}</td>
-                        <td className="text-end text-success fw-bold">{formatCurrency(Number(food.gia_ban))}</td>
-                        <td className="text-center">
-                          <span className={`badge rounded-pill ${food.so_luong_ton > 10 ? 'bg-light text-dark border' : 'bg-warning text-dark'}`}>
-                            {food.so_luong_ton}
-                          </span>
-                        </td>
-                        <td className="text-center">
-                          <div className="d-flex justify-content-center gap-2">
-                            {canEdit && (
-                              <button
-                                className="btn btn-sm btn-outline-primary border-0"
-                                onClick={() => handleEdit(food)}
-                                title="Cập nhật"
-                              >
-                                ✏️
-                              </button>
-                            )}
-                            {canDeletePerm && (
-                              <button
-                                className="btn btn-sm btn-outline-danger border-0"
-                                onClick={() => handleDelete(food.id)}
-                                title="Xóa"
-                              >
-                                🗑️
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="text-center text-muted py-5">
-                      <div className="d-flex flex-column align-items-center">
-                        <span style={{ fontSize: "2rem" }}>🍲</span>
-                        <span className="mt-2">Không tìm thấy món ăn nào phù hợp.</span>
+                return (
+                  <tr key={food.id}>
+                    <td>{index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}</td>
+                    <td className="fw-semibold text-start">{food.ten_do_an}</td>
+                    <td>
+                      {imageUrl ? (
+                        <img
+                          src={imageUrl}
+                          alt={food.ten_do_an}
+                          className="img-thumbnail"
+                          style={{ width: 60, height: 60, objectFit: "cover", borderRadius: "6px" }}
+                          onError={(e) => {
+                            e.currentTarget.src = "https://placehold.co/60?text=N/A";
+                            e.currentTarget.onerror = null;
+                          }}
+                        />
+                      ) : (
+                        <div className="bg-light d-flex align-items-center justify-content-center text-muted border rounded" style={{width: 60, height: 60, margin: '0 auto'}}>
+                            <small>N/A</small>
+                        </div>
+                      )}
+                    </td>
+                    <td className="text-end fw-bold text-secondary">{formatCurrency(Number(food.gia_nhap))}</td>
+                    <td className="text-end fw-bold text-success">{formatCurrency(Number(food.gia_ban))}</td>
+                    <td>
+                      <span className={`badge ${food.so_luong_ton > 10 ? 'bg-info' : 'bg-warning'}`}>
+                        {food.so_luong_ton}
+                      </span>
+                    </td>
+                    <td>
+                      {/* ✅ SỬA LỖI: text-nowrap để không bị xuống dòng */}
+                      <div className="d-flex justify-content-center gap-2 text-nowrap">
+                        {canEdit && (
+                          <button
+                            className="btn btn-sm btn-primary"
+                            onClick={() => handleEdit(food)}
+                          >
+                            Cập nhật
+                          </button>
+                        )}
+                        {canDeletePerm && (
+                          <button
+                            className="btn btn-sm btn-danger"
+                            onClick={() => handleDelete(food.id)}
+                          >
+                            Xóa
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-        
-        {/* Footer của Card chứa Pagination */}
-        {totalPages > 1 && (
-            <div className="card-footer bg-white border-top-0 py-3">
-             <nav>
-               <ul className="pagination justify-content-center mb-0">
-                 <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-                   <button
-                     className="page-link border-0"
-                     onClick={() => setCurrentPage((p) => p - 1)}
-                     disabled={currentPage === 1}
-                   >
-                     &laquo; Trước
-                   </button>
-                 </li>
-                 <li className="page-item active mx-2">
-                   <span className="page-link rounded-pill px-3">
-                     {currentPage} / {totalPages}
-                   </span>
-                 </li>
-                 <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
-                   <button
-                     className="page-link border-0"
-                     onClick={() => setCurrentPage((p) => p + 1)}
-                     disabled={currentPage === totalPages}
-                   >
-                     Sau &raquo;
-                   </button>
-                 </li>
-               </ul>
-             </nav>
-            </div>
-        )}
+                );
+              })
+            ) : (
+              <tr>
+                <td colSpan={7} className="text-center text-muted py-3">
+                  Không tìm thấy món ăn nào.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <nav>
+          <ul className="pagination justify-content-center">
+            <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => setCurrentPage((p) => p - 1)}
+                disabled={currentPage === 1}
+              >
+                Trước
+              </button>
+            </li>
+            <li className="page-item active">
+              <span className="page-link">
+                {currentPage} / {totalPages}
+              </span>
+            </li>
+            <li className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}>
+              <button
+                className="page-link"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={currentPage === totalPages}
+              >
+                Sau
+              </button>
+            </li>
+          </ul>
+        </nav>
+      )}
     </div>
   );
 }
