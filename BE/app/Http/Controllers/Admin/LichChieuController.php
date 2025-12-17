@@ -38,6 +38,7 @@ class LichChieuController extends Controller
                 $query->whereDate('gio_chieu', $ngayChieu);
             }
 
+            $this->autoSoftDeleteLichChieuHetHan();
             $lichChieu = $query->get();
 
             return response()->json([
@@ -53,6 +54,16 @@ class LichChieuController extends Controller
             ], 500);
         }
     }
+
+    public function autoSoftDeleteLichChieuHetHan()
+    {
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+
+        LichChieu::where('gio_ket_thuc', '<', $now)
+            ->whereNull('deleted_at')
+            ->delete(); // xoá mềm
+    }
+
 
     // Thêm 1 hoặc nhiều lịch chiếu
     public function store(Request $request)
