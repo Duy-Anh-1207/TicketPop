@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\LichChieu;
 use App\Models\LoaiGhe;
 use App\Models\Room;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -179,6 +181,24 @@ class RoomController extends Controller
             ], 404);
         }
 
+        /**
+         * 👉 Nếu phòng ĐANG HOẠT ĐỘNG (1)
+         * và chuẩn bị chuyển sang BẢO TRÌ (0)
+         * thì phải check lịch chiếu
+         */
+        if ($room->trang_thai == 1) {
+            $coLichDangHoatDong = LichChieu::where('phong_id', $room->id)
+                ->where('gio_ket_thuc', '>', Carbon::now())
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($coLichDangHoatDong) {
+                return response()->json([
+                    'message' => 'Không thể bảo trì vì phòng vẫn còn lịch chiếu đang hoạt động!'
+                ], 400);
+            }
+        }
+
         // Toggle trạng thái
         $room->trang_thai = $room->trang_thai == 1 ? 0 : 1;
         $room->save();
@@ -191,4 +211,5 @@ class RoomController extends Controller
             ]
         ], 200);
     }
+
 }

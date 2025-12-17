@@ -119,8 +119,7 @@ export const useChangeStatusPhongChieu = () => {
         onSuccess: (data) => {
             Swal.fire(
                 "🔄 Thành công!",
-                `Trạng thái phòng đã đổi sang: ${
-                    data?.data?.trang_thai_moi == 1 ? "Hoạt động" : "Ngừng hoạt động"
+                `Trạng thái phòng đã đổi sang: ${data?.data?.trang_thai_moi == 1 ? "Hoạt động" : "Ngừng hoạt động"
                 }`,
                 "success"
             );
@@ -130,7 +129,7 @@ export const useChangeStatusPhongChieu = () => {
             const err = error as { response?: { data?: { message?: string } } };
             Swal.fire(
                 "❌ Lỗi!",
-                err.response?.data?.message || "Không thể đổi trạng thái phòng!",
+                err.response?.data?.message || "Phòng đang có lịch chiếu hoạt động!",
                 "error"
             );
         },
