@@ -69,6 +69,7 @@ export const deleteLichChieu = async (id: number | string) => {
   const { data } = await axiosClient.delete(`/lich-chieu/${id}`);
   return data;
 };
+// Sao chép lịch chiếu từ ngày mẫu sang khoảng ngày
 export const copyLichChieuByDateRange = async (payload: {
   ngay_mau: string;        // 2025-12-17
   ngay_bat_dau: string;    // 2025-12-20
@@ -80,4 +81,9 @@ export const copyLichChieuByDateRange = async (payload: {
     payload
   );
   return res.data;
+};
+// Lấy danh sách lịch chiếu theo phòng
+export const getLichChieuByPhong = async (id: number | string) => {
+  const { data } = await axiosClient.get(`/rooms/${id}/lichTheoPhong`);
+  return data.data;
 };

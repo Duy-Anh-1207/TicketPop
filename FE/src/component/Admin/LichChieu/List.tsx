@@ -1,12 +1,11 @@
-
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useListLichChieu } from "../../../hook/useLichChieu";
+import { useLichTheoPhong, useListLichChieu } from "../../../hook/useLichChieu";
 import type { LichChieu } from "../../../types/lichchieu";
 import axios from "axios";
 
-const ITEMS_PER_PAGE = 5; 
+const ITEMS_PER_PAGE = 5;
 
 export default function LichChieuList() {
   const navigate = useNavigate();
@@ -14,6 +13,10 @@ export default function LichChieuList() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPhong, setSelectedPhong] = useState<number | null>(null);
+
+  // 👉 lấy lịch theo phòng khi click
+  const { data: lichTheoPhong } = useLichTheoPhong(selectedPhong);
 
   const filteredLichChieu = useMemo(() => {
     if (!allLichChieu) return [];
@@ -44,28 +47,17 @@ export default function LichChieuList() {
       showCancelButton: true,
       confirmButtonText: "Xóa",
       cancelButtonText: "Hủy",
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#f37b63",
     });
+
     if (result.isConfirmed) {
-      Swal.fire({
-        title: "Đang xóa...",
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-      });
       try {
         const response = await axios.delete(
           `http://127.0.0.1:8000/api/lich-chieu/${id}`
         );
         Swal.fire("🎉 Thành công", response.data.message, "success");
         refetch();
-      } catch (error: any) {
-        console.error("Lỗi khi xóa lịch chiếu:", error.response || error);
-        Swal.fire(
-          "Lỗi",
-          error.response?.data?.message || "Không thể xóa lịch chiếu!",
-          "error"
-        );
+      } catch {
+        Swal.fire("Lỗi", "Không thể xóa lịch chiếu!", "error");
       }
     }
   };
@@ -74,129 +66,150 @@ export default function LichChieuList() {
 
   return (
     <div className="container p-4">
+      {/* HEADER */}
       <div className="d-flex justify-content-between align-items-center mb-3">
         <button
           onClick={() => navigate(`/admin/lich-chieu/them-moi`)}
-          className="btn btn-success rounded"
+          className="btn btn-success"
         >
           Thêm lịch chiếu
         </button>
-        <div className="w-50">
-          <input 
-            type="text"
-            className="form-control"
-            placeholder="Tìm theo tên phim hoặc tên phòng..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-          />
-        </div>
+
+        <input
+          className="form-control w-50"
+          placeholder="Tìm theo tên phim hoặc phòng..."
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCurrentPage(1);
+          }}
+        />
       </div>
 
-      <div className="table-responsive">
-        <table className="table table-bordered mx-auto">
-          <thead className="table-light">
-            <tr>
-              <th className="text-center">STT</th>
-              <th className="text-center">Phim</th>
-              <th className="text-center">Phòng chiếu</th>
-              <th className="text-center">Phiên bản</th>
-              <th className="text-center">Giờ chiếu</th>
-              <th className="text-center">Giờ kết thúc</th>
-              <th className="text-center">Hành động</th>
+      {/* TABLE */}
+      <table className="table table-bordered">
+        <thead className="table-light">
+          <tr>
+            <th>STT</th>
+            <th>Phim</th>
+            <th>Phòng chiếu</th>
+            <th>Phiên bản</th>
+            <th>Giờ chiếu</th>
+            <th>Giờ kết thúc</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {paginatedLichChieu.map((lichChieu, index) => (
+            <tr key={lichChieu.id}>
+              <td>{index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}</td>
+              <td>{lichChieu.phim?.ten_phim}</td>
+
+              {/* 👉 CLICK PHÒNG */}
+              <td>
+                <button
+                  className="btn btn-link p-0"
+                  onClick={() => setSelectedPhong(lichChieu.phong?.id ?? null)}
+                >
+                  {lichChieu.phong?.ten_phong}
+                </button>
+              </td>
+
+              <td>{lichChieu.phien_ban?.the_loai}</td>
+              <td>{new Date(lichChieu.gio_chieu).toLocaleString()}</td>
+              <td>{new Date(lichChieu.gio_ket_thuc).toLocaleString()}</td>
+
+              <td>
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={() => handleDelete(lichChieu.id)}
+                >
+                  Xóa
+                </button>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {paginatedLichChieu.length > 0 ? (
-              paginatedLichChieu.map((lichChieu: LichChieu, index: number) => {
-                const phimName = lichChieu.phim?.ten_phim || "Không xác định";
-                const phongName = lichChieu.phong?.ten_phong || "Không xác định";
-                const phienBanName = lichChieu.phien_ban?.the_loai || "Không có phiên bản";
+          ))}
+        </tbody>
+      </table>
+
+      {/* PAGINATION */}
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-center gap-2">
+          <button
+            className="btn btn-outline-secondary"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => p - 1)}
+          >
+            Trước
+          </button>
+
+          <span className="align-self-center">
+            {currentPage}/{totalPages}
+          </span>
+
+          <button
+            className="btn btn-outline-secondary"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => p + 1)}
+          >
+            Sau
+          </button>
+        </div>
+      )}
+
+      {/* 👉 HIỂN THỊ KHUNG GIỜ THEO PHÒNG */}
+      {selectedPhong && (
+        <div className="mt-4">
+          <h5 className="mb-3">
+            🎥 Lịch chiếu phòng: <span className="text-primary">{paginatedLichChieu.find(lc => lc.phong?.id === selectedPhong)?.phong?.ten_phong}</span>
+          </h5>
+
+          {lichTheoPhong?.length > 0 ? (
+            <div className="row g-3">
+              {lichTheoPhong.map((lc: LichChieu) => {
+                const ngayChieu = new Date(lc.gio_chieu).toLocaleDateString("vi-VN");
+                const gioBatDau = new Date(lc.gio_chieu).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                const gioKetThuc = new Date(lc.gio_ket_thuc).toLocaleTimeString("vi-VN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
 
                 return (
-                  <tr key={lichChieu.id}>
-                    <td className="text-center">
-                      {index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}
-                    </td>
-                    <td className="text-center">{phimName}</td>
-                    <td className="text-center">{phongName}</td>
-                    <td className="text-center">{phienBanName}</td>
-                    <td className="text-center">
-                      {new Date(lichChieu.gio_chieu).toLocaleString()}
-                    </td>
-                    <td className="text-center">
-                      {new Date(lichChieu.gio_ket_thuc).toLocaleString()}
-                    </td>
-                    <td className="text-center">
-                      <div className="dropup position-static">
-                        <button
-                          className="btn btn-outline-secondary btn-sm rounded"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          <i className="fa-solid fa-ellipsis-vertical"></i>
-                        </button>
-                        <ul className="dropdown-menu" style={{ minWidth: "220px" }}>
-                          <li>
-                            <button
-                              className="dropdown-item"
-                              onClick={() => navigate(`/admin/lich-chieu/${lichChieu.id}`)}
-                            >
-                              Xem chi tiết
-                            </button>
-                             <button
-                              className="dropdown-item text-danger"
-                              onClick={() => handleDelete(lichChieu.id)}
-                            >
-                              Xóa
-                            </button>
-                          </li>
-                        </ul>
+                  <div className="col-md-6 col-lg-4" key={lc.id}>
+                    <div className="card shadow-sm h-100">
+                      <div className="card-body">
+                        <h6 className="card-title mb-2">
+                          🎬 {lc.phim?.ten_phim}
+                        </h6>
+
+                        <div className="mb-2 text-muted">
+                          📅 {ngayChieu}
+                        </div>
+
+                        <div>
+                          <span className="badge bg-success me-2">
+                            {gioBatDau}
+                          </span>
+                          <span className="badge bg-secondary">
+                            {gioKetThuc}
+                          </span>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
+                    </div>
+                  </div>
                 );
-              })
-            ) : (
-              // Nếu không có kết quả lọc
-              <tr>
-                <td colSpan={7} className="text-center text-muted py-3">
-                  Không tìm thấy lịch chiếu nào.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-      {totalPages > 1 && (
-        <nav>
-          <ul className="pagination justify-content-center">
-            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-              <button 
-                className="page-link" 
-                onClick={() => setCurrentPage(p => p - 1)}
-                disabled={currentPage === 1}
-              >
-                Trước
-              </button>
-            </li>
-            <li className="page-item active">
-              <span className="page-link">{currentPage} / {totalPages}</span>
-            </li>
-            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-              <button 
-                className="page-link" 
-                onClick={() => setCurrentPage(p => p + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Sau
-              </button>
-            </li>
-          </ul>
-        </nav>
+              })}
+            </div>
+          ) : (
+            <div className="alert alert-warning">
+              Phòng này hiện chưa có lịch chiếu.
+            </div>
+          )}
+        </div>
       )}
 
     </div>

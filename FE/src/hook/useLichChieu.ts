@@ -6,6 +6,7 @@ import {
   createLichChieu,
   updateLichChieu,
   deleteLichChieu,
+  getLichChieuByPhong,
 } from "../provider/LichChieuProviders";
 import type { LichChieu } from "../types/lichchieu";
 
@@ -105,5 +106,16 @@ export const useDeleteLichChieu = () => {
         "error"
       );
     },
+  });
+};
+
+export const useLichTheoPhong = (phongId: number | null) => {
+  return useQuery({
+    queryKey: ["lich-theo-phong", phongId],
+    queryFn: () => {
+      if (!phongId) return Promise.resolve([]);
+      return getLichChieuByPhong(phongId);
+    },
+    enabled: !!phongId,
   });
 };
