@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell
+  ResponsiveContainer, Legend, PieChart, Pie, Cell
 } from "recharts";
 import "./ThongKe.css";
 
@@ -129,6 +129,7 @@ const ThongKeVe: React.FC = () => {
               <h3>Phân bố loại vé</h3>
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
+                  <Legend />
                   <Pie
                     data={data.phanBoLoaiVe}
                     dataKey="so_luong"
@@ -147,12 +148,24 @@ const ThongKeVe: React.FC = () => {
 
           <div className="thongke-chart">
             <h3>Top phim bán chạy</h3>
-            <ResponsiveContainer width="100%" height={250}>
+            <ResponsiveContainer width="100%" height={300}>
               <BarChart data={data.topPhimBanChay}>
                 <XAxis dataKey="ten_phim" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="tong_ve" fill="#FB8C00" />
+                <Legend />
+                <Bar
+                  dataKey="ve_da_ban"
+                  name="Vé đã bán"
+                  fill="#FB8C00"
+                  radius={[6, 6, 0, 0]}
+                />
+                <Bar
+                  dataKey="ve_trong"
+                  name="Vé trống"
+                  fill="#43A047"
+                  radius={[6, 6, 0, 0]}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -50,24 +50,64 @@ class ThongKeController extends Controller
         $phimId = $request->query('phim_id');
         $range = $this->rangeDate($request->from_date, $request->to_date);
 
-        $query = DB::table('thanh_toan')
+        /**
+         * 1. Vé đã bán theo phim
+         */
+        $veDaBan = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
             ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
-            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
+            ->when(
+                $range,
+                fn($q) =>
+                $q->whereBetween('thanh_toan.created_at', $range)
+            )
             ->select(
+                'phim.id as phim_id',
                 'phim.ten_phim',
-                'phim.anh_poster',
-                DB::raw('COUNT(thanh_toan.id) as tong_ve'),
+                DB::raw('COUNT(DISTINCT dat_ve.id) as ve_da_ban'),
                 DB::raw('SUM(thanh_toan.tong_tien_goc) as tong_tien')
             )
-            ->groupBy('phim.id', 'phim.ten_phim', 'phim.anh_poster')
-            ->orderByDesc('tong_ve')
+            ->groupBy('phim.id', 'phim.ten_phim')
+            ->orderByDesc('ve_da_ban')
             ->limit(5)
             ->get();
 
-        return response()->json(['status' => true, 'data' => $query]);
+        /**
+         * 2. Tổng vé (tổng ghế theo phim)
+         */
+        $tongVe = DB::table('lich_chieu')
+            ->join('phong_chieu', 'lich_chieu.phong_id', '=', 'phong_chieu.id')
+            ->join('ghe', 'phong_chieu.id', '=', 'ghe.phong_id')
+            ->select(
+                'lich_chieu.phim_id',
+                DB::raw('COUNT(ghe.id) as tong_ve')
+            )
+            ->groupBy('lich_chieu.phim_id')
+            ->get()
+            ->keyBy('phim_id');
+
+
+        /**
+         * 3. Gộp dữ liệu
+         */
+        $data = $veDaBan->map(function ($item) use ($tongVe) {
+            $tong = $tongVe[$item->phim_id]->tong_ve ?? 0;
+
+            return [
+                'ten_phim'  => $item->ten_phim,
+                've_da_ban' => (int) $item->ve_da_ban,
+                've_trong'  => max(0, $tong - $item->ve_da_ban),
+                'tong_ve'   => (int) $tong,
+                'tong_tien' => (int) $item->tong_tien,
+            ];
+        });
+
+        return response()->json([
+            'status' => true,
+            'data' => $data
+        ]);
     }
 
     // Phân bố loại vé
@@ -117,51 +157,61 @@ class ThongKeController extends Controller
 
     // II. THỐNG KÊ DOANH THU 
 
-    // Thống kê ghế theo ngày
-    public function GheTheoNgay(Request $request)
+    // Thống kê ghế
+    public function ThongKeGhe(Request $request)
     {
-        // 1. Khoảng ngày
-        $range = $this->rangeDate(
-            $request->from_date,
-            $request->to_date
-        );
+        $phimId = $request->query('phim_id');
+        $range = $this->rangeDate($request->from_date, $request->to_date);
 
-        // 2. Tổng số ghế
-        $tongSoGhe = DB::table('ghe')->count();
+        // Tổng ghế theo phòng
+        $tongGheTheoPhong = DB::table('ghe')
+            ->select('phong_id', DB::raw('COUNT(id) as tong_ghe'))
+            ->groupBy('phong_id');
 
-        // 3. Ghế bán theo NGÀY
-        $gheBanTheoNgay = DB::table('dat_ve_chi_tiet')
-            ->join('dat_ve', 'dat_ve_chi_tiet.dat_ve_id', '=', 'dat_ve.id')
-            ->join('thanh_toan', 'dat_ve.id', '=', 'thanh_toan.dat_ve_id')
-            ->when(
-                $range,
-                fn($q) =>
-                $q->whereBetween('thanh_toan.created_at', $range)
-            )
+        $query = DB::table('thanh_toan')
+            ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
+            ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
+            ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
+            ->join('phong_chieu', 'lich_chieu.phong_id', '=', 'phong_chieu.id')
+            ->join('dat_ve_chi_tiet', 'dat_ve.id', '=', 'dat_ve_chi_tiet.dat_ve_id')
+            ->join('ghe', 'dat_ve_chi_tiet.ghe_id', '=', 'ghe.id')
+            ->joinSub($tongGheTheoPhong, 'tg', function ($join) {
+                $join->on('phong_chieu.id', '=', 'tg.phong_id');
+            })
+            ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
             ->select(
                 DB::raw('DATE(thanh_toan.created_at) as ngay'),
-                DB::raw('COUNT(DISTINCT dat_ve_chi_tiet.ghe_id) as ghe_da_ban')
+                'phim.ten_phim',
+                'phong_chieu.ten_phong',
+                DB::raw('COUNT(DISTINCT dat_ve_chi_tiet.ghe_id) as ghe_da_ban'),
+                DB::raw('tg.tong_ghe as tong_ghe')
             )
-            ->groupBy(DB::raw('DATE(thanh_toan.created_at)'))
+            ->groupBy(
+                DB::raw('DATE(thanh_toan.created_at)'),
+                'phim.ten_phim',
+                'phong_chieu.ten_phong',
+                'tg.tong_ghe'
+            )
             ->orderBy('ngay')
             ->get();
 
-        // 4. Build data
-        $data = [];
-
-        foreach ($gheBanTheoNgay as $item) {
-            $data[] = [
-                'ngay' => $item->ngay,
-                'ghe_da_ban' => $item->ghe_da_ban,
-                'ghe_trong' => max(0, $tongSoGhe - $item->ghe_da_ban),
+        // build data
+        $data = $query->map(function ($item) {
+            return [
+                'ngay'        => $item->ngay,
+                'ten_phim'    => $item->ten_phim,
+                'ten_phong'   => $item->ten_phong,
+                'ghe_da_ban'  => (int)$item->ghe_da_ban,
+                'ghe_trong'   => max(0, $item->tong_ghe - $item->ghe_da_ban),
+                'tong_ghe'    => (int)$item->tong_ghe,
             ];
-        }
+        });
 
         return response()->json([
             'status' => true,
             'from_date' => $request->from_date,
             'to_date' => $request->to_date,
-            'tong_ghe' => $tongSoGhe,
             'data' => $data
         ]);
     }

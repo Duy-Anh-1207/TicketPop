@@ -193,7 +193,7 @@ Route::prefix('thong-ke')->group(function () {
 
 
     // THỐNG KÊ DOANH THU
-    Route::get('/ghe-theo-ngay', [ThongKeController::class, 'GheTheoNgay']);
+    Route::get('/thong-ke-ghe', [ThongKeController::class, 'ThongKeGhe']);
     Route::get('/doanh-thu-phim', [ThongKeController::class, 'doanhThuPhim']);
     Route::get('/doanh-thu-do-an', [ThongKeController::class, 'doanhThuDoAn']);
     Route::get('/doanh-thu-theo-thang', [ThongKeController::class, 'doanhThuTheoThang']);

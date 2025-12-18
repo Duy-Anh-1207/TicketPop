@@ -112,3 +112,12 @@
   font-weight: 500;
   color: #555;
 }
+.ghe-summary p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.ghe-summary {
+  text-align: center;
+  margin-top: 8px;
+}
