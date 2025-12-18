@@ -146,10 +146,11 @@ const Payment = () => {
     datVe.so_dien_thoai || datVe.nguoi_dung?.so_dien_thoai || "Chưa cung cấp";
 
   return (
-    <div className="payment-container">
-      <div className="payment-grid">
-        <div className="left-column">
-          {/* <div className="movie-poster-wrapper">
+    <div className="payment-conten">
+      <div className="payment-container">
+        <div className="payment-grid">
+          <div className="left-column">
+            {/* <div className="movie-poster-wrapper">
             <img
               src={
                 datVe.lich_chieu?.phim?.anh_poster || "/placeholder-movie.jpg"
@@ -159,237 +160,239 @@ const Payment = () => {
             />
           </div> */}
 
-          <div className="customer-info">
-            <h3>Thông tin khách hàng</h3>
-            <div className="info-item">
-              <span className="label">Họ tên:</span>
-              <span className="value">{hoTen}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">Email:</span>
-              <span className="value">{email}</span>
-            </div>
-            <div className="info-item">
-              <span className="label">SĐT:</span>
-              <span className="value">{soDienThoai}</span>
-            </div>
-          </div>
-          <div className="voucher-section">
-            <div className="voucher-wrapper">
-              <div className="voucher-label">
-                {datVe.ma_giam_gia_id ? "Đã áp dụng mã giảm giá" : "Bạn có mã giảm giá?"}
+            <div className="customer-info">
+              <h3>Thông tin khách hàng</h3>
+              <div className="info-item">
+                <span className="label">Họ tên:</span>
+                <span className="value">{hoTen}</span>
               </div>
+              <div className="info-item">
+                <span className="label">Email:</span>
+                <span className="value">{email}</span>
+              </div>
+              <div className="info-item">
+                <span className="label">SĐT:</span>
+                <span className="value">{soDienThoai}</span>
+              </div>
+            </div>
+            <div className="voucher-section">
+              <div className="voucher-wrapper">
+                <div className="voucher-label">
+                  {datVe.ma_giam_gia_id ? "Đã áp dụng mã giảm giá" : "Bạn có mã giảm giá?"}
+                </div>
 
-              <div className="voucher-input-group">
-                {datVe.ma_giam_gia_id ? (
-                  <div
-                    className="voucher-input voucher-applied"
-                    style={{
-                      backgroundColor: "#f0fdf4",
-                      border: "1px solid #86efac",
-                      color: "#166534",
-                      padding: "8px 12px",
-                      borderRadius: "6px",
-                      fontWeight: "500",
-                      cursor: "not-allowed",
-                      userSelect: "none",
-                    }}
+                <div className="voucher-input-group">
+                  {datVe.ma_giam_gia_id ? (
+                    <div
+                      className="voucher-input voucher-applied"
+                      style={{
+                        backgroundColor: "#f0fdf4",
+                        border: "1px solid #86efac",
+                        color: "#166534",
+                        padding: "8px 12px",
+                        borderRadius: "6px",
+                        fontWeight: "500",
+                        cursor: "not-allowed",
+                        userSelect: "none",
+                      }}
+                    >
+                    </div>
+                  ) : (
+                    // Ô nhập mã
+                    <Input
+                      className="voucher-input"
+                      placeholder="Nhập mã giảm giá"
+                      value={voucherCode}
+                      onChange={(e) => setVoucherCode(e.target.value)}
+                      onPressEnter={handleApplyVoucher}
+                      disabled={applying}
+                    />
+                  )}
+
+                  <Button
+                    type="primary"
+                    className="voucher-btn"
+                    loading={applying}
+                    onClick={handleApplyVoucher}
+                    disabled={!!datVe.ma_giam_gia_id || applying || !voucherCode.trim()}
                   >
-                  </div>
-                ) : (
-                  // Ô nhập mã
-                  <Input
-                    className="voucher-input"
-                    placeholder="Nhập mã giảm giá"
-                    value={voucherCode}
-                    onChange={(e) => setVoucherCode(e.target.value)}
-                    onPressEnter={handleApplyVoucher}
-                    disabled={applying}
-                  />
-                )}
+                    {datVe.ma_giam_gia_id ? "Đã áp dụng" : "Áp dụng"}
+                  </Button>
+                </div>
 
-                <Button
-                  type="primary"
-                  className="voucher-btn"
-                  loading={applying}
-                  onClick={handleApplyVoucher}
-                  disabled={!!datVe.ma_giam_gia_id || applying || !voucherCode.trim()}
-                >
-                  {datVe.ma_giam_gia_id ? "Đã áp dụng" : "Áp dụng"}
-                </Button>
+                {datVe.ma_giam_gia_id && (
+                  <div className="voucher-applied-info">
+                    <svg className="check-icon" viewBox="0 0 16 16" fill="currentColor">
+                      <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L7 10.586 5.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
+                    </svg>
+
+                    <span>
+                      Đã áp dụng mã <strong></strong>
+
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+          </div>
+
+          <div className="right-column">
+            <div className="movie-details">
+              <div
+                style={{
+                  background: "#fff3cd",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  marginBottom: "15px",
+                  border: "1px solid #ffeeba",
+                  fontWeight: 600,
+                  textAlign: "center",
+                  color: "#856404",
+                }}
+              >
+                Thời gian còn lại để thanh toán:{" "}
+                {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
               </div>
 
-              {datVe.ma_giam_gia_id && (
-                <div className="voucher-applied-info">
-                  <svg className="check-icon" viewBox="0 0 16 16" fill="currentColor">
-                    <path d="M8 16A8 8 0 108 0a8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L7 10.586 5.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
-                  </svg>
+              <h2>{datVe.lich_chieu?.phim?.ten_phim}</h2>
+              <p>Phòng: {datVe.lich_chieu?.phong?.ten_phong}</p>
+              <p>
+                Ngày chiếu:{" "}
+                {new Date(datVe.lich_chieu?.gio_chieu).toLocaleDateString(
+                  "vi-VN"
+                )}
+              </p>
+              <p>
+                Giờ:{" "}
+                {new Date(datVe.lich_chieu?.gio_chieu).toLocaleTimeString(
+                  "vi-VN",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}{" "}
+                -{" "}
+                {new Date(datVe.lich_chieu?.gio_ket_thuc).toLocaleTimeString(
+                  "vi-VN",
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}
+              </p>
 
-                  <span>
-                    Đã áp dụng mã <strong></strong>
+              {/* Ghế đã chọn */}
+              <div className="seat-info">
+                <h4>Ghế đã chọn</h4>
+                <div className="seat-list">
+                  {datVe.chi_tiet.map((ct: any) => (
+                    <span key={ct.id} className="seat-tag">
+                      {ct.ghe.so_ghe}
+                    </span>
+                  ))}
+                </div>
+              </div>
 
-                  </span>
+              {/* ĐỒ ĂN */}
+              {datVe.do_an && datVe.do_an.length > 0 && (
+                <div className="food-info">
+                  <h4>Combo đồ ăn</h4>
+                  {datVe.do_an.map((item: any) => (
+                    <div key={item.id} className="food-item">
+                      {item.anh_do_an ? (
+                        <img
+                          src="https://png.pngtree.com/png-clipart/20240608/original/pngtree-popcorn-corn-cinema-icon-vector-cinema-png-image_15274782.png"
+                          alt={item.ten_do_an}
+                          className="food-thumb"
+                        />
+                      ) : (
+                        <div className="food-thumb placeholder">Food</div>
+                      )}
+                      <div className="food-details">
+                        <span className="food-name">{item.ten_do_an}</span>
+                        <span className="food-quantity">x{item.quantity}</span>
+                        <span className="food-price">
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(item.gia_ban * item.quantity)}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
-            </div>
-          </div>
 
-        </div>
-
-        <div className="right-column">
-          <div className="movie-details">
-            <div
-              style={{
-                background: "#fff3cd",
-                padding: "12px",
-                borderRadius: "8px",
-                marginBottom: "15px",
-                border: "1px solid #ffeeba",
-                fontWeight: 600,
-                textAlign: "center",
-                color: "#856404",
-              }}
-            >
-              Thời gian còn lại để thanh toán:{" "}
-              {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, "0")}
-            </div>
-
-            <h2>{datVe.lich_chieu?.phim?.ten_phim}</h2>
-            <p>Phòng: {datVe.lich_chieu?.phong?.ten_phong}</p>
-            <p>
-              Ngày chiếu:{" "}
-              {new Date(datVe.lich_chieu?.gio_chieu).toLocaleDateString(
-                "vi-VN"
-              )}
-            </p>
-            <p>
-              Giờ:{" "}
-              {new Date(datVe.lich_chieu?.gio_chieu).toLocaleTimeString(
-                "vi-VN",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )}{" "}
-              -{" "}
-              {new Date(datVe.lich_chieu?.gio_ket_thuc).toLocaleTimeString(
-                "vi-VN",
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )}
-            </p>
-
-            {/* Ghế đã chọn */}
-            <div className="seat-info">
-              <h4>Ghế đã chọn</h4>
-              <div className="seat-list">
-                {datVe.chi_tiet.map((ct: any) => (
-                  <span key={ct.id} className="seat-tag">
-                    {ct.ghe.so_ghe}
+              <div className="total-price">
+                <h3>
+                  Tổng tiền:{" "}
+                  <span>
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(Number(datVe.tong_tien))}
                   </span>
-                ))}
+                </h3>
               </div>
-            </div>
-
-            {/* ĐỒ ĂN */}
-            {datVe.do_an && datVe.do_an.length > 0 && (
-              <div className="food-info">
-                <h4>Combo đồ ăn</h4>
-                {datVe.do_an.map((item: any) => (
-                  <div key={item.id} className="food-item">
-                    {item.anh_do_an ? (
-                      <img
-                        src="https://png.pngtree.com/png-clipart/20240608/original/pngtree-popcorn-corn-cinema-icon-vector-cinema-png-image_15274782.png"
-                        alt={item.ten_do_an}
-                        className="food-thumb"
-                      />
-                    ) : (
-                      <div className="food-thumb placeholder">Food</div>
-                    )}
-                    <div className="food-details">
-                      <span className="food-name">{item.ten_do_an}</span>
-                      <span className="food-quantity">x{item.quantity}</span>
-                      <span className="food-price">
-                        {new Intl.NumberFormat("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }).format(item.gia_ban * item.quantity)}
-                      </span>
-                    </div>
-                  </div>
-                ))}
+              <div className="payment-methods">
+                <h4>Phương thức thanh toán</h4>
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  disabled={!datVe}
+                  onClick={handleThanhToanMoMo}
+                  className="momo-btn"
+                  style={{
+                    backgroundColor: "#a50064",
+                    borderColor: "#a50064",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                    alt="MoMo"
+                    style={{ width: 28, height: 28, borderRadius: "50%" }}
+                  />
+                  Thanh toán qua MoMo
+                </Button>
               </div>
-            )}
-
-            <div className="total-price">
-              <h3>
-                Tổng tiền:{" "}
-                <span>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(Number(datVe.tong_tien))}
-                </span>
-              </h3>
-            </div>
-            <div className="payment-methods">
-              <h4>Phương thức thanh toán</h4>
-              <Button
-                type="primary"
-                size="large"
-                block
-                disabled={!datVe}
-                onClick={handleThanhToanMoMo}
-                className="momo-btn"
-                style={{
-                  backgroundColor: "#a50064",
-                  borderColor: "#a50064",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                <img
-                  src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
-                  alt="MoMo"
-                  style={{ width: 28, height: 28, borderRadius: "50%" }}
-                />
-                Thanh toán qua MoMo
-              </Button>
-            </div>
-            <br />
-            <div className="payment-methods">
-              <Button
-                type="primary"
-                size="large"
-                block
-                disabled={!datVe}
-                onClick={handleThanhToanVNPAY}
-                className="momo-btn"
-                style={{
-                  backgroundColor: "#a50064",
-                  borderColor: "#a50064",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "10px",
-                }}
-              >
-                <img
-                  src="https://images.seeklogo.com/logo-png/42/1/vnpay-logo-png_seeklogo-428006.png"
-                  alt="VNPAY"
-                  style={{ width: 28, height: 28, borderRadius: "50%" }}
-                />
-                Thanh toán qua VNPAY
-              </Button>
+              <br />
+              <div className="payment-methods">
+                <Button
+                  type="primary"
+                  size="large"
+                  block
+                  disabled={!datVe}
+                  onClick={handleThanhToanVNPAY}
+                  className="momo-btn"
+                  style={{
+                    backgroundColor: "#a50064",
+                    borderColor: "#a50064",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <img
+                    src="https://images.seeklogo.com/logo-png/42/1/vnpay-logo-png_seeklogo-428006.png"
+                    alt="VNPAY"
+                    style={{ width: 28, height: 28, borderRadius: "50%" }}
+                  />
+                  Thanh toán qua VNPAY
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
   );
 };
 

@@ -7,10 +7,6 @@
 }
 
 /* ===== ÉP TOÀN BỘ CHỮ TRONG CONTAINER SANG TRẮNG ===== */
-.container,
-.container * {
-  color: #ffffff;
-}
 
 
 .container::before {

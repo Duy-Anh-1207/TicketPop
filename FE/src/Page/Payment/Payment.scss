@@ -1,3 +1,21 @@
+.payment-conten {
+  min-height: 100vh;
+  padding: 40px 16px;
+
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1920&q=80");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
 .payment-container {
   max-width: 1200px;
   margin: 30px auto;

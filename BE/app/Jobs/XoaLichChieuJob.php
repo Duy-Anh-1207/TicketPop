@@ -19,14 +19,14 @@ class XoaLichChieuJob implements ShouldQueue
     {
         $now = Carbon::now('Asia/Ho_Chi_Minh');
 
-        $lichHetHan = LichChieu::where('gio_ket_thuc', '<', $now)
-            ->whereNull('deleted_at')
+        $lichHetHan = LichChieu::whereNull('deleted_at')
+            ->where('gio_ket_thuc', '<', $now->subDays(5))
             ->get();
 
         foreach ($lichHetHan as $lich) {
-            $lich->delete(); // ✅ xoá mềm
+            $lich->delete(); // xoá mềm
 
-            Log::info('🗑️ Auto soft delete lịch chiếu', [
+            Log::info('🗑️ Auto soft delete lịch chiếu sau 5 ngày kết thúc', [
                 'lich_chieu_id' => $lich->id,
                 'gio_ket_thuc'  => $lich->gio_ket_thuc,
             ]);

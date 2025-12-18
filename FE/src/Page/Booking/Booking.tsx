@@ -261,7 +261,7 @@ const Booking = () => {
   };
 
   return (
-    <div className="booking-container">
+    <div className="booking-page"><div className="booking-container">
       {/* Thông tin phim */}
       <div className="booking-content">
         {lichChieu.phim?.anh_poster && (
@@ -269,9 +269,8 @@ const Booking = () => {
             src={
               lichChieu.phim?.anh_poster?.startsWith("http")
                 ? lichChieu.phim?.anh_poster
-                : `${import.meta.env.VITE_API_BASE_URL}/storage/${
-                    lichChieu.phim?.anh_poster
-                  }`
+                : `${import.meta.env.VITE_API_BASE_URL}/storage/${lichChieu.phim?.anh_poster
+                }`
             }
             alt={lichChieu.phim?.ten_phim}
             className="booking-poster"
@@ -329,17 +328,16 @@ const Booking = () => {
                         return (
                           <div
                             key={ghe.id}
-                            className={`seat-item ${
-                              ghe.trang_thai === "da_dat"
+                            className={`seat-item ${ghe.trang_thai === "da_dat"
                                 ? "booked"
                                 : ghe.trang_thai_ghe === 0
-                                ? "broken"
-                                : isSelected
-                                ? "selected"
-                                : ghe.loai_ghe_id === 2
-                                ? "vip"
-                                : "thuong"
-                            }`}
+                                  ? "broken"
+                                  : isSelected
+                                    ? "selected"
+                                    : ghe.loai_ghe_id === 2
+                                      ? "vip"
+                                      : "thuong"
+                              }`}
                             onClick={() =>
                               ghe.trang_thai !== "da_dat" && toggleSeat(ghe)
                             }
@@ -374,9 +372,8 @@ const Booking = () => {
                         src={
                           food.image.startsWith("http")
                             ? food.image
-                            : `${import.meta.env.VITE_API_BASE_URL}${
-                                food.image
-                              }`
+                            : `${import.meta.env.VITE_API_BASE_URL}${food.image
+                            }`
                         }
                         alt={food.ten_do_an}
                         className="food-img"
@@ -479,7 +476,8 @@ const Booking = () => {
           </Button>
         </div>
       </div>
-    </div>
+    </div></div>
+
   );
 };
 

@@ -50,7 +50,7 @@
 /* ÉP TOÀN BỘ CHỮ + ICON TRONG HEADER SANG TRẮNG */
 .header-bg,
 .header-bg * {
-  color: #ffffff !important;
+  color: black !important;
 }
 
 /* link */
