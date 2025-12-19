@@ -82,18 +82,6 @@ const Navbar: React.FC = () => {
         </li>
         <li style={{ margin: "0 15px" }}>
           <a
-            href="#event"
-            style={{
-              color: "black",
-              textDecoration: "none",
-              fontSize: "16px",
-            }}
-          >
-            Tổ chức sự kiện
-          </a>
-        </li>
-        <li style={{ margin: "0 15px" }}>
-          <a
             href="/tin-tuc"
             style={{
               color: "black",
