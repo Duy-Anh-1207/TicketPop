@@ -259,4 +259,70 @@ class ThongKeController extends Controller
 
         return response()->json(['status' => true, 'data' => $query]);
     }
+    public function thongKeSuatChieu(Request $request)
+    {
+        $phimId = $request->query('phim_id');
+        $range = $this->rangeDate($request->from_date, $request->to_date);
+
+        // theo phim
+        $theoPhim = DB::table('lich_chieu')
+            ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
+            ->when($phimId, fn($q) => $q->where('phim.id', $phimId)) 
+            ->when($range, fn($q) => $q->whereBetween('lich_chieu.gio_chieu', $range))
+            ->select(
+                'phim.ten_phim',
+                DB::raw('COUNT(lich_chieu.id) as so_suat_chieu')
+            )
+            ->groupBy('phim.id', 'phim.ten_phim')
+            ->get();
+
+        // theo phòng
+        $theoPhong = DB::table('lich_chieu')
+            ->join('phong_chieu', 'lich_chieu.phong_id', '=', 'phong_chieu.id')
+            ->when($range, fn($q) => $q->whereBetween('gio_chieu', $range))
+            ->select(
+                'phong_chieu.ten_phong',
+                DB::raw('COUNT(lich_chieu.id) as so_suat_chieu')
+            )
+            ->groupBy('phong_chieu.ten_phong')
+            ->orderByDesc('so_suat_chieu')
+            ->get();
+
+
+        // theo ngày
+        $theoNgay = DB::table('lich_chieu')
+            ->when($range, fn($q) => $q->whereBetween('gio_chieu', $range))
+            ->select(
+                DB::raw('DATE(gio_chieu) as ngay'),
+                DB::raw('COUNT(id) as so_suat_chieu')
+            )
+            ->groupBy(DB::raw('DATE(gio_chieu)'))
+            ->orderBy('ngay')
+            ->get();
+
+
+        // theo giờ
+        $theoGio = DB::table('lich_chieu')
+            ->select(
+                DB::raw('HOUR(gio_chieu) as gio'),
+                DB::raw('COUNT(id) as so_suat_chieu')
+            )
+            ->groupBy(DB::raw('HOUR(gio_chieu)'))
+            ->orderBy('gio')
+            ->get();
+
+
+        return response()->json([
+            'status' => true,
+            'from_date' => $request->from_date,
+            'to_date' => $request->to_date,
+            'data' => [
+                'theo_phim'  => $theoPhim,
+                'theo_phong' => $theoPhong,
+                'theo_ngay'  => $theoNgay,
+                'theo_gio'   => $theoGio,
+            ]
+        ]);
+    }
+
 }
