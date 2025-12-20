@@ -40,9 +40,11 @@ class RoomController extends Controller
             'hang_thuong' => 'required|integer|min:0',
             'hang_vip' => 'required|integer|min:0',
             'trang_thai' => 'required|string',
+            'chieu_phim'  => 'required|in:2D,3D,IMAX',
         ], [
             'loai_so_do.regex' => 'Sơ đồ phải có dạng NxM, ví dụ: 8x8 hoặc 10x12.',
             'ten_phong.unique' => 'Tên phòng đã tồn tại.',
+            'chieu_phim.in'    => 'Chiếu phim chỉ được phép: 2D, 3D hoặc IMAX.',
         ]);
 
         [$rows, $cols] = explode('x', $data['loai_so_do']);
@@ -126,9 +128,11 @@ class RoomController extends Controller
             'hang_thuong' => 'sometimes|required|integer|min:0',
             'hang_vip' => 'sometimes|required|integer|min:0',
             'trang_thai' => 'sometimes|required|string',
+             'chieu_phim'  => 'sometimes|required|in:2D,3D,IMAX',
         ], [
             'ten_phong.unique' => 'Tên phòng đã tồn tại, vui lòng chọn tên khác!',
             'loai_so_do.regex' => 'Sơ đồ phải có dạng NxM, ví dụ: 8x8 hoặc 10x12.',
+            'chieu_phim.in'    => 'Chiếu phim chỉ được phép: 2D, 3D hoặc IMAX.',
         ]);
         $loaiSoDo = $data['loai_so_do'] ?? $room->loai_so_do;
         $hangThuong = $data['hang_thuong'] ?? $room->hang_thuong;

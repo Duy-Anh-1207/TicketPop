@@ -50,33 +50,25 @@ class ThongKeController extends Controller
         $phimId = $request->query('phim_id');
         $range = $this->rangeDate($request->from_date, $request->to_date);
 
-        /**
-         * 1. Vé đã bán theo phim
-         */
+        // 1. Vé đã bán theo phim
         $veDaBan = DB::table('thanh_toan')
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
             ->when($phimId, fn($q) => $q->where('phim.id', $phimId))
-            ->when(
-                $range,
-                fn($q) =>
-                $q->whereBetween('thanh_toan.created_at', $range)
-            )
+            ->when($range, fn($q) => $q->whereBetween('thanh_toan.created_at', $range))
             ->select(
                 'phim.id as phim_id',
                 'phim.ten_phim',
-                DB::raw('COUNT(DISTINCT dat_ve.id) as ve_da_ban'),
-                DB::raw('SUM(thanh_toan.tong_tien_goc) as tong_tien')
+                DB::raw('COUNT(DISTINCT dat_ve.id) as ve_da_ban')
             )
             ->groupBy('phim.id', 'phim.ten_phim')
             ->orderByDesc('ve_da_ban')
             ->limit(5)
             ->get();
 
-        /**
-         * 2. Tổng vé (tổng ghế theo phim)
-         */
+        // 2. Tổng vé (tổng ghế theo phim)
+
         $tongVe = DB::table('lich_chieu')
             ->join('phong_chieu', 'lich_chieu.phong_id', '=', 'phong_chieu.id')
             ->join('ghe', 'phong_chieu.id', '=', 'ghe.phong_id')
@@ -88,10 +80,8 @@ class ThongKeController extends Controller
             ->get()
             ->keyBy('phim_id');
 
+        //3. Gộp dữ liệu
 
-        /**
-         * 3. Gộp dữ liệu
-         */
         $data = $veDaBan->map(function ($item) use ($tongVe) {
             $tong = $tongVe[$item->phim_id]->tong_ve ?? 0;
 
@@ -100,7 +90,6 @@ class ThongKeController extends Controller
                 've_da_ban' => (int) $item->ve_da_ban,
                 've_trong'  => max(0, $tong - $item->ve_da_ban),
                 'tong_ve'   => (int) $tong,
-                'tong_tien' => (int) $item->tong_tien,
             ];
         });
 
@@ -109,6 +98,7 @@ class ThongKeController extends Controller
             'data' => $data
         ]);
     }
+
 
     // Phân bố loại vé
     public function phanBoLoaiVe(Request $request)
@@ -172,8 +162,7 @@ class ThongKeController extends Controller
             ->join('dat_ve', 'thanh_toan.dat_ve_id', '=', 'dat_ve.id')
             ->join('lich_chieu', 'dat_ve.lich_chieu_id', '=', 'lich_chieu.id')
             ->join('phim', 'lich_chieu.phim_id', '=', 'phim.id')
-            ->join('phong_chieu', 'lich_chieu.phong_id', '=', 'phong_chieu.id')
-            ->join('dat_ve_chi_tiet', 'dat_ve.id', '=', 'dat_ve_chi_tiet.dat_ve_id')
+            ->join('phong_chieu', 'lich_chieu.phong_id', '=', 'phong_chieu.id')->join('dat_ve_chi_tiet', 'dat_ve.id', '=', 'dat_ve_chi_tiet.dat_ve_id')
             ->join('ghe', 'dat_ve_chi_tiet.ghe_id', '=', 'ghe.id')
             ->joinSub($tongGheTheoPhong, 'tg', function ($join) {
                 $join->on('phong_chieu.id', '=', 'tg.phong_id');

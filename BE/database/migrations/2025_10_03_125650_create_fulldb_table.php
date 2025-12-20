@@ -110,6 +110,7 @@ return new class extends Migration
             $table->string('loai_so_do', 10); // Ví dụ: 8x8, 12x12
             $table->integer('hang_thuong');
             $table->integer('hang_vip');
+            $table->enum('chieu_phim', ['2D', '3D', 'IMAX']);
             $table->boolean('trang_thai')->default(false);
             $table->timestamps();
             $table->softDeletes();

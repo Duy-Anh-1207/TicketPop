@@ -15,6 +15,7 @@ class Room extends Model
         'hang_thuong',
         'hang_vip',
         'trang_thai',
+        'chieu_phim',
     ];
 
     public function ghes()

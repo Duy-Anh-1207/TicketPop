@@ -96,8 +96,7 @@ const ThongKeDoanhThu: React.FC = () => {
         </div>
 
         <div className="filter-item">
-          <label>Đến ngày:</label>
-          <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+          <label>Đến ngày:</label><input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
         </div>
 
         <div className="filter-item">
@@ -131,10 +130,10 @@ const ThongKeDoanhThu: React.FC = () => {
             {/* DOANH THU THEO THÁNG */}
             <div className="thongke-chart">
               <h3>Doanh thu theo tháng</h3>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={320}>
                 <LineChart data={data?.doanhThuTheoThang || []}>
                   <XAxis dataKey="thang" />
-                  <YAxis width={90}
+                  <YAxis width={140}
                     tickFormatter={formatVND}
                   />
                   <Tooltip
@@ -177,10 +176,9 @@ const ThongKeDoanhThu: React.FC = () => {
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={data?.doanhThuPhim || []}>
                 <XAxis dataKey="ten_phim" />
-                <YAxis width={90}
+                <YAxis width={140}
                   tickFormatter={formatVND}
-                />
-                <Tooltip
+                /><Tooltip
                   formatter={(value: any) => formatVND(value)}
                 />
                 <Bar

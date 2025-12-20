@@ -4,6 +4,7 @@ export interface PhongChieu {
     loai_so_do: string;
     hang_thuong: number;
     hang_vip: number;
+    chieu_phim?: string;
     trang_thai: string;
     created_at: string;
     updated_at: string;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./LichChieu.scss";
 import { getLichChieuTheoPhim } from "../../../../provider/Client/lichChieuClientProvider";
@@ -18,13 +18,16 @@ interface LichChieuItem {
 
 const LichChieu = () => {
   const { slug } = useParams();
-  const phimId = slug ? parseInt(slug.split("-").pop() || "0", 10) : 0;
   const navigate = useNavigate();
+
+  const phimId = slug ? parseInt(slug.split("-").pop() || "0", 10) : 0;
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [lichChieu, setLichChieu] = useState<LichChieuItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [datesWithShowtime, setDatesWithShowtime] = useState<Set<string>>(new Set());
 
+  // ===== Tạo danh sách 7 ngày =====
   const days = Array.from({ length: 7 }, (_, i) => {
     const date = new Date();
     date.setDate(date.getDate() + i);
@@ -37,7 +40,7 @@ const LichChieu = () => {
     return { label, value };
   });
 
-  const [datesWithShowtime, setDatesWithShowtime] = useState<Set<string>>(new Set());
+  // ===== Kiểm tra ngày nào có suất chiếu =====
   useEffect(() => {
     if (!phimId) return;
 
@@ -45,7 +48,7 @@ const LichChieu = () => {
       const results = await Promise.all(
         days.map((day) =>
           getLichChieuTheoPhim(phimId, day.value)
-            .then((res) => (res.data && res.data.length > 0 ? day.value : null))
+            .then((res) => (res.data?.length > 0 ? day.value : null))
             .catch(() => null)
         )
       );
@@ -54,51 +57,69 @@ const LichChieu = () => {
       setDatesWithShowtime(validDates);
 
       if (!selectedDate && validDates.size > 0) {
-        const firstValid = days.find((d) => validDates.has(d.value));
-        if (firstValid) setSelectedDate(firstValid.value);
+        const firstDate = days.find((d) => validDates.has(d.value));
+        if (firstDate) setSelectedDate(firstDate.value);
       }
     };
 
     checkShowtimes();
   }, [phimId]);
 
-  useEffect(() => {
-    const fetchLichChieu = async () => {
-      if (!selectedDate || !phimId) return;
-      if (!datesWithShowtime.has(selectedDate)) {
-        setLichChieu([]);
-        return;
-      }
+  // ===== Hàm fetch lịch chiếu (dùng cho realtime) =====
+  const fetchLichChieu = useCallback(async () => {
+    if (!selectedDate || !phimId) return;
+    if (!datesWithShowtime.has(selectedDate)) {
+      setLichChieu([]);
+      return;
+    }
 
-      try {
-        setLoading(true);
-        const res = await getLichChieuTheoPhim(phimId, selectedDate);
-        setLichChieu(res.data || []);
-      } catch (error) {
-        console.error("Lỗi khi lấy lịch chiếu:", error);
-        setLichChieu([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchLichChieu();
+    try {
+      setLoading(true);
+      const res = await getLichChieuTheoPhim(phimId, selectedDate);
+      setLichChieu(res.data || []);
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch chiếu:", error);
+      setLichChieu([]);
+    } finally {
+      setLoading(false);
+    }
   }, [selectedDate, phimId, datesWithShowtime]);
 
-  const handleSelectDate = (dateValue: string) => {
-    if (datesWithShowtime.has(dateValue)) {
-      setSelectedDate(dateValue);
+  // ===== Realtime polling (15s) =====
+  useEffect(() => {
+    fetchLichChieu();
+
+    const interval = setInterval(() => {
+      fetchLichChieu();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, [fetchLichChieu]);
+
+  // ===== Refresh khi quay lại tab =====
+  useEffect(() => {
+    const onFocus = () => fetchLichChieu();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [fetchLichChieu]);
+
+  const handleSelectDate = (date: string) => {
+    if (datesWithShowtime.has(date)) {
+      setSelectedDate(date);
     }
   };
 
   const handleSelectShowtime = (lc: LichChieuItem) => {
-    navigate(`/booking/${slug}`, { state: { lichChieuId: lc.id } });
+    navigate(`/booking/${slug}`, {
+      state: { lichChieuId: lc.id },
+    });
   };
 
   return (
     <div id="lich-chieu" className="lichchieu-wrapper">
       <h3 className="title">Lịch chiếu</h3>
 
+      {/* ===== Chọn ngày ===== */}
       <div className="days-container">
         {days.map((day) => {
           const hasShowtime = datesWithShowtime.has(day.value);
@@ -107,10 +128,11 @@ const LichChieu = () => {
           return (
             <button
               key={day.value}
-              className={`day-btn ${isSelected ? "active" : ""} ${!hasShowtime ? "disabled" : ""
-                }`}
-              onClick={() => handleSelectDate(day.value)}
+              className={`day-btn ${isSelected ? "active" : ""} ${
+                !hasShowtime ? "disabled" : ""
+              }`}
               disabled={!hasShowtime}
+              onClick={() => handleSelectDate(day.value)}
             >
               {day.label}
             </button>
@@ -118,63 +140,55 @@ const LichChieu = () => {
         })}
       </div>
 
+      {/* ===== Lịch chiếu ===== */}
       <div className="schedule-box">
-        {selectedDate ? (
-          loading ? (
-            <p>Đang tải lịch chiếu...</p>
-          ) : lichChieu.length > 0 ? (
-            <>
-              {Object.entries(
-                lichChieu.reduce((groups, lc) => {
-                  const phongId = lc.phong.id;
-                  const key = `${phongId}`;
-                  if (!groups[key]) {
-                    groups[key] = {
-                      phong: lc.phong,
-                      showtimes: [],
-                    };
-                  }
-                  groups[key].showtimes.push(lc);
-                  return groups;
-                }, {} as Record<string, { phong: LichChieuItem["phong"]; showtimes: LichChieuItem[] }>)
-              )
-                .sort(([a], [b]) => parseInt(a) - parseInt(b))
-                .map(([_, group]) => (
-                  <div key={group.phong.id} className="room-group">
-                    <h4 className="room-name">
-                      {group.phong.ten_phong}
-                    </h4>
-                    <div className="showtimes-row">
-                      {group.showtimes
-                        .sort((a, b) => new Date(a.gio_chieu).getTime() - new Date(b.gio_chieu).getTime())
-                        .map((lc) => {
-                          const date = new Date(lc.gio_chieu);
-                          const gioPhut = date.toLocaleTimeString("vi-VN", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          });
-                          const phienBan = lc.phien_ban?.the_loai || "Thường";
-
-                          return (
-                            <div
-                              key={lc.id}
-                              className="showtime-item"
-                              onClick={() => handleSelectShowtime(lc)}
-                            >
-                              <div className="time">{gioPhut}</div>
-                              <div className="version-tag">{phienBan}</div>
-                            </div>
-                          );
-                        })}
-                    </div>
-                  </div>
-                ))}
-            </>
-          ) : (
-            <p>Không có suất chiếu nào trong ngày này.</p>
-          )
+        {loading ? (
+          <p>Đang tải lịch chiếu...</p>
+        ) : lichChieu.length === 0 ? (
+          <p>Không có suất chiếu nào.</p>
         ) : (
-          <p>Vui lòng chọn ngày để xem lịch chiếu.</p>
+          Object.values(
+            lichChieu.reduce((groups, lc) => {
+              const id = lc.phong.id;
+              if (!groups[id]) {
+                groups[id] = { phong: lc.phong, showtimes: [] as LichChieuItem[] };
+              }
+              groups[id].showtimes.push(lc);
+              return groups;
+            }, {} as Record<number, { phong: LichChieuItem["phong"]; showtimes: LichChieuItem[] }>)
+          ).map((group) => (
+            <div key={group.phong.id} className="room-group">
+              <h4 className="room-name">{group.phong.ten_phong}</h4>
+
+              <div className="showtimes-row">
+                {group.showtimes
+                  .sort(
+                    (a, b) =>
+                      new Date(a.gio_chieu).getTime() -
+                      new Date(b.gio_chieu).getTime()
+                  )
+                  .map((lc) => {
+                    const time = new Date(lc.gio_chieu).toLocaleTimeString(
+                      "vi-VN",
+                      { hour: "2-digit", minute: "2-digit" }
+                    );
+
+                    return (
+                      <div
+                        key={lc.id}
+                        className="showtime-item"
+                        onClick={() => handleSelectShowtime(lc)}
+                      >
+                        <div className="time">{time}</div>
+                        <div className="version-tag">
+                          {lc.phien_ban?.the_loai || "Thường"}
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          ))
         )}
       </div>
     </div>

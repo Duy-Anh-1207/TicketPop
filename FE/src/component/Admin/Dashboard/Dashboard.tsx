@@ -41,14 +41,15 @@ const Dashboard: React.FC = () => {
   const tongDoanhThu =
     data?.doanhThu?.reduce((sum: number, x: any) => sum + (Number(x.revenue) || 0), 0) ?? 0;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  const formatVND = (value: number | string) => {
+    const num = Number(value); // ép về số
+    return num.toLocaleString("vi-VN") + " đ";
   };
 
   const stats = [
     {
       label: "DOANH THU",
-      value: formatCurrency(tongDoanhThu),
+      value: formatVND(tongDoanhThu),
       color: "green",
       icon: "💰",
     },
@@ -96,15 +97,13 @@ const Dashboard: React.FC = () => {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data?.doanhThu || []}>
             <XAxis dataKey="label" />
-            <YAxis width={90}
-              tickFormatter={formatCurrency} />
-            <Tooltip formatter={(value: any) => formatCurrency(value)} />
+            <YAxis width={150} tickFormatter={formatVND} />
+            <Tooltip formatter={(value: any) => formatVND(value)} />
             <Bar dataKey="revenue" fill="#3b82f6" radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Top phim */}
       <div className="topphim-section">
         <h2 className="section-title">🎬 Top 5 Phim Có Doanh Thu Cao Nhất</h2>
         <div className="topphim-grid">
@@ -132,13 +131,13 @@ const Dashboard: React.FC = () => {
                   <p>
                     Doanh thu:{" "}
                     <span className="highlight green">
-                      {Number(phim.tong_doanh_thu ?? 0).toLocaleString("vi-VN")} đ
+                      {Number(phim.tong_doanh_thu ?? 0).toLocaleString()}
                     </span>
                   </p>
                   <p>
                     Số vé:{" "}
                     <span className="highlight">
-                      {(phim.tong_ve ?? 0).toLocaleString("vi-VN")}
+                      {(phim.tong_ve ?? 0).toLocaleString("")}
                     </span>
                   </p>
                 </div>
@@ -149,9 +148,6 @@ const Dashboard: React.FC = () => {
       </div>
 
 
-      <p className="footer">
-        ©2025 TicketsPop. Hand crafted & made by TicketsPop.
-      </p>
     </div>
   );
 };

@@ -69,25 +69,34 @@ const Booking = () => {
   useEffect(() => {
     if (!lichChieuId) return;
 
+    let mounted = true;
+
     const fetchGhe = async () => {
       setLoadingGhe(true);
-
       try {
         const res = await axios.get(
           `http://127.0.0.1:8000/api/check-ghe/lich-chieu/${lichChieuId}`
         );
 
+        if (!mounted) return;
         const gheFormatted = res.data.data;
         setGheList(gheFormatted);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách ghế:", error);
-        message.error("Không thể tải danh sách ghế!");
+        if (mounted) message.error("Không thể tải danh sách ghế!");
       } finally {
-        setLoadingGhe(false);
+        if (mounted) setLoadingGhe(false);
       }
     };
 
+    // load lần đầu và sau đó reload mỗi 15s
     fetchGhe();
+    const intervalId = window.setInterval(fetchGhe, 15000);
+
+    return () => {
+      mounted = false;
+      clearInterval(intervalId);
+    };
   }, [lichChieuId]);
 
   // Gom ghế theo hàng

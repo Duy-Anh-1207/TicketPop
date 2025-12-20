@@ -66,8 +66,17 @@ const ChiTietDonVeRap = () => {
         <Descriptions.Item label="Số điện thoại">{payload.khach_hang?.so_dien_thoai}</Descriptions.Item>
         <Descriptions.Item label="Phim">{payload.phim?.ten_phim}</Descriptions.Item>
         <Descriptions.Item label="Poster">
-          {payload.phim?.poster && <Image src={payload.phim.poster} width={100} />}
+          {payload.phim?.poster ? (
+            <Image
+              src={`http://127.0.0.1:8000/storage/${payload.phim.poster}`}
+              width={120}
+              style={{ borderRadius: 8 }}
+            />
+          ) : (
+            <span className="text-muted">Không có poster</span>
+          )}
         </Descriptions.Item>
+
         <Descriptions.Item label="Phòng">{payload.phong}</Descriptions.Item>
         <Descriptions.Item label="Suất chiếu">
           {payload.gio_chieu} - {payload.gio_ket_thuc}

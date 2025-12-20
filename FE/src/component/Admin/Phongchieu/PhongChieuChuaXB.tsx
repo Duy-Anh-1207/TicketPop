@@ -123,6 +123,7 @@ export default function PhongChieuChuaXuatBanList() {
               <th>STT</th>
               <th>Tên phòng</th>
               <th>Loại sơ đồ</th>
+              <th>Loại phim</th>
               <th>Hàng thường</th>
               <th>Hàng VIP</th>
               <th>Trạng thái</th>
@@ -139,6 +140,7 @@ export default function PhongChieuChuaXuatBanList() {
                   </td>
                   <td>{pc.ten_phong}</td>
                   <td>{pc.loai_so_do}</td>
+                  <td className="text-center">{pc.chieu_phim || "-"}</td>
                   <td className="text-center">{pc.hang_thuong}</td>
                   <td className="text-center">{pc.hang_vip}</td>
                   <td className="text-center">
@@ -176,7 +178,7 @@ export default function PhongChieuChuaXuatBanList() {
               ))
             ) : (
               <tr>
-                <td colSpan={8} className="text-center text-muted py-3">
+                <td colSpan={9} className="text-center text-muted py-3">
                   Không tìm thấy phòng chiếu nào chưa xuất bản.
                 </td>
               </tr>

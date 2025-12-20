@@ -1,12 +1,13 @@
-import { useState, useMemo } from "react";
-import { useCreatePhongChieu, useListPhongChieuTH0, useListPhongChieuTH1 } from "../../../hook/PhongChieuHook";
-import { useNavigate } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
+import { useCreatePhongChieu, useListPhongChieuTH0, useListPhongChieuTH1, usePhongChieuDetail, useUpdatePhongChieu } from "../../../hook/PhongChieuHook";
+import { useNavigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import type { PhongChieu } from "../../../types/phongchieu";
 
 export default function CreatePhongChieu() {
   const navigate = useNavigate();
   const createPhongChieu = useCreatePhongChieu();
+  const updatePhongChieu = useUpdatePhongChieu();
 
   // 🔹 Lấy tất cả phòng chiếu để check trùng tên
   const { data: phongChieuTH0 } = useListPhongChieuTH0();
@@ -20,7 +21,26 @@ export default function CreatePhongChieu() {
     hang_thuong: 0,
     hang_vip: 0,
     trang_thai: "0",
+    chieu_phim: "2D",
   });
+
+  const { id } = useParams();
+  const isEdit = Boolean(id);
+  const { data: detail } = usePhongChieuDetail(id ?? null as any);
+
+  useEffect(() => {
+    if (detail) {
+      setForm((prev) => ({
+        ...prev,
+        ten_phong: detail.ten_phong || "",
+        loai_so_do: detail.loai_so_do || "",
+        hang_thuong: detail.hang_thuong || 0,
+        hang_vip: detail.hang_vip || 0,
+        trang_thai: String(detail.trang_thai ?? "0"),
+        chieu_phim: detail.chieu_phim || "2D",
+      }));
+    }
+  }, [detail]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -47,10 +67,22 @@ export default function CreatePhongChieu() {
       return;
     }
 
+    if (isEdit && id) {
+      updatePhongChieu.mutate(
+        { id, values: form },
+        {
+          onSuccess: () => {
+            // điều hướng về list theo trạng thái
+            if (form.trang_thai === "1") navigate("/admin/roomxb");
+            else navigate("/admin/roomcxb");
+          },
+        }
+      );
+      return;
+    }
+
     createPhongChieu.mutate(form, {
       onSuccess: () => {
-        Swal.fire("✅ Thành công!", "Đã thêm phòng chiếu mới.", "success");
-
         // Điều hướng theo trạng thái phòng chiếu
         if (form.trang_thai === "1") {
           navigate("/admin/roomxb"); // danh sách phòng đã xuất bản
@@ -133,13 +165,27 @@ export default function CreatePhongChieu() {
           </select>
         </div>
 
+        <div className="mb-4">
+          <label className="form-label">Loại phim</label>
+          <select
+            className="form-select"
+            name="chieu_phim"
+            value={form.chieu_phim}
+            onChange={handleChange}
+          >
+            <option value="2D">2D</option>
+            <option value="3D">3D</option>
+            <option value="IMAX">IMAX</option>
+          </select>
+        </div>
+
         <div className="d-flex justify-content-between">
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={createPhongChieu.isPending}
+            disabled={createPhongChieu.isPending || updatePhongChieu.isPending}
           >
-            {createPhongChieu.isPending ? "Đang thêm..." : "Thêm mới"}
+            {isEdit ? (updatePhongChieu.isPending ? "Đang cập nhật..." : "Cập nhật") : (createPhongChieu.isPending ? "Đang thêm..." : "Thêm mới")}
           </button>
         </div>
       </form>

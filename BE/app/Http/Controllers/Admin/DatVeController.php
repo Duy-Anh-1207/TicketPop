@@ -318,6 +318,8 @@ class DatVeController extends Controller
                     'ten_do_an' => $item->doAn?->ten_do_an ?? 'Đồ ăn',
                     'anh_do_an' => $item->doAn?->image ?? null,
                     'gia_ban' => $item->gia_ban,
+                    // provide both keys so frontend can use either `so_luong` or `quantity`
+                    'so_luong' => $item->so_luong,
                     'quantity' => $item->so_luong,
                 ];
             });
