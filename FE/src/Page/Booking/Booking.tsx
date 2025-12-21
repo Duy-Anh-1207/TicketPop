@@ -28,7 +28,7 @@ const Booking = () => {
   const location = useLocation();
   const lichChieuId = location.state?.lichChieuId;
   const navigate = useNavigate();
-
+  const isLoggedIn = !!localStorage.getItem("user");
   const { data: lichChieu, isLoading, error } = useLichChieuDetail(lichChieuId);
   const { data: foods, isLoading: loadingFood } = useListFood();
 
@@ -234,6 +234,13 @@ const Booking = () => {
 
   // --- Đặt vé ---
   const handleBooking = async () => {
+    if (!isLoggedIn) {
+      message.error("Bạn cần đăng nhập để mua vé!");
+      navigate("/login", {
+        state: { redirectTo: location.pathname },
+      });
+      return;
+    }
     if (selectedSeats.length === 0) {
       message.warning("Vui lòng chọn ít nhất 1 ghế!");
       return;
@@ -474,15 +481,15 @@ const Booking = () => {
           </div>
 
           <Button
-            type="primary"
-            size="large"
-            block
-            className="booking-btn"
-            disabled={selectedSeats.length === 0}
-            onClick={handleBooking}
-          >
-            Đặt vé ({selectedSeats.length} ghế)
-          </Button>
+          type="primary"
+          block
+          disabled={!isLoggedIn || selectedSeats.length === 0}
+          onClick={handleBooking}
+        >
+          {!isLoggedIn
+            ? "Vui lòng đăng nhập để mua vé"
+            : `Đặt vé (${selectedSeats.length} ghế)`}
+        </Button>
         </div>
       </div>
     </div></div>
