@@ -89,10 +89,10 @@ export default function PhongChieuChuaXuatBanList() {
           <tr>
             <th>STT</th>
             <th>Tên phòng</th>
-            <th>Sơ đồ</th>
+            <th>Loại sơ đồ</th>
             <th>Chiếu phim</th>
-            <th>Thường</th>
-            <th>VIP</th>
+            <th>Hàng thường</th>
+            <th>Hàng VIP</th>
             <th>Trạng thái</th>
             <th>Ngày tạo</th>
             <th>Hành động</th>

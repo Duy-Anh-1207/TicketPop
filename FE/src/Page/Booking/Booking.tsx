@@ -345,14 +345,14 @@ const Booking = () => {
                           <div
                             key={ghe.id}
                             className={`seat-item ${ghe.trang_thai === "da_dat"
-                                ? "booked"
-                                : ghe.trang_thai_ghe === 0
-                                  ? "broken"
-                                  : isSelected
-                                    ? "selected"
-                                    : ghe.loai_ghe_id === 2
-                                      ? "vip"
-                                      : "thuong"
+                              ? "booked"
+                              : ghe.trang_thai_ghe === 0
+                                ? "broken"
+                                : isSelected
+                                  ? "selected"
+                                  : ghe.loai_ghe_id === 2
+                                    ? "vip"
+                                    : "thuong"
                               }`}
                             onClick={() =>
                               ghe.trang_thai !== "da_dat" && toggleSeat(ghe)
@@ -481,15 +481,30 @@ const Booking = () => {
           </div>
 
           <Button
-          type="primary"
-          block
-          disabled={!isLoggedIn || selectedSeats.length === 0}
-          onClick={handleBooking}
-        >
-          {!isLoggedIn
-            ? "Vui lòng đăng nhập để mua vé"
-            : `Đặt vé (${selectedSeats.length} ghế)`}
-        </Button>
+            type="primary"
+            block
+            size="large"
+            disabled={!isLoggedIn || selectedSeats.length === 0}
+            onClick={handleBooking}
+            style={{
+              height: 52,
+              fontSize: 16,
+              fontWeight: 600,
+              borderRadius: 12,
+              background:
+                !isLoggedIn || selectedSeats.length === 0
+                  ? "#9ca3af"
+                  : "linear-gradient(135deg, #ef4444, #dc2626)",
+              border: "none",
+            }}
+          >
+            {!isLoggedIn
+              ? "Đăng nhập để mua vé"
+              : selectedSeats.length === 0
+                ? "Chọn ghế để tiếp tục"
+                : `Đặt vé (${selectedSeats.length} ghế)`}
+          </Button>
+
         </div>
       </div>
     </div></div>

@@ -131,6 +131,12 @@ export default function LichChieuList() {
 
               <td>
                 <button
+                  className="btn btn-sm btn-primary me-2"
+                  onClick={() => navigate(`/admin/lich-chieu/${lichChieu.id}`)}
+                >
+                  Xem chi tiết
+                </button>
+                <button
                   className="btn btn-sm btn-danger"
                   onClick={() => handleDelete(lichChieu.id)}
                 >

@@ -91,7 +91,7 @@ export default function PhongChieuList() {
               <th>STT</th>
               <th>Tên phòng</th>
               <th>Loại sơ đồ</th>
-              <th>Loại phim</th>
+              <th>Chiếu phim</th>
               <th>Hàng thường</th>
               <th>Hàng VIP</th>
               <th>Trạng thái</th>
