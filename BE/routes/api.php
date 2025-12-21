@@ -190,10 +190,11 @@ Route::prefix('thong-ke')->group(function () {
     Route::get('/top-phim-ban-chay', [ThongKeController::class, 'topPhimBanChay']);
     Route::get('/phan-bo-loai-ve', [ThongKeController::class, 'phanBoLoaiVe']);
     Route::get('/ve-theo-gio-hom-nay', [ThongKeController::class, 'veTheoGioHomNay']);
+     Route::get('/suat-chieu', [ThongKeController::class, 'thongKeSuatChieu']);
 
 
     // THỐNG KÊ DOANH THU
-    Route::get('/thong-ke-ghe', [ThongKeController::class, 'ThongKeGhe']);
+    Route::get('/ghe', [ThongKeController::class, 'ThongKeGhe']);
     Route::get('/doanh-thu-phim', [ThongKeController::class, 'doanhThuPhim']);
     Route::get('/doanh-thu-do-an', [ThongKeController::class, 'doanhThuDoAn']);
     Route::get('/doanh-thu-theo-thang', [ThongKeController::class, 'doanhThuTheoThang']);

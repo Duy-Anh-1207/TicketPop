@@ -28,17 +28,29 @@ const LichChieu = () => {
   const [datesWithShowtime, setDatesWithShowtime] = useState<Set<string>>(new Set());
 
   // ===== Tạo danh sách 7 ngày =====
-  const days = Array.from({ length: 7 }, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() + i);
-    const value = date.toISOString().split("T")[0];
-    const label = date.toLocaleDateString("vi-VN", {
-      weekday: "short",
-      day: "2-digit",
-      month: "2-digit",
-    });
-    return { label, value };
+  const pad2 = (n: number) => String(n).padStart(2, "0");
+
+const toLocalYMD = (d: Date) => {
+  const y = d.getFullYear();
+  const m = pad2(d.getMonth() + 1);
+  const day = pad2(d.getDate());
+  return `${y}-${m}-${day}`;
+};
+
+const days = Array.from({ length: 7 }, (_, i) => {
+  const date = new Date();
+  date.setDate(date.getDate() + i);
+
+  const value = toLocalYMD(date); // ✅ local YYYY-MM-DD (không bị UTC lùi ngày)
+
+  const label = date.toLocaleDateString("vi-VN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
   });
+
+  return { label, value };
+});
 
   // ===== Kiểm tra ngày nào có suất chiếu =====
   useEffect(() => {

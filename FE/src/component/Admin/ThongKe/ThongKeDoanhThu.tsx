@@ -23,7 +23,7 @@ const fetchThongKe = async (params: any) => {
     axios.get(`${API_URL}/thong-ke/doanh-thu-phim`, { params }),
     axios.get(`${API_URL}/thong-ke/doanh-thu-do-an`, { params }),
     axios.get(`${API_URL}/thong-ke/doanh-thu-theo-thang`, { params }),
-    axios.get(`${API_URL}/thong-ke/thong-ke-ghe`, { params }),
+    axios.get(`${API_URL}/thong-ke/ghe`, { params }),
   ]);
 
   return {

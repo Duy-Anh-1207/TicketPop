@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Events\LichChieuMoi;
 use App\Http\Controllers\Controller;
+use App\Jobs\TangGiaVeTheoNgayJob;
 use App\Models\Ghe;
 use App\Models\GiaVe;
 
@@ -170,6 +171,7 @@ class LichChieuController extends Controller
             }
 
             DB::commit();
+            dispatch(new TangGiaVeTheoNgayJob());
 
             return response()->json([
                 'message' => 'Thêm nhiều lịch chiếu thành công',
@@ -332,6 +334,7 @@ class LichChieuController extends Controller
             }
 
             DB::commit();
+            dispatch(new TangGiaVeTheoNgayJob());
 
             return response()->json([
                 'message' => 'Tạo lịch chiếu tự động cho 1 ngày thành công',
@@ -517,6 +520,7 @@ class LichChieuController extends Controller
             }
 
             DB::commit();
+            dispatch(new TangGiaVeTheoNgayJob());
 
             return response()->json([
                 'message' => 'Copy lịch chiếu theo khoảng ngày thành công',

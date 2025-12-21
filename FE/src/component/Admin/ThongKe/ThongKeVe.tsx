@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, Legend, PieChart, Pie, Cell
+  LineChart, BarChart, Bar, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, Legend, Line, PieChart, Pie, Cell
 } from "recharts";
 import "./ThongKe.css";
 
@@ -12,7 +12,6 @@ const API_URL = "http://localhost:8000/api";
 // FETCH PHIM
 const fetchMovies = async () => {
   const res = await axios.get(`${API_URL}/phim`);
-
   if (Array.isArray(res.data.data)) return res.data.data;
   if (Array.isArray(res.data)) return res.data;
   return [];
@@ -20,11 +19,12 @@ const fetchMovies = async () => {
 
 // FETCH THỐNG KÊ
 const fetchThongKe = async (params: any) => {
-  const [gio, top, loai, homNay] = await Promise.all([
+  const [gio, top, loai, homNay, suatChieu] = await Promise.all([
     axios.get(`${API_URL}/thong-ke/gio-mua-nhieu-nhat`, { params }),
     axios.get(`${API_URL}/thong-ke/top-phim-ban-chay`, { params }),
     axios.get(`${API_URL}/thong-ke/phan-bo-loai-ve`, { params }),
     axios.get(`${API_URL}/thong-ke/ve-theo-gio-hom-nay`, { params }),
+    axios.get(`${API_URL}/thong-ke/suat-chieu`, { params }), 
   ]);
 
   return {
@@ -32,6 +32,7 @@ const fetchThongKe = async (params: any) => {
     topPhimBanChay: top.data.data,
     phanBoLoaiVe: loai.data.data,
     veTheoGioHomNay: homNay.data.data,
+    suatChieu: suatChieu.data.data,
   };
 };
 
@@ -81,7 +82,7 @@ const ThongKeVe: React.FC = () => {
   return (
     <div className="thongke-container">
       <h2>Thống kê vé</h2>
-
+      {/* FILTER BOX */}
       <div className="filter-box">
         <div className="filter-item">
           <label>Từ ngày:</label>
@@ -113,6 +114,7 @@ const ThongKeVe: React.FC = () => {
       {data && (
         <>
           <div className="thongke-chart-row">
+            {/* GIỜ MUA NHIỀU NHẤT */}
             <div className="thongke-chart">
               <h3>Giờ mua nhiều nhất</h3>
               <ResponsiveContainer width="100%" height={250}>
@@ -124,7 +126,7 @@ const ThongKeVe: React.FC = () => {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
+            {/* PHÂN BỐ LOẠI VÉ */}
             <div className="thongke-chart">
               <h3>Phân bố loại vé</h3>
               <ResponsiveContainer width="100%" height={250}>
@@ -145,7 +147,7 @@ const ThongKeVe: React.FC = () => {
               </ResponsiveContainer>
             </div>
           </div>
-
+          {/* TOP PHIM BÁN CHẠY */}             
           <div className="thongke-chart">
             <h3>Top phim bán chạy</h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -169,18 +171,85 @@ const ThongKeVe: React.FC = () => {
               </BarChart>
             </ResponsiveContainer>
           </div>
-
+          {/* VÉ BÁN THEO GIỜ HÔM NAY */}            
           <div className="thongke-chart">
             <h3>Vé bán theo giờ hôm nay</h3>
-            <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={data.veTheoGioHomNay}>
-                <XAxis dataKey="gio" />
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={data.veTheoGioHomNay || []}>
+                <XAxis
+                  dataKey="gio"
+                  tickFormatter={(v) => `${v}:00`}
+                />
+                <YAxis
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  formatter={(value: any) => [`${value} vé`, "Số vé bán"]}
+                  labelFormatter={(label) => `Giờ: ${label}:00`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="so_luong"
+                  stroke="#43A047"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          {/* SUẤT CHIẾU THEO PHIM */}            
+          <div className="thongke-chart">
+            <h3>Suất chiếu theo phim</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data.suatChieu.theo_phim}>
+                <XAxis dataKey="ten_phim" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="so_luong" fill="#43A047" />
+                <Legend />
+                <Bar dataKey="so_suat_chieu" name="Số suất chiếu" fill="#5E35B1" />
               </BarChart>
             </ResponsiveContainer>
           </div>
+          {/* SUẤT CHIẾU THEO PHÒNG */}                 
+          <div className="thongke-chart">
+            <h3>Suất chiếu theo phòng</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={data.suatChieu.theo_phong}>
+                <XAxis dataKey="ten_phong" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="so_suat_chieu" name="Số suất chiếu" fill="#00897B" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          {/* SUẤT CHIẾU THEO GIỜ */}            
+          <div className="thongke-chart">
+            <h3>Suất chiếu theo giờ</h3>
+            <ResponsiveContainer width="100%" height={320}>
+              <LineChart data={data?.suatChieu?.theo_gio || []}>
+                <XAxis
+                  dataKey="gio"
+                  tickFormatter={(v) => `${v}:00`}
+                />
+                <YAxis
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  formatter={(value: any) => [`${value} suất`, "Số suất chiếu"]}
+                  labelFormatter={(label) => `Giờ: ${label}:00`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="so_suat_chieu"
+                  stroke="#FB8C00"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+                   
         </>
       )}
     </div>
