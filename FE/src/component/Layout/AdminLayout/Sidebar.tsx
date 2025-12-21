@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useUserPermissions } from "../../../hook/useUserPermissions";
 import axios from "axios";
 import logo from "/src/assets/logo.png";
+import "./Sidebar.css";
 
 
 interface MenuItem {
@@ -35,7 +36,7 @@ const Sidebar: React.FC = () => {
   const { canAccess } = useUserPermissions();
 
 
- 
+
   // Fetch menu từ API
   useEffect(() => {
     const fetchMenus = async () => {
@@ -110,32 +111,25 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="left-sidebar with-vertical">
-      <div className="brand-logo d-flex align-items-center justify-content-between">
-        {/* LOGO */}
-        <Link to="/" className="text-nowrap logo-img">
+      {/* LOGO */}
+      <div className="brand-logo">
+        <Link to="/" className="logo-img">
           <img
             src={logo}
             alt="Logo"
             style={{
-              height: "120px",       // chỉnh to/nhỏ tại đây
+              height: "120px",
+              width: "100%",
               objectFit: "contain",
-              width: "250px",
             }}
           />
         </Link>
-
-        {/* TOGGLER MOBILE */}
-        <a
-          href="#"
-          className="sidebartoggler ms-auto text-decoration-none fs-5 d-block d-xl-none"
-          onClick={(e) => e.preventDefault()}
-        >
-          <i className="ti ti-x"></i>
-        </a>
       </div>
-      <div className="scroll-sidebar" data-simplebar>
+
+      {/* MENU */}
+      <div className="scroll-sidebar">
         <nav className="sidebar-nav">
-          <ul id="sidebarnav" className="mb-0">
+          <ul id="sidebarnav">
             {loading ? (
               <li className="sidebar-item">
                 <p className="p-3">Đang tải menu...</p>
@@ -146,64 +140,57 @@ const Sidebar: React.FC = () => {
               </li>
             ) : (
               menus.map((menu) => {
-                // Kiểm tra quyền truy cập
-                const hasAccess = canAccess(menu.id, 4);
-                if (!hasAccess) return null;
+                if (!canAccess(menu.id, 4)) return null;
 
                 const isOpen = openMenus[menu.ma_chuc_nang] || false;
                 const hasChildren = menu.children.length > 0;
 
                 return (
                   <li key={menu.ma_chuc_nang} className="sidebar-item">
+                    {/* MENU CHA */}
                     {hasChildren ? (
                       <a
-                        className={`sidebar-link has-arrow ${menu.color}-hover-bg`}
                         href="#"
+                        className="sidebar-link has-arrow"
                         aria-expanded={isOpen}
                         onClick={(e) => {
                           e.preventDefault();
                           toggleMenu(menu.ma_chuc_nang);
                         }}
                       >
-                        <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
-                          <Icon
-                            icon={menu.icon}
-                            className="fs-6"
-                          />
+                        <span className="aside-icon">
+                          <Icon icon={menu.icon} />
                         </span>
-                        <span className="hide-menu ps-1">{menu.ten_chuc_nang}</span>
+                        <span className="hide-menu">{menu.ten_chuc_nang}</span>
                       </a>
                     ) : (
-                      <Link
-                        to={menu.path}
-                        className={`sidebar-link ${menu.color}-hover-bg`}
-                      >
-                        <span className={`aside-icon p-2 bg-${menu.color}-subtle rounded-1`}>
-                          <Icon
-                            icon={menu.icon}
-                            className="fs-6"
-                          />
+                      <Link to={menu.path} className="sidebar-link">
+                        <span className="aside-icon">
+                          <Icon icon={menu.icon} />
                         </span>
-                        <span className="hide-menu ps-1">{menu.ten_chuc_nang}</span>
+                        <span className="hide-menu">{menu.ten_chuc_nang}</span>
                       </Link>
                     )}
 
+                    {/* MENU CON */}
                     {hasChildren && (
                       <ul
-                        aria-expanded={isOpen}
-                        className={`collapse first-level ${isOpen ? "show" : ""}`}
+                        className={`first-level collapse ${isOpen ? "show" : ""}`}
                       >
-                        {menu.children.map((child) => {
-                          const childHasAccess = canAccess(child.id, 4);
-                          return childHasAccess ? (
+                        {menu.children.map((child) =>
+                          canAccess(child.id, 4) ? (
                             <li key={child.ma_chuc_nang} className="sidebar-item">
                               <Link to={child.path} className="sidebar-link">
-                                <span className="sidebar-icon"></span>
-                                <span className="hide-menu">{child.ten_chuc_nang}</span>
+                                <span className="aside-icon">
+                                  <Icon icon={child.icon || "solar:dot-circle-bold"} />
+                                </span>
+                                <span className="hide-menu">
+                                  {child.ten_chuc_nang}
+                                </span>
                               </Link>
                             </li>
-                          ) : null;
-                        })}
+                          ) : null
+                        )}
                       </ul>
                     )}
                   </li>
@@ -215,5 +202,6 @@ const Sidebar: React.FC = () => {
       </div>
     </aside>
   );
+
 };
 export default Sidebar;

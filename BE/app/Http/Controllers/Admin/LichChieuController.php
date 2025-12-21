@@ -60,7 +60,7 @@ class LichChieuController extends Controller
     {
         $now = Carbon::now('Asia/Ho_Chi_Minh');
 
-        LichChieu::where('gio_ket_thuc', '<', $now)
+        LichChieu::where('gio_ket_thuc', '<', $now->subDays(5))
             ->whereNull('deleted_at')
             ->delete(); // xoá mềm
     }

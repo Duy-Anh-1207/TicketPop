@@ -19,6 +19,8 @@ interface LichChieuItem {
 const LichChieu = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  // const now = new Date();
+
 
   const phimId = slug ? parseInt(slug.split("-").pop() || "0", 10) : 0;
 
@@ -30,27 +32,27 @@ const LichChieu = () => {
   // ===== Tạo danh sách 7 ngày =====
   const pad2 = (n: number) => String(n).padStart(2, "0");
 
-const toLocalYMD = (d: Date) => {
-  const y = d.getFullYear();
-  const m = pad2(d.getMonth() + 1);
-  const day = pad2(d.getDate());
-  return `${y}-${m}-${day}`;
-};
+  const toLocalYMD = (d: Date) => {
+    const y = d.getFullYear();
+    const m = pad2(d.getMonth() + 1);
+    const day = pad2(d.getDate());
+    return `${y}-${m}-${day}`;
+  };
 
-const days = Array.from({ length: 7 }, (_, i) => {
-  const date = new Date();
-  date.setDate(date.getDate() + i);
+  const days = Array.from({ length: 7 }, (_, i) => {
+    const date = new Date();
+    date.setDate(date.getDate() + i);
 
-  const value = toLocalYMD(date); // ✅ local YYYY-MM-DD (không bị UTC lùi ngày)
+    const value = toLocalYMD(date); // ✅ local YYYY-MM-DD (không bị UTC lùi ngày)
 
-  const label = date.toLocaleDateString("vi-VN", {
-    weekday: "short",
-    day: "2-digit",
-    month: "2-digit",
+    const label = date.toLocaleDateString("vi-VN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    });
+
+    return { label, value };
   });
-
-  return { label, value };
-});
 
   // ===== Kiểm tra ngày nào có suất chiếu =====
   useEffect(() => {
@@ -140,9 +142,8 @@ const days = Array.from({ length: 7 }, (_, i) => {
           return (
             <button
               key={day.value}
-              className={`day-btn ${isSelected ? "active" : ""} ${
-                !hasShowtime ? "disabled" : ""
-              }`}
+              className={`day-btn ${isSelected ? "active" : ""} ${!hasShowtime ? "disabled" : ""
+                }`}
               disabled={!hasShowtime}
               onClick={() => handleSelectDate(day.value)}
             >
@@ -171,9 +172,20 @@ const days = Array.from({ length: 7 }, (_, i) => {
           ).map((group) => (
             <div key={group.phong.id} className="room-group">
               <h4 className="room-name">{group.phong.ten_phong}</h4>
-
               <div className="showtimes-row">
                 {group.showtimes
+                  .filter((lc) => {
+                    const gioChieu = new Date(lc.gio_chieu);
+                    const now = new Date();
+
+                    // ✅ Nếu là hôm nay → ẩn suất đã qua
+                    if (selectedDate === toLocalYMD(now)) {
+                      return gioChieu.getTime() > now.getTime();
+                    }
+
+                    // ✅ Ngày tương lai → hiển thị
+                    return true;
+                  })
                   .sort(
                     (a, b) =>
                       new Date(a.gio_chieu).getTime() -

@@ -106,15 +106,24 @@ export default function LichChieuList() {
               <td>{index + 1 + (currentPage - 1) * ITEMS_PER_PAGE}</td>
               <td>{lichChieu.phim?.ten_phim}</td>
 
-              {/* 👉 CLICK PHÒNG */}
               <td>
                 <button
-                  className="btn btn-link p-0"
                   onClick={() => setSelectedPhong(lichChieu.phong?.id ?? null)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "black",
+                    fontWeight: 500,
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.textDecoration = "underline")}
+                  onMouseLeave={(e) => (e.currentTarget.style.textDecoration = "none")}
                 >
                   {lichChieu.phong?.ten_phong}
                 </button>
               </td>
+
 
               <td>{lichChieu.phien_ban?.the_loai}</td>
               <td>{new Date(lichChieu.gio_chieu).toLocaleString()}</td>

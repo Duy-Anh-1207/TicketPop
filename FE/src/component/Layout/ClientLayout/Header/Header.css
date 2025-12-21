@@ -8,11 +8,9 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-
 .header-top {
   width: 1200px;
   margin: 0 auto;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -45,10 +43,7 @@
   }
 }
 /* ÉP TOÀN BỘ CHỮ + ICON TRONG HEADER SANG TRẮNG */
-.header-bg,
-.header-bg * {
-  color: black !important;
-}
+
 
 /* link */
 .header-bg a {

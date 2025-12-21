@@ -33,126 +33,160 @@ export default function LoginButton() {
   if (!user) {
     return (
       <div className="d-flex align-items-center gap-3">
+        {/* ĐĂNG NHẬP */}
         <Link
           to="/dang-nhap"
           className="d-flex align-items-center gap-2 px-3 py-2"
           style={{
-            color: "black",
-            cursor: "pointer",
-            borderRadius: "6px",
-            fontWeight: "500",
-            fontSize: "15px",
-            transition: "color 0.2s ease",
+            color: "#e5e7eb",
+            borderRadius: "10px",
+            fontWeight: 500,
+            fontSize: "14px",
             textDecoration: "none",
+            transition: "all 0.25s ease",
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.color = "#8000ff")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "#6366f1";
+            e.currentTarget.style.transform = "translateY(-1px)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "#e5e7eb";
+            e.currentTarget.style.transform = "none";
+          }}
+          onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+          onMouseUp={(e) => (e.currentTarget.style.transform = "translateY(-1px)")}
         >
-          <User size={20} />
+          <User size={22} />
           <span>Đăng nhập</span>
         </Link>
 
+        {/* ĐĂNG KÝ */}
         <Link
           to="/dang-ky"
-          className="d-flex align-items-center gap-2 px-3 py-2"
+          className="d-flex align-items-center gap-2 px-4 py-2"
           style={{
-            color: "black",
-            cursor: "pointer",
-            borderRadius: "6px",
-            fontWeight: "500",
-            fontSize: "15px",
-            transition: "color 0.2s ease",
+            color: "#fff",
+            borderRadius: "10px",
+            fontWeight: 500,
+            fontSize: "14px",
             textDecoration: "none",
-            border: "1px solid #8000ff",
+            border: "1px solid rgba(99,102,241,0.6)",
+            transition: "all 0.25s ease",
+            boxShadow: "0 0 0 rgba(99,102,241,0)",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = "#8000ff";
-            e.currentTarget.style.color = "white";
+            e.currentTarget.style.background = "#6366f1";
+            e.currentTarget.style.borderColor = "#6366f1";
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow =
+              "0 8px 20px rgba(99,102,241,0.45)";
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.background = "transparent";
-            e.currentTarget.style.color = "black";
+            e.currentTarget.style.borderColor = "rgba(99,102,241,0.6)";
+            e.currentTarget.style.transform = "none";
+            e.currentTarget.style.boxShadow = "none";
           }}
+          onMouseDown={(e) => (e.currentTarget.style.transform = "scale(0.96)")}
+          onMouseUp={(e) => (e.currentTarget.style.transform = "translateY(-2px)")}
         >
-          <User size={20} />
+          <User size={22} />
           <span>Đăng ký</span>
         </Link>
       </div>
+
     );
   }
 
   // 🟢 Nếu đã đăng nhập → hiện tên người dùng và menu Đăng xuất
   return (
-    <div
-      className="position-relative"
-      ref={menuRef}
-      style={{ zIndex: 999 }}
-    >
+    <div className="position-relative" ref={menuRef} style={{ zIndex: 1000 }}>
+      {/* USER BUTTON */}
       <div
         className="d-flex align-items-center gap-2 px-3 py-2"
         style={{
-          color: "black",
+          color: "#e5e7eb",
           cursor: "pointer",
-          borderRadius: "6px",
-          fontWeight: "500",
-          fontSize: "15px",
-          transition: "color 0.2s ease",
+          borderRadius: "10px",
+          fontWeight: 500,
+          fontSize: "14px",
+          transition: "all 0.25s ease",
         }}
         onClick={() => setShowMenu(!showMenu)}
-        onMouseEnter={(e) => (e.currentTarget.style.color = "#8000ff")}
-        onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.color = "#6366f1";
+          e.currentTarget.style.background = "rgba(99,102,241,0.12)";
+          e.currentTarget.style.transform = "translateY(-1px)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.color = "#e5e7eb";
+          e.currentTarget.style.background = "transparent";
+          e.currentTarget.style.transform = "none";
+        }}
       >
-        <User size={20} />
+        <User size={22} />
         <span>{user.ten}</span>
       </div>
 
+
+      {/* DROPDOWN */}
       {showMenu && (
         <div
-          className="position-absolute end-0 mt-2 bg-white shadow-lg border rounded-3 py-2"
+          className="position-absolute end-0 mt-2 py-2"
           style={{
-            minWidth: "180px", // Tăng độ rộng 1 chút
-            top: "100%",
-            right: 0,
-            zIndex: 9999,
+            minWidth: "200px",
+            background: "rgba(2,6,23,0.95)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "12px",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
           }}
         >
-          {/* === NÚT MỚI: THÔNG TIN TÀI KHOẢN === */}
+          {/* THÔNG TIN TÀI KHOẢN */}
           <Link
-            to="/thong-tin-tai-khoan" // 1. Đường dẫn đến trang profile
-            onClick={() => setShowMenu(false)} // 2. Đóng menu khi click
-            className="d-flex align-items-center gap-2 w-100 px-3 py-2 text-start border-0 bg-transparent"
+            to="/thong-tin-tai-khoan"
+            onClick={() => setShowMenu(false)}
+            className="d-flex align-items-center gap-2 px-4 py-2"
             style={{
-              color: "#333", // 3. Style giống nút cũ
+              color: "#e5e7eb",
               fontSize: "14px",
-              cursor: "pointer",
-              backgroundColor: "transparent",
-              textDecoration: "none", // 4. Bỏ gạch chân
+              textDecoration: "none",
+              transition: "background 0.2s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f3f3")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(99,102,241,0.15)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "transparent")
+            }
           >
-            <User size={18} /> {/* 5. Dùng icon User đã import */}
+            <User size={16} />
             <span>Thông tin tài khoản</span>
           </Link>
 
-          {/* === NÚT ĐĂNG XUẤT (SỬA LẠI MÀU) === */}
+          {/* ĐĂNG XUẤT */}
           <button
             onClick={handleLogout}
-            className="d-flex align-items-center gap-2 w-100 px-3 py-2 text-start border-0 bg-transparent"
+            className="d-flex align-items-center gap-2 w-100 px-4 py-2 border-0 bg-transparent"
             style={{
-              color: "#dc3545", // <-- Đổi màu đỏ
+              color: "#f87171",
               fontSize: "14px",
               cursor: "pointer",
-              backgroundColor: "transparent",
+              transition: "background 0.2s ease",
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.background = "#f3f3f3")}
-            onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.background = "rgba(248,113,113,0.15)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.background = "transparent")
+            }
           >
-            <LogOut size={18} />
+            <LogOut size={16} />
             <span>Đăng xuất</span>
           </button>
         </div>
       )}
     </div>
+
   );
 }

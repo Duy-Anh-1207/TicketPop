@@ -4,15 +4,23 @@ import { Outlet } from 'react-router-dom';
 
 const LayoutWeb = () => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        background: '#000',          // 👈 QUAN TRỌNG
+      }}
+    >
       <Header />
-      <main style={{ flex: 1 }}>
+      <main style={{ flex: 1, background: '#000' }}>
         <Outlet />
       </main>
       <Footer />
     </div>
   );
 };
+
 
 
 export default LayoutWeb;
