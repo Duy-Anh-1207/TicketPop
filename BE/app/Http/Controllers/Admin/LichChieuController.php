@@ -92,6 +92,11 @@ class LichChieuController extends Controller
 
                 $gioChieu = Carbon::parse($item['gio_chieu'], 'Asia/Ho_Chi_Minh');
                 $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15);
+                $this->validateThoiGianTrongPhamViPhim(
+                    $phim,
+                    $gioChieu,
+                    $gioKetThuc
+                );
 
                 // 🚫 Không cho phép lịch chiếu trong quá khứ
                 if ($gioChieu->lt(Carbon::now('Asia/Ho_Chi_Minh'))) {
@@ -260,6 +265,12 @@ class LichChieuController extends Controller
             while (true) {
                 $gioChieu   = $currentStart->copy();
                 $gioKetThuc = $gioChieu->copy()->addMinutes($phim->thoi_luong + 15); // +15p dọn phòng
+                $this->validateThoiGianTrongPhamViPhim(
+                    $phim,
+                    $gioChieu,
+                    $gioKetThuc
+                );
+
 
                 // nếu suất này kết thúc sau giới hạn thì dừng
                 if ($gioKetThuc->gt($limitEnd)) {
@@ -467,6 +478,11 @@ class LichChieuController extends Controller
 
                     $gioMoi = $gioMau->copy()->setDate($day->year, $day->month, $day->day);
                     $ketThucMoi = $gioMoi->copy()->addMinutes($durationMinutes);
+                    $this->validateThoiGianTrongPhamViPhim(
+                        $mau->phim,   // đã load quan hệ
+                        $gioMoi,
+                        $ketThucMoi
+                    );
 
                     // 🚫 check trùng lịch theo khoảng thời gian
                     $trung = LichChieu::where('phong_id', $mau->phong_id)
@@ -740,5 +756,27 @@ class LichChieuController extends Controller
             'total' => $lichTheoPhong->count(),
             'data' => $lichTheoPhong
         ]);
+    }
+    private function validateThoiGianTrongPhamViPhim(
+        Phim $phim,
+        Carbon $gioChieu,
+        Carbon $gioKetThuc
+    ) {
+        $batDauPhim = Carbon::parse($phim->ngay_cong_chieu)->startOfDay();
+        $ketThucPhim = Carbon::parse($phim->ngay_ket_thuc)->endOfDay();
+
+        if ($gioChieu->lt($batDauPhim)) {
+            throw new Exception(
+                "❌ Giờ chiếu ({$gioChieu->format('d/m/Y H:i')}) 
+            sớm hơn ngày công chiếu của phim ({$batDauPhim->format('d/m/Y')})"
+            );
+        }
+
+        if ($gioKetThuc->gt($ketThucPhim)) {
+            throw new Exception(
+                "❌ Giờ kết thúc ({$gioKetThuc->format('d/m/Y H:i')}) 
+            vượt quá ngày kết thúc phim ({$ketThucPhim->format('d/m/Y')})"
+            );
+        }
     }
 }
